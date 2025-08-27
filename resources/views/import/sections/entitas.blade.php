@@ -174,7 +174,23 @@
         @push('scripts')
             <script>
                 $(function() {
-                    // init Select2 AJAX helper
+                    function applyPartyDetail(type, payload) {
+                        if (type === 'pengirim') {
+                            $('#pengirim_alamat').val(payload.address || '');
+                            $('#pengirim_negara').val(payload.country || '').trigger('change');
+                        } else {
+                            $('#penjual_alamat').val(payload.address || '');
+                            $('#penjual_negara').val(payload.country || '').trigger('change');
+                        }
+                    }
+
+                    function fetchAndApply(id, type) {
+                        if (!id) return;
+                        $.getJSON("{{ route('ajax.party.show', ':id') }}".replace(':id', id), function(resp) {
+                            applyPartyDetail(type, resp);
+                        });
+                    }
+
                     function initPartySelect($el) {
                         const type = $el.data('type'); // 'pengirim' | 'penjual'
                         const placeholder = $el.data('placeholder') || 'Cari...';
@@ -200,36 +216,44 @@
                             }
                         });
 
-                        // Prefill selected (edit mode)
+                        // Prefill (mode edit): jika ada initial-id, pastikan option muncul dan detail ikut diaplikasikan bila field kosong
                         const initId = $el.data('initial-id');
                         const initText = $el.data('initial-text');
-                        if (initId && initText) {
-                            const option = new Option(initText, initId, true, true);
-                            $el.append(option).trigger('change');
+                        if (initId) {
+                            if (initText) {
+                                const option = new Option(initText, initId, true, true);
+                                $el.append(option).trigger('change');
+                            } else {
+                                // kalau text tidak ada, fetch detail untuk bikin option + apply
+                                $.getJSON("{{ route('ajax.party.show', ':id') }}".replace(':id', initId), function(resp) {
+                                    const option = new Option(resp.text, resp.id, true, true);
+                                    $el.append(option).trigger('change');
+                                    // hanya apply kalau memang kosong (biar nggak nimpah hasil edit manual di mode edit)
+                                    const emptyAddr = (type === 'pengirim' ? !$('#pengirim_alamat').val() : !$(
+                                        '#penjual_alamat').val());
+                                    const emptyNeg = (type === 'pengirim' ? !$('#pengirim_negara').val() : !$(
+                                        '#penjual_negara').val());
+                                    if (emptyAddr || emptyNeg) applyPartyDetail(type, resp);
+                                });
+                            }
                         }
 
-                        // On select: fetch detail & autofill address/country
+                        // ALWAYS SYNC on select (overwrite alamat & negara sesuai master)
                         $el.on('select2:select', function(e) {
                             const id = e.params.data.id;
-                            if (!id) return;
-                            $.getJSON("{{ route('ajax.party.show', ':id') }}".replace(':id', id), function(resp) {
-                                if (type === 'pengirim') {
-                                    if (!$('#pengirim_alamat').val()) $('#pengirim_alamat').val(resp
-                                        .address || '');
-                                    if (!$('#pengirim_negara').val() && resp.country) {
-                                        $('#pengirim_negara').val(resp.country).trigger('change');
-                                    }
-                                } else {
-                                    if (!$('#penjual_alamat').val()) $('#penjual_alamat').val(resp
-                                        .address || '');
-                                    if (!$('#penjual_negara').val() && resp.country) {
-                                        $('#penjual_negara').val(resp.country).trigger('change');
-                                    }
-                                }
+                            fetchAndApply(id, type);
+                        });
+
+                        // On clear: kosongkan alamat & negara
+                        $el.on('select2:clear', function() {
+                            applyPartyDetail(type, {
+                                address: '',
+                                country: ''
                             });
                         });
                     }
 
+                    // Inisialisasi semua select2-ajax
                     $('.select2-ajax').each(function() {
                         initPartySelect($(this));
                     });

@@ -62,84 +62,76 @@ class ImportNotificationWizardController extends Controller
     'penjual.negara'   => 'required|string|size:2',
     ],
 
-'dokumen' => [
-        'invoice_no'         => 'required|string|max:100',
-        'invoice_tgl'        => 'required|date',
-        'packing_list_no'    => 'nullable|string|max:100',
-        'packing_list_tgl'   => 'nullable|date',
-        'bl_awb_no'          => 'nullable|string|max:100',
-        'bl_awb_tgl'         => 'nullable|date',
-        'lc_no'              => 'nullable|string|max:100',
-        'lc_tgl'             => 'nullable|date',
+    'dokumen' => [
+        'items_json' => 'required|string',
     ],
-'pengangkut' => [
-        'moda'               => 'required|in:Laut,Udara,Darat',
-        'voy_flight'         => 'nullable|string|max:50',
-        'nama_kapal_pesawat' => 'nullable|string|max:120',
-        'pelabuhan_muat'     => 'nullable|string|max:100',
-        'pelabuhan_transit'  => 'nullable|string|max:100',
-        'pelabuhan_bongkar'  => 'nullable|string|max:100',
-        'etd'                => 'nullable|date',
-        'eta'                => 'nullable|date',
-    ],
-'kemasan' => [
-        'jenis'              => 'required|string|max:50',
-        'jumlah'             => 'required|integer|min:0',
-        'total_bruto'        => 'nullable|numeric|min:0',
-        'total_netto'        => 'nullable|numeric|min:0',
-        // (opsional: array container sederhana)
-        'containers'                 => 'nullable|array',
-        'containers.*.nomor'         => 'nullable|string|max:20',
-        'containers.*.ukuran'        => 'nullable|in:20GP,40GP,40HC,45HC,Lainnya',
-        'containers.*.seal_no'       => 'nullable|string|max:30',
-    ],
-'transaksi' => [
-        'valuta'             => 'required|string|max:3',
-        'kurs'               => 'nullable|numeric|min:0',
-        'fob'                => 'nullable|numeric|min:0',
-        'freight'            => 'nullable|numeric|min:0',
-        'insurance'          => 'nullable|numeric|min:0',
-        'cif'                => 'required|numeric|min:0',
-        'incoterm'           => 'nullable|string|max:10',
-        'cara_pembayaran'    => 'nullable|in:TT,LC,OpenAccount,Consignment,Lainnya',
-        'negara_muatan'      => 'nullable|string|max:80',
-    ],
-'barang' => [
-        'items'                      => 'required|array|min:1',
-        'items.*.hs'                 => 'required|string|max:20',
-        'items.*.uraian'             => 'required|string|max:255',
-        'items.*.merk'               => 'nullable|string|max:100',
-        'items.*.tipe'               => 'nullable|string|max:100',
-        'items.*.negara_asal'        => 'nullable|string|max:80',
-        'items.*.qty'                => 'required|numeric|min:0.0001',
-        'items.*.sat'                => 'required|string|max:10',
-        'items.*.bruto_kg'           => 'nullable|numeric|min:0',
-        'items.*.neto_kg'            => 'nullable|numeric|min:0',
-        'items.*.nilai_cif'          => 'required|numeric|min:0',
-    ],
-'pungutan' => [
-        'bm_percent'         => 'nullable|numeric|min:0',
-        'ppn_percent'        => 'nullable|numeric|min:0',
-        'pph_percent'        => 'nullable|numeric|min:0',
-        // nilai dihitung di UI namun tetap kita izinkan masuk (optional)
-        'bea_masuk'          => 'nullable|numeric|min:0',
-        'ppn'                => 'nullable|numeric|min:0',
-        'pph'                => 'nullable|numeric|min:0',
-        'total_pungutan'     => 'nullable|numeric|min:0',
-    ],
-'pernyataan' => [
-        'declared_by'        => 'required|string|max:150',
-        'jabatan'            => 'nullable|string|max:100',
-        'place_date'         => 'required|string|max:150',
-        'ttd_image_path'     => 'nullable|string|max:255',
-        'agree'              => 'accepted',
-    ],
+
+    'pengangkut' => [
+            'moda'               => 'required|in:Laut,Udara,Darat',
+            'voy_flight'         => 'nullable|string|max:50',
+            'nama_kapal_pesawat' => 'nullable|string|max:120',
+            'pelabuhan_muat'     => 'nullable|string|max:100',
+            'pelabuhan_transit'  => 'nullable|string|max:100',
+            'pelabuhan_bongkar'  => 'nullable|string|max:100',
+            'etd'                => 'nullable|date',
+            'eta'                => 'nullable|date',
+        ],
+    'kemasan' => [
+            'jenis'              => 'required|string|max:50',
+            'jumlah'             => 'required|integer|min:0',
+            'total_bruto'        => 'nullable|numeric|min:0',
+            'total_netto'        => 'nullable|numeric|min:0',
+            // (opsional: array container sederhana)
+            'containers'                 => 'nullable|array',
+            'containers.*.nomor'         => 'nullable|string|max:20',
+            'containers.*.ukuran'        => 'nullable|in:20GP,40GP,40HC,45HC,Lainnya',
+            'containers.*.seal_no'       => 'nullable|string|max:30',
+        ],
+    'transaksi' => [
+            'valuta'             => 'required|string|max:3',
+            'kurs'               => 'nullable|numeric|min:0',
+            'fob'                => 'nullable|numeric|min:0',
+            'freight'            => 'nullable|numeric|min:0',
+            'insurance'          => 'nullable|numeric|min:0',
+            'cif'                => 'required|numeric|min:0',
+            'incoterm'           => 'nullable|string|max:10',
+            'cara_pembayaran'    => 'nullable|in:TT,LC,OpenAccount,Consignment,Lainnya',
+            'negara_muatan'      => 'nullable|string|max:80',
+        ],
+    'barang' => [
+            'items'                      => 'required|array|min:1',
+            'items.*.hs'                 => 'required|string|max:20',
+            'items.*.uraian'             => 'required|string|max:255',
+            'items.*.merk'               => 'nullable|string|max:100',
+            'items.*.tipe'               => 'nullable|string|max:100',
+            'items.*.negara_asal'        => 'nullable|string|max:80',
+            'items.*.qty'                => 'required|numeric|min:0.0001',
+            'items.*.sat'                => 'required|string|max:10',
+            'items.*.bruto_kg'           => 'nullable|numeric|min:0',
+            'items.*.neto_kg'            => 'nullable|numeric|min:0',
+            'items.*.nilai_cif'          => 'required|numeric|min:0',
+        ],
+    'pungutan' => [
+            'bm_percent'         => 'nullable|numeric|min:0',
+            'ppn_percent'        => 'nullable|numeric|min:0',
+            'pph_percent'        => 'nullable|numeric|min:0',
+            // nilai dihitung di UI namun tetap kita izinkan masuk (optional)
+            'bea_masuk'          => 'nullable|numeric|min:0',
+            'ppn'                => 'nullable|numeric|min:0',
+            'pph'                => 'nullable|numeric|min:0',
+            'total_pungutan'     => 'nullable|numeric|min:0',
+        ],
+    'pernyataan' => [
+            'declared_by'        => 'required|string|max:150',
+            'jabatan'            => 'nullable|string|max:100',
+            'place_date'         => 'required|string|max:150',
+            'ttd_image_path'     => 'nullable|string|max:255',
+            'agree'              => 'accepted',
+        ],
         ];
     }    public function show(Request $request, ?string $step = 'header')
     {
         if (!in_array($step, $this->steps, true)) $step = 'header';
-        // $data = $request->session()->get('wizard_import', []);
-        // dd($data);
         $data = $request->session()->get('wizard_import', []);
         return view('import.wizard', [
             'current' => $step,
@@ -160,24 +152,60 @@ class ImportNotificationWizardController extends Controller
     // === OVERRIDE store di akhir step: jika _editing_id ada, update instead of create ===
     public function store(Request $request, string $step)
     {
-        if ($step === 'header') {
-            // Generate nomor_aju sekali saja per draft
-            $draft = $request->session()->get('wizard_import', []);
-            if (empty($draft['header']['nomor_aju'])) {
-                $validated['nomor_aju'] = $this->generateNomorAju(
-                    $request->input('kantor_pabean')
-                );
-            } else {
-                $validated['nomor_aju'] = $draft['header']['nomor_aju'];
-            }
-        }
-
         if (!in_array($step, $this->steps, true)) {
             return redirect()->route('wizard.show', 'header');
         }
 
+        // Save current input to session before validation to preserve data on failure
+        $draft = $request->session()->get('wizard_import', []);
+        $inputData = $request->input();
+        $draft[$step] = array_merge($draft[$step] ?? [], $inputData);
+        $request->session()->put('wizard_import', $draft);
+
         $validated = $request->validate($this->rules[$step]);
 
+        // Special handling for dokumen step - decode JSON and validate items
+        if ($step === 'dokumen') {
+            $itemsJson = $validated['items_json'] ?? '';
+            if (empty($itemsJson)) {
+                return back()->withErrors(['items_json' => 'The items field is required.']);
+            }
+            
+            $items = json_decode($itemsJson, true);
+            if (!is_array($items) || count($items) < 1) {
+                return back()->withErrors(['items_json' => 'The items field is required and must contain at least 1 document.']);
+            }
+            
+            foreach ($items as $idx => $item) {
+                if (!isset($item['seri']) || !is_numeric($item['seri']) || $item['seri'] < 1) {
+                    return back()->withErrors(['items_json' => "Item #".($idx+1).": seri is required and must be a positive integer."]);
+                }
+                if (!isset($item['jenis']) || !in_array($item['jenis'], array_keys(config('import.jenis_dokumen')))) {
+                    return back()->withErrors(['items_json' => "Item #".($idx+1).": jenis is required and must be valid."]);
+                }
+                if (!isset($item['nomor']) || empty(trim($item['nomor'])) || strlen($item['nomor']) > 100) {
+                    return back()->withErrors(['items_json' => "Item #".($idx+1).": nomor is required and must be less than 100 characters."]);
+                }
+                if (!isset($item['tanggal']) || !strtotime($item['tanggal'])) {
+                    return back()->withErrors(['items_json' => "Item #".($idx+1).": tanggal is required and must be a valid date."]);
+                }
+            }
+            
+            $validated['items'] = $items;
+            unset($validated['items_json']);
+        }
+
+        // For header, generate nomor_aju if not already set
+        if ($step === 'header') {
+            $draft = $request->session()->get('wizard_import', []);
+            if (empty($draft['header']['nomor_aju'])) {
+                $validated['nomor_aju'] = $this->generateNomorAju(
+                    $validated['kantor_pabean'] ?? null
+                );
+            }
+        }
+
+        // Update with validated data
         $draft = $request->session()->get('wizard_import', []);
         $draft[$step] = array_merge($draft[$step] ?? [], $validated);
         $request->session()->put('wizard_import', $draft);

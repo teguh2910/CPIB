@@ -47,4 +47,14 @@ return [
         'DE' => 'Germany',
         // tambahkan sesuai kebutuhan
     ],
+    'jenis_dokumen' => [
+    'INV'   => 'Invoice',
+    'PL'    => 'Packing List',
+    'BLAWB' => 'Bill of Lading / Air Waybill',
+    'LC'    => 'Letter of Credit',
+    'COO'   => 'Certificate of Origin',
+    'INS'   => 'Insurance',
+    'OTH'   => 'Dokumen Lainnya',
+    ],
+
 ];
