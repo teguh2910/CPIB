@@ -67,26 +67,42 @@ class ImportNotificationWizardController extends Controller
     ],
 
     'pengangkut' => [
-            'moda'               => 'required|in:Laut,Udara,Darat',
-            'voy_flight'         => 'nullable|string|max:50',
-            'nama_kapal_pesawat' => 'nullable|string|max:120',
-            'pelabuhan_muat'     => 'nullable|string|max:100',
-            'pelabuhan_transit'  => 'nullable|string|max:100',
-            'pelabuhan_bongkar'  => 'nullable|string|max:100',
-            'etd'                => 'nullable|date',
-            'eta'                => 'nullable|date',
-        ],
+    // Section BC 1.1
+    'bc11.no_tutup_pu' => 'nullable|string|max:50',
+    'bc11.pos_1'       => 'nullable|integer|min:0',
+    'bc11.pos_2'       => 'nullable|integer|min:0',
+    'bc11.pos_3'       => 'nullable|integer|min:0',
+
+    // Section Pengangkutan
+    'angkut.cara'      => 'required|string|in:' . implode(',', array_keys(config('import.cara_pengangkutan'))),
+    'angkut.nama'      => 'nullable|string|max:120', // jika pakai master local; bisa dijadikan in:... jika mau strict
+    'angkut.voy'       => 'nullable|string|max:50',
+    'angkut.bendera'   => 'nullable|string|in:' . implode(',', array_keys(config('import.negara'))),
+    'angkut.eta'       => 'nullable|date',
+
+    // Section Pelabuhan & Tempat Penimbunan
+    'pelabuhan.muat'    => 'nullable|string|in:' . implode(',', array_keys(config('import.pelabuhan'))),
+    'pelabuhan.transit' => 'nullable|string|in:' . implode(',', array_keys(config('import.pelabuhan'))),
+    'pelabuhan.tujuan'  => 'nullable|string|in:' . implode(',', array_keys(config('import.pelabuhan'))),
+    'tps.kode'          => 'nullable|string|in:' . implode(',', array_keys(config('import.tps'))),
+    ],
     'kemasan' => [
-            'jenis'              => 'required|string|max:50',
-            'jumlah'             => 'required|integer|min:0',
-            'total_bruto'        => 'nullable|numeric|min:0',
-            'total_netto'        => 'nullable|numeric|min:0',
-            // (opsional: array container sederhana)
-            'containers'                 => 'nullable|array',
-            'containers.*.nomor'         => 'nullable|string|max:20',
-            'containers.*.ukuran'        => 'nullable|in:20GP,40GP,40HC,45HC,Lainnya',
-            'containers.*.seal_no'       => 'nullable|string|max:30',
-        ],
+    // List KEMASAN
+    'kemasan'                 => 'required|array|min:0',
+    'kemasan.*.seri'          => 'required|integer|min:1',
+    'kemasan.*.jumlah'        => 'required|numeric|min:0.0001',
+    'kemasan.*.jenis'         => 'required|string|in:' . implode(',', array_keys(config('import.jenis_kemasan'))),
+    'kemasan.*.merek'         => 'nullable|string|max:100',
+
+    // List PETI KEMAS
+    'petikemas'               => 'required|array|min:0',
+    'petikemas.*.seri'        => 'required|integer|min:1',
+    'petikemas.*.nomor'       => ['required','string','max:15', 'regex:/^[A-Z]{4}\d{7}$/'], // ISO: 4 letters + 7 digits (owner+serial+check)
+    'petikemas.*.ukuran'      => 'required|string|in:' . implode(',', array_keys(config('import.ukuran_petikemas'))),
+    'petikemas.*.jenis_muatan'=> 'required|string|in:' . implode(',', array_keys(config('import.jenis_muatan_petikemas'))),
+    'petikemas.*.tipe'        => 'required|string|in:' . implode(',', array_keys(config('import.tipe_petikemas'))),
+    ],
+
     'transaksi' => [
             'valuta'             => 'required|string|max:3',
             'kurs'               => 'nullable|numeric|min:0',

@@ -1,39 +1,158 @@
-<div class="grid md:grid-cols-3 gap-4">
-    <x-field label="Moda">
-        <select name="moda" class="w-full border rounded px-3 py-2" required>
-            @foreach (['Laut', 'Udara', 'Darat'] as $m)
-                <option value="{{ $m }}" @selected(old('moda', $draft['moda'] ?? '') === $m)>{{ $m }}</option>
-            @endforeach
-        </select>
-    </x-field>
-    <x-field label="Voy/Flight">
-        <input name="voy_flight" class="w-full border rounded px-3 py-2"
-            value="{{ old('voy_flight', $draft['voy_flight'] ?? '') }}">
-    </x-field>
-    <x-field label="Nama Kapal/Pesawat">
-        <input name="nama_kapal_pesawat" class="w-full border rounded px-3 py-2"
-            value="{{ old('nama_kapal_pesawat', $draft['nama_kapal_pesawat'] ?? '') }}">
-    </x-field>
+@php
+    $p = $draft ?? [];
 
-    <x-field label="Pelabuhan Muat">
-        <input name="pelabuhan_muat" class="w-full border rounded px-3 py-2"
-            value="{{ old('pelabuhan_muat', $draft['pelabuhan_muat'] ?? '') }}">
-    </x-field>
-    <x-field label="Pelabuhan Transit">
-        <input name="pelabuhan_transit" class="w-full border rounded px-3 py-2"
-            value="{{ old('pelabuhan_transit', $draft['pelabuhan_transit'] ?? '') }}">
-    </x-field>
-    <x-field label="Pelabuhan Bongkar">
-        <input name="pelabuhan_bongkar" class="w-full border rounded px-3 py-2"
-            value="{{ old('pelabuhan_bongkar', $draft['pelabuhan_bongkar'] ?? '') }}">
-    </x-field>
+    $opsCara = config('import.cara_pengangkutan');
+    $opsSarana = config('import.sarana_angkut');
+    $opsNegara = config('import.negara');
+    $opsPort = config('import.pelabuhan');
+    $opsTps = config('import.tps');
 
-    <x-field label="ETD">
-        <input type="date" name="etd" class="w-full border rounded px-3 py-2"
-            value="{{ old('etd', $draft['etd'] ?? '') }}">
-    </x-field>
-    <x-field label="ETA">
-        <input type="date" name="eta" class="w-full border rounded px-3 py-2"
-            value="{{ old('eta', $draft['eta'] ?? '') }}">
-    </x-field>
+    $bc = $p['bc11'] ?? [];
+    $ang = $p['angkut'] ?? [];
+    $pel = $p['pelabuhan'] ?? [];
+    $tps = $p['tps'] ?? [];
+@endphp
+
+<div class="grid md:grid-cols-2 gap-4">
+    {{-- ====== KOLOM KIRI ====== --}}
+    <div class="space-y-4">
+        {{-- Section BC 1.1 --}}
+        <div class="bg-gray-50 border rounded-xl p-4 space-y-3">
+            <h3 class="font-semibold">BC 1.1</h3>
+            <div class="grid grid-cols-1 gap-3">
+                <x-field label="Nomor Tutup PU BC.1.1">
+                    <input name="bc11[no_tutup_pu]" class="w-full border rounded px-3 py-2"
+                        value="{{ old('bc11.no_tutup_pu', $bc['no_tutup_pu'] ?? '') }}">
+                </x-field>
+                <div>
+                    <label class="block text-sm mb-1">Nomor Pos</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="number" name="bc11[pos_1]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('bc11.pos_1', $bc['pos_1'] ?? '') }}" placeholder="Pos">
+                        <input type="number" name="bc11[pos_2]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('bc11.pos_2', $bc['pos_2'] ?? '') }}" placeholder="Subpos">
+                        <input type="number" name="bc11[pos_3]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('bc11.pos_3', $bc['pos_3'] ?? '') }}" placeholder="Sub-subpos">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Section Pengangkutan --}}
+        <div class="bg-gray-50 border rounded-xl p-4 space-y-3">
+            <h3 class="font-semibold">Pengangkutan</h3>
+            <div class="grid grid-cols-1 gap-3">
+                <div class="grid md:grid-cols-2 gap-3">
+                    <x-field label="Cara Pengangkutan">
+                        <select name="angkut[cara]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('angkut.cara', $ang['cara'] ?? '') }}" required>
+                            <option value="">-- Pilih Cara --</option>
+                            @foreach ($opsCara as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+
+                    <x-field label="Nama Sarana Angkut">
+                        <input type="text" name="angkut[nama]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('angkut.nama', $ang['nama'] ?? '') }}">
+                    </x-field>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-3">
+                    <x-field label="Nomor Voy/Flight">
+                        <input name="angkut[voy]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('angkut.voy', $ang['voy'] ?? '') }}">
+                    </x-field>
+
+                    <x-field label="Bendera">
+                        <select name="angkut[bendera]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('angkut.bendera', $ang['bendera'] ?? '') }}">
+                            <option value="">-- Pilih Negara --</option>
+                            @foreach ($opsNegara as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('angkut.bendera', $ang['bendera'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                </div>
+
+                <x-field label="Perkiraan Tanggal Tiba (ETA)">
+                    <input type="date" name="angkut[eta]" class="w-full border rounded px-3 py-2"
+                        value="{{ old('angkut.eta', $ang['eta'] ?? '') }}">
+                </x-field>
+            </div>
+        </div>
+    </div>
+
+    {{-- ====== KOLOM KANAN ====== --}}
+    <div class="space-y-4">
+        {{-- Section Pelabuhan & Tempat Penimbunan --}}
+        <div class="bg-gray-50 border rounded-xl p-4 space-y-3">
+            <h3 class="font-semibold">Pelabuhan & Tempat Penimbunan</h3>
+            <div class="grid grid-cols-1 gap-3">
+                <div class="grid md:grid-cols-2 gap-3">
+                    <x-field label="Pelabuhan Muat">
+                        <select name="pelabuhan[muat]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('pelabuhan.muat', $pel['muat'] ?? '') }}">
+                            <option value="">-- Pilih --</option>
+                            @foreach ($opsPort as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.muat', $pel['muat'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                    <x-field label="Pelabuhan Transit">
+                        <select name="pelabuhan[transit]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('pelabuhan.transit', $pel['transit'] ?? '') }}">
+                            <option value="">-- Pilih --</option>
+                            @foreach ($opsPort as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.transit', $pel['transit'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                    <x-field label="Pelabuhan Tujuan">
+                        <select name="pelabuhan[tujuan]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('pelabuhan.tujuan', $pel['tujuan'] ?? '') }}">
+                            <option value="">-- Pilih --</option>
+                            @foreach ($opsPort as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.tujuan', $pel['tujuan'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                    <x-field label="Tempat Penimbunan">
+                        <select name="tps[kode]" class="w-full border rounded px-3 py-2 select2"
+                            data-selected="{{ old('tps.kode', $tps['kode'] ?? '') }}">
+                            <option value="">-- Pilih --</option>
+                            @foreach ($opsTps as $k => $v)
+                                <option value="{{ $k }}" @if ((string) old('tps.kode', $tps['kode'] ?? '') === (string) $k) selected @endif>
+                                    {{ $v }}</option>
+                            @endforeach
+                        </select>
+                    </x-field>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@push('scripts')
+    <script>
+        $(function() {
+            // init sekali untuk semua .select2 di tab ini
+            $('.select2').select2({
+                width: '100%'
+            });
+            // set value dari data-selected agar binding stabil
+            $('.select2').each(function() {
+                var v = $(this).data('selected');
+                if (v !== undefined && v !== null && v !== '') {
+                    $(this).val(String(v)).trigger('change');
+                }
+            });
+        });
+    </script>
+@endpush

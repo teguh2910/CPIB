@@ -56,5 +56,71 @@ return [
     'INS'   => 'Insurance',
     'OTH'   => 'Dokumen Lainnya',
     ],
+    'cara_pengangkutan' => [
+        '1'  => 'Laut (Sea)',
+        '2' => 'Udara (Air)',
+    ],
+    'negara' => [
+        'ID' => 'Indonesia',
+        'SG' => 'Singapore',
+        'JP' => 'Japan',
+        'CN' => 'China',
+        'US' => 'United States',
+        'MY' => 'Malaysia',
+    ],
 
+    // pelabuhan (UN/Locode contoh)
+    'pelabuhan' => [
+        'IDJKT' => 'IDJKT - Tanjung Priok (Jakarta)',
+        'IDSUB' => 'IDSUB - Tanjung Perak (Surabaya)',
+        'IDCGK' => 'IDCGK - Soekarno-Hatta (Jakarta Air)',
+        'SGSIN' => 'SGSIN - Singapore',
+        'JPTYO' => 'JPTYO - Tokyo',
+        'CNSZX' => 'CNSZX - Shenzhen',
+    ],
+
+    // Tempat Penimbunan Sementara (TPS) / Gudang
+    'tps' => [
+        'TPS01' => 'TPS01 - TPS Koja',
+        'TPS02' => 'TPS02 - TPS Tanjung Priok',
+        'BOND01'=> 'BOND01 - Gudang Berikat A',
+    ],
+     'jenis_kemasan' => [
+        'CT' => 'Carton',
+        'BX' => 'Box',
+        'PK' => 'Pack',
+        'BG' => 'Bag',
+        'CS' => 'Case',
+        'DR' => 'Drum',
+        'PL' => 'Pallet',
+        'RL' => 'Roll',
+        'OTH'=> 'Lainnya',
+    ],
+
+    // Ukuran peti kemas
+    'ukuran_petikemas' => [
+        '20'  => '20 Feet',
+        '40'  => '40 Feet',
+        '45'  => '45 Feet',
+        '20H' => '20 High Cube',
+        '40H' => '40 High Cube',
+    ],
+
+    // Jenis muatan peti kemas
+    'jenis_muatan_petikemas' => [
+        'FCL' => 'FCL (Full Container Load)',
+        'LCL' => 'LCL (Less than Container Load)',
+        'MTY' => 'Empty',
+        'BBK' => 'Breakbulk in Container',
+    ],
+
+    // Tipe peti kemas
+    'tipe_petikemas' => [
+        'GP'  => 'General Purpose (Dry)',
+        'HC'  => 'High Cube',
+        'RF'  => 'Reefer (Refrigerated)',
+        'OT'  => 'Open Top',
+        'FR'  => 'Flat Rack',
+        'TK'  => 'Tank',
+    ],
 ];
