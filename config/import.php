@@ -123,4 +123,53 @@ return [
         'FR'  => 'Flat Rack',
         'TK'  => 'Tank',
     ],
+    'jenis_valuta' => [
+        'IDR' => 'IDR - Rupiah',
+        'USD' => 'USD - US Dollar',
+        'EUR' => 'EUR - Euro',
+        'JPY' => 'JPY - Yen',
+        'SGD' => 'SGD - Singapore Dollar',
+    ],
+    'jenis_transaksi' => [
+        'JUAL-BELI' => 'Jual Beli',
+        'KONSINYASI' => 'Konsinyasi',
+        'HIBAH' => 'Hibah/Gratis',
+        'PINJAM' => 'Pinjam Pakai',
+        'LAIN' => 'Lainnya',
+    ],
+    'incoterm' => [
+        'EXW' => 'EXW - Ex Works',
+        'FCA' => 'FCA - Free Carrier',
+        'FOB' => 'FOB - Free On Board',
+        'CFR' => 'CFR - Cost and Freight',
+        'CIF' => 'CIF - Cost, Insurance & Freight',
+        'DAP' => 'DAP - Delivered At Place',
+        'DDP' => 'DDP - Delivered Duty Paid',
+    ],
+    'jenis_asuransi' => [
+        'NONE' => 'Tidak Ada',
+        'MARINE' => 'Marine Cargo',
+        'AIR' => 'Air Cargo',
+        'LAND' => 'Land Cargo',
+        'LAIN' => 'Lainnya',
+    ],
+    'kondisi_barang' => [
+        'BARU'     => 'Baru',
+        'BEKAS'    => 'Bekas',
+        'REMAN'    => 'Re-manufactured',
+    ],
+    // satuan barang contoh
+    'satuan_barang' => [
+        'PCS' => 'PCS - Pieces',
+        'SET' => 'SET - Set',
+        'KG'  => 'KG - Kilogram',
+        'M'   => 'M - Meter',
+        'L'   => 'L - Liter',
+        'BOX' => 'BOX - Box',
+    ],
+    // gunakan 'jenis_kemasan' & 'negara' yang sudah ada sebelumnya
+    'ket_bm'  => [ 'MFN' => 'MFN', 'FTA' => 'FTA', 'ANTI' => 'Anti Dumping', 'LAIN' => 'Lainnya'],
+    'ket_ppn' => [ 'PPN' => 'PPN Umum', 'PPNBM' => 'PPnBM', 'LAIN' => 'Lainnya'],
+    'ket_pph' => [ 'PPh22' => 'PPh 22 Impor', 'PPh23' => 'PPh 23', 'LAIN' => 'Lainnya'],
 ];
+

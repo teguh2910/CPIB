@@ -32,7 +32,7 @@ class AuthController extends Controller
         // reset draft wizard saat login (opsional)
         $request->session()->forget('wizard_import');
 
-        return redirect()->route('wizard.show', 'header');
+        return redirect()->route('import.index');
     }
 
     public function logout(Request $request)

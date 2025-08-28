@@ -97,36 +97,78 @@ class ImportNotificationWizardController extends Controller
     // List PETI KEMAS
     'petikemas'               => 'required|array|min:0',
     'petikemas.*.seri'        => 'required|integer|min:1',
-    'petikemas.*.nomor'       => ['required','string','max:15', 'regex:/^[A-Z]{4}\d{7}$/'], // ISO: 4 letters + 7 digits (owner+serial+check)
+    'petikemas.*.nomor'       => 'required','string','max:20',
     'petikemas.*.ukuran'      => 'required|string|in:' . implode(',', array_keys(config('import.ukuran_petikemas'))),
     'petikemas.*.jenis_muatan'=> 'required|string|in:' . implode(',', array_keys(config('import.jenis_muatan_petikemas'))),
     'petikemas.*.tipe'        => 'required|string|in:' . implode(',', array_keys(config('import.tipe_petikemas'))),
     ],
 
     'transaksi' => [
-            'valuta'             => 'required|string|max:3',
-            'kurs'               => 'nullable|numeric|min:0',
-            'fob'                => 'nullable|numeric|min:0',
-            'freight'            => 'nullable|numeric|min:0',
-            'insurance'          => 'nullable|numeric|min:0',
-            'cif'                => 'required|numeric|min:0',
-            'incoterm'           => 'nullable|string|max:10',
-            'cara_pembayaran'    => 'nullable|in:TT,LC,OpenAccount,Consignment,Lainnya',
-            'negara_muatan'      => 'nullable|string|max:80',
-        ],
+    // HARGA
+    'harga.valuta'       => 'required|string|in:' . implode(',', array_keys(config('import.jenis_valuta'))),
+    'harga.ndpbm'        => 'required|numeric|min:0',
+    'harga.jenis'        => 'required|string|in:' . implode(',', array_keys(config('import.jenis_transaksi'))),
+    'harga.incoterm'     => 'required|string|in:' . implode(',', array_keys(config('import.incoterm'))),
+    'harga.harga_barang' => 'required|numeric|min:0',
+    'harga.nilai_pabean' => 'required|numeric|min:0', // dikalkulasi di front, tapi tetap kita terima
+
+    // BIAYA LAINNYA
+    'biaya.penambah'     => 'nullable|numeric|min:0',
+    'biaya.pengurang'    => 'nullable|numeric|min:0',
+    'biaya.freight'      => 'nullable|numeric|min:0',
+    'biaya.jenis_asuransi' => 'required|string|in:' . implode(',', array_keys(config('import.jenis_asuransi'))),
+    'biaya.asuransi'     => 'nullable|numeric|min:0',
+    'biaya.voluntary_on' => 'nullable|boolean',
+    'biaya.voluntary_amt'=> 'nullable|numeric|min:0',
+
+    // BERAT
+    'berat.kotor'        => 'required|numeric|min:0',
+    'berat.bersih'       => 'required|numeric|min:0',
+],
+
     'barang' => [
-            'items'                      => 'required|array|min:1',
-            'items.*.hs'                 => 'required|string|max:20',
-            'items.*.uraian'             => 'required|string|max:255',
-            'items.*.merk'               => 'nullable|string|max:100',
-            'items.*.tipe'               => 'nullable|string|max:100',
-            'items.*.negara_asal'        => 'nullable|string|max:80',
-            'items.*.qty'                => 'required|numeric|min:0.0001',
-            'items.*.sat'                => 'required|string|max:10',
-            'items.*.bruto_kg'           => 'nullable|numeric|min:0',
-            'items.*.neto_kg'            => 'nullable|numeric|min:0',
-            'items.*.nilai_cif'          => 'required|numeric|min:0',
-        ],
+    'items'                                     => 'required|array|min:1',
+    'items.*.seri'                              => 'required|integer|min:1',
+
+    // Informasi Dasar
+    'items.*.pos_tarif'                         => 'required|string|max:20',
+    'items.*.lartas'                            => 'required|boolean',
+    'items.*.kode_barang'                       => 'nullable|string|max:50',
+    'items.*.uraian'                            => 'required|string|max:500',
+    'items.*.spesifikasi'                       => 'nullable|string|max:500',
+    'items.*.kondisi'                           => 'nullable|string|in:' . implode(',', array_keys(config('import.kondisi_barang'))),
+    'items.*.negara_asal'                       => 'required|string|in:' . implode(',', array_keys(config('import.negara'))),
+    'items.*.berat_bersih'                      => 'required|numeric|min:0',
+
+    // Jumlah & Kemasan
+    'items.*.jumlah'                            => 'required|numeric|min:0.0000001',
+    'items.*.satuan'                            => 'required|string|in:' . implode(',', array_keys(config('import.satuan_barang'))),
+    'items.*.jml_kemasan'                       => 'nullable|numeric|min:0',
+    'items.*.jenis_kemasan'                     => 'nullable|string|in:' . implode(',', array_keys(config('import.jenis_kemasan'))),
+
+    // Nilai & Keuangan
+    'items.*.nilai_barang'                      => 'required|numeric|min:0',
+    'items.*.fob'                               => 'nullable|numeric|min:0',
+    'items.*.freight'                           => 'nullable|numeric|min:0',
+    'items.*.asuransi'                          => 'nullable|numeric|min:0',
+    'items.*.harga_satuan'                      => 'required|numeric|min:0',
+    'items.*.nilai_pabean_rp'                   => 'required|numeric|min:0',
+    'items.*.dokumen_fasilitas'                 => 'nullable|string|max:150', // label dari tab Dokumen
+
+    // Pungutan
+    'items.*.ket_bm'                            => 'nullable|string|in:' . implode(',', array_keys(config('import.ket_bm'))),
+    'items.*.tarif_bm'                          => 'nullable|numeric|min:0',   // persen
+    'items.*.bayar_bm'                          => 'nullable|numeric|min:0',
+
+    'items.*.ppn_tarif'                         => 'nullable|numeric|in:0,11,12', // 0/11/12
+    'items.*.ket_ppn'                           => 'nullable|string|in:' . implode(',', array_keys(config('import.ket_ppn'))),
+    'items.*.bayar_ppn'                         => 'nullable|numeric|min:0',
+
+    'items.*.ket_pph'                           => 'nullable|string|in:' . implode(',', array_keys(config('import.ket_pph'))),
+    'items.*.tarif_pph'                         => 'nullable|numeric|min:0',   // persen
+    'items.*.bayar_pph'                         => 'nullable|numeric|min:0',
+],
+
     'pungutan' => [
             'bm_percent'         => 'nullable|numeric|min:0',
             'ppn_percent'        => 'nullable|numeric|min:0',

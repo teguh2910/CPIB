@@ -233,7 +233,7 @@
                     edit(i) {
                         this.editingIndex = i;
                         this.form = JSON.parse(JSON.stringify(this.items[i]));
-                        this.$nextTick(() => {
+                        Alpine.nextTick(() => {
                             const $s = $(Alpine.$data(document.querySelector('[x-data]')).$refs.jenisKemasanSelect);
                             $s.val(this.form.jenis || '').trigger($.fn.select2 ? 'change' : 'input');
                         });
@@ -251,7 +251,7 @@
                             jenis: '',
                             merek: ''
                         };
-                        this.$nextTick(() => {
+                        Alpine.nextTick(() => {
                             const $s = $(Alpine.$data(document.querySelector('[x-data]')).$refs.jenisKemasanSelect);
                             $s.val('').trigger($.fn.select2 ? 'change' : 'input');
                         });
@@ -279,6 +279,11 @@
                             alert('Lengkapi Nomor, Ukuran, Jenis Muatan, dan Tipe.');
                             return;
                         }
+                        const nomorRegex = /^[A-Z]{4}\d{7}$/;
+                        if (!nomorRegex.test(this.form.nomor)) {
+                            alert('Nomor kontainer harus 4 huruf besar diikuti 7 digit (contoh: MSCU1234567).');
+                            return;
+                        }
                         const payload = {
                             seri: parseInt(this.form.seri || (this.items.length + 1), 10),
                             nomor: this.form.nomor,
@@ -294,7 +299,7 @@
                     edit(i) {
                         this.editingIndex = i;
                         this.form = JSON.parse(JSON.stringify(this.items[i]));
-                        this.$nextTick(() => {
+                        Alpine.nextTick(() => {
                             const d = Alpine.$data(document.querySelector('[x-data]'));
                             $(d.$refs.ukuranSelect).val(this.form.ukuran || '').trigger($.fn.select2 ? 'change' :
                                 'input');
@@ -318,7 +323,7 @@
                             jenis_muatan: '',
                             tipe: ''
                         };
-                        this.$nextTick(() => {
+                        Alpine.nextTick(() => {
                             const d = Alpine.$data(document.querySelector('[x-data]'));
                             $(d.$refs.ukuranSelect).val('').trigger($.fn.select2 ? 'change' : 'input');
                             $(d.$refs.jenisMuatanSelect).val('').trigger($.fn.select2 ? 'change' : 'input');
@@ -370,7 +375,7 @@
                     this.petikemas.resetForm();
 
                     // Init Select2 all
-                    this.$nextTick(() => {
+                    Alpine.nextTick(() => {
                         if ($.fn.select2) {
                             $('.select2-basic').each(function() {
                                 const $el = $(this);
