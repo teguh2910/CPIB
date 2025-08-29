@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/usr/bin/php",
+            "args": [
+                "/home/teguh/coding/CPIB/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
