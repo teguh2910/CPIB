@@ -347,17 +347,4 @@ class ImportNotificationWizardController extends Controller
         return redirect()->route('wizard.show', 'header')
             ->with('success', 'Mode edit: data dimuat ke draft. Lanjutkan perubahan dan Submit di step terakhir.');
     }
-    // === EXPORT PDF ===
-    public function exportPdf(Request $request, int $id)
-    {
-        $userId = $request->session()->get('user_id');
-        $data = ImportNotification::where('user_id', $userId)->findOrFail($id);
-
-        $html = view('import.pdf', ['data' => $data])->render();
-
-        // Pastikan package dompdf sudah terinstall
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('a4');
-        return $pdf->download('pemberitahuan-impor-'.$data->id.'.pdf');
     }
-
-}

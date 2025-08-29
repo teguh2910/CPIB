@@ -2,10 +2,12 @@
     $e = $draft ?? [];
     $negaraOpts = config('import.negara');
     $pengirimSelected = $e['pengirim']['party_id'] ?? null;
-    $pengirimSelText = $e['pengirim']['name'] ?? null; // kalau mau simpan label untuk prefill (opsional)
     $penjualSelected = $e['penjual']['party_id'] ?? null;
-    $penjualSelText = $e['penjual']['name'] ?? null;
     $statusOpts = config('import.status_importir');
+
+    // Get parties for dropdown
+    $pengirimParties = \App\Models\Party::where('type', 'pengirim')->get();
+    $penjualParties = \App\Models\Party::where('type', 'penjual')->get();
 @endphp
 
 <div class="grid md:grid-cols-2 gap-4">
@@ -41,8 +43,7 @@
                         required>
                 </x-field>
                 <x-field label="Status">
-                    <select name="importir[status]" class="w-full border rounded px-3 py-2 select2"
-                        data-selected="{{ old('importir.status', $e['importir']['status'] ?? '') }}" required>
+                    <select name="importir[status]" class="w-full border rounded px-3 py-2" required>
                         <option value="">-- Pilih Status --</option>
                         @foreach ($statusOpts as $k => $v)
                             <option value="{{ $k }}" @if ((string) old('importir.status', $e['importir']['status'] ?? 'MITA') === (string) $k) selected @endif>
@@ -112,12 +113,15 @@
             <h3 class="font-semibold">Pengirim Barang</h3>
             <div class="grid grid-cols-1 gap-3">
 
-                {{-- Select2 AJAX --}}
+                {{-- Select Pengirim --}}
                 <x-field label="Nama (Master)">
-                    <select name="pengirim[party_id]" id="pengirim_party"
-                        class="w-full border rounded px-3 py-2 select2-ajax" data-initial-id="{{ $pengirimSelected }}"
-                        data-initial-text="{{ $pengirimSelText }}" data-type="pengirim"
-                        data-placeholder="Cari pengirim...">
+                    <select name="pengirim[party_id]" class="w-full border rounded px-3 py-2" required>
+                        <option value="">-- Pilih Pengirim --</option>
+                        @foreach ($pengirimParties as $party)
+                            <option value="{{ $party->id }}" @if ($pengirimSelected == $party->id) selected @endif>
+                                {{ $party->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </x-field>
 
@@ -144,12 +148,15 @@
             <h3 class="font-semibold">Penjual Barang</h3>
             <div class="grid grid-cols-1 gap-3">
 
-                {{-- Select2 AJAX --}}
+                {{-- Select Penjual --}}
                 <x-field label="Nama (Master)">
-                    <select name="penjual[party_id]" id="penjual_party"
-                        class="w-full border rounded px-3 py-2 select2-ajax" data-initial-id="{{ $penjualSelected }}"
-                        data-initial-text="{{ $penjualSelText }}" data-type="penjual"
-                        data-placeholder="Cari penjual...">
+                    <select name="penjual[party_id]" class="w-full border rounded px-3 py-2" required>
+                        <option value="">-- Pilih Penjual --</option>
+                        @foreach ($penjualParties as $party)
+                            <option value="{{ $party->id }}" @if ($penjualSelected == $party->id) selected @endif>
+                                {{ $party->name }}
+                            </option>
+                        @endforeach
                     </select>
                 </x-field>
 
@@ -170,93 +177,5 @@
                 </div>
             </div>
         </div>
-
-        @push('scripts')
-            <script>
-                $(function() {
-                    function applyPartyDetail(type, payload) {
-                        if (type === 'pengirim') {
-                            $('#pengirim_alamat').val(payload.address || '');
-                            $('#pengirim_negara').val(payload.country || '').trigger('change');
-                        } else {
-                            $('#penjual_alamat').val(payload.address || '');
-                            $('#penjual_negara').val(payload.country || '').trigger('change');
-                        }
-                    }
-
-                    function fetchAndApply(id, type) {
-                        if (!id) return;
-                        $.getJSON("{{ route('ajax.party.show', ':id') }}".replace(':id', id), function(resp) {
-                            applyPartyDetail(type, resp);
-                        });
-                    }
-
-                    function initPartySelect($el) {
-                        const type = $el.data('type'); // 'pengirim' | 'penjual'
-                        const placeholder = $el.data('placeholder') || 'Cari...';
-
-                        $el.select2({
-                            width: '100%',
-                            placeholder: placeholder,
-                            allowClear: true,
-                            ajax: {
-                                url: "{{ route('ajax.party.search') }}",
-                                dataType: 'json',
-                                delay: 250,
-                                data: function(params) {
-                                    return {
-                                        q: params.term,
-                                        page: params.page || 1,
-                                        type: type
-                                    };
-                                },
-                                processResults: function(data) {
-                                    return data;
-                                }
-                            }
-                        });
-
-                        // Prefill (mode edit): jika ada initial-id, pastikan option muncul dan detail ikut diaplikasikan bila field kosong
-                        const initId = $el.data('initial-id');
-                        const initText = $el.data('initial-text');
-                        if (initId) {
-                            if (initText) {
-                                const option = new Option(initText, initId, true, true);
-                                $el.append(option).trigger('change');
-                            } else {
-                                // kalau text tidak ada, fetch detail untuk bikin option + apply
-                                $.getJSON("{{ route('ajax.party.show', ':id') }}".replace(':id', initId), function(resp) {
-                                    const option = new Option(resp.text, resp.id, true, true);
-                                    $el.append(option).trigger('change');
-                                    // hanya apply kalau memang kosong (biar nggak nimpah hasil edit manual di mode edit)
-                                    const emptyAddr = (type === 'pengirim' ? !$('#pengirim_alamat').val() : !$(
-                                        '#penjual_alamat').val());
-                                    const emptyNeg = (type === 'pengirim' ? !$('#pengirim_negara').val() : !$(
-                                        '#penjual_negara').val());
-                                    if (emptyAddr || emptyNeg) applyPartyDetail(type, resp);
-                                });
-                            }
-                        }
-
-                        // ALWAYS SYNC on select (overwrite alamat & negara sesuai master)
-                        $el.on('select2:select', function(e) {
-                            const id = e.params.data.id;
-                            fetchAndApply(id, type);
-                        });
-
-                        // On clear: kosongkan alamat & negara
-                        $el.on('select2:clear', function() {
-                            applyPartyDetail(type, {
-                                address: '',
-                                country: ''
-                            });
-                        });
-                    }
-
-                    // Inisialisasi semua select2-ajax
-                    $('.select2-ajax').each(function() {
-                        initPartySelect($(this));
-                    });
-                });
-            </script>
-        @endpush
+    </div>
+</div>

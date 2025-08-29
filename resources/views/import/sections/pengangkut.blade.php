@@ -44,14 +44,19 @@
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Cara Pengangkutan">
-                        <select name="angkut[cara]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('angkut.cara', $ang['cara'] ?? '') }}" required>
+                        <select name="angkut[cara]" class="w-full border rounded px-3 py-2" required>
                             <option value="">-- Pilih Cara --</option>
                             @foreach ($opsCara as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? '') === (string) $k) selected @endif>
-                                    {{ $v }}</option>
+                                    {{ $v }}
+                                </option>
                             @endforeach
                         </select>
+                    </x-field>
+                    <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? '') === (string) $k) selected @endif>
+                        {{ $v }}</option>
+                    @endforeach
+                    </select>
                     </x-field>
 
                     <x-field label="Nama Sarana Angkut">
@@ -67,8 +72,7 @@
                     </x-field>
 
                     <x-field label="Bendera">
-                        <select name="angkut[bendera]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('angkut.bendera', $ang['bendera'] ?? '') }}">
+                        <select name="angkut[bendera]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($opsNegara as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('angkut.bendera', $ang['bendera'] ?? '') === (string) $k) selected @endif>
@@ -94,8 +98,7 @@
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Pelabuhan Muat">
-                        <select name="pelabuhan[muat]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('pelabuhan.muat', $pel['muat'] ?? '') }}">
+                        <select name="pelabuhan[muat]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('pelabuhan.muat', $pel['muat'] ?? '') === (string) $k) selected @endif>
@@ -104,8 +107,7 @@
                         </select>
                     </x-field>
                     <x-field label="Pelabuhan Transit">
-                        <select name="pelabuhan[transit]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('pelabuhan.transit', $pel['transit'] ?? '') }}">
+                        <select name="pelabuhan[transit]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('pelabuhan.transit', $pel['transit'] ?? '') === (string) $k) selected @endif>
@@ -114,8 +116,7 @@
                         </select>
                     </x-field>
                     <x-field label="Pelabuhan Tujuan">
-                        <select name="pelabuhan[tujuan]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('pelabuhan.tujuan', $pel['tujuan'] ?? '') }}">
+                        <select name="pelabuhan[tujuan]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('pelabuhan.tujuan', $pel['tujuan'] ?? '') === (string) $k) selected @endif>
@@ -124,8 +125,7 @@
                         </select>
                     </x-field>
                     <x-field label="Tempat Penimbunan">
-                        <select name="tps[kode]" class="w-full border rounded px-3 py-2 select2"
-                            data-selected="{{ old('tps.kode', $tps['kode'] ?? '') }}">
+                        <select name="tps[kode]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsTps as $k => $v)
                                 <option value="{{ $k }}" @if ((string) old('tps.kode', $tps['kode'] ?? '') === (string) $k) selected @endif>
@@ -138,21 +138,3 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-    <script>
-        $(function() {
-            // init sekali untuk semua .select2 di tab ini
-            $('.select2').select2({
-                width: '100%'
-            });
-            // set value dari data-selected agar binding stabil
-            $('.select2').each(function() {
-                var v = $(this).data('selected');
-                if (v !== undefined && v !== null && v !== '') {
-                    $(this).val(String(v)).trigger('change');
-                }
-            });
-        });
-    </script>
-@endpush

@@ -3,23 +3,21 @@
 
 @section('content')
     @php
-        $h = $data->header ?? [];
-        $e = $data->entitas ?? [];
-        $d = $data->dokumen ?? [];
-        $pg = $data->pengangkut ?? [];
-        $km = $data->kemasan ?? [];
-        $tr = $data->transaksi ?? [];
-        $br = $data->barang ?? [];
-        $pgtn = $data->pungutan ?? [];
-        $pry = $data->pernyataan ?? [];
+        $h = $importNotification->header ?? [];
+        $e = $importNotification->entitas ?? [];
+        $d = $importNotification->dokumen ?? [];
+        $pg = $importNotification->pengangkut ?? [];
+        $km = $importNotification->kemasan ?? [];
+        $tr = $importNotification->transaksi ?? [];
+        $br = $importNotification->barang ?? [];
+        $pgtn = $importNotification->pungutan ?? [];
+        $pry = $importNotification->pernyataan ?? [];
     @endphp
 
     <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-xl font-semibold">Detail Pemberitahuan Impor #{{ $data->id }}</h1>
+        <h1 class="text-xl font-semibold">Detail Pemberitahuan Impor #{{ $importNotification->id }}</h1>
         <div class="flex gap-2">
-            <a href="{{ route('import.edit', $data->id) }}" class="px-3 py-2 rounded border text-sm">Edit</a>
-            <a href="{{ route('import.export.pdf', $data->id) }}" class="px-3 py-2 rounded bg-black text-white text-sm">Unduh
-                PDF</a>
+            <a href="{{ route('import.edit', $importNotification->id) }}" class="px-3 py-2 rounded border text-sm">Edit</a>
         </div>
     </div>
 
@@ -27,7 +25,7 @@
         <div class="bg-white rounded-xl shadow p-4">
             <h2 class="font-semibold mb-2">Header</h2>
             <div class="text-sm">
-                <div>Nomor Aju: {{ $data->header['nomor_aju'] ?? '-' }}</div>
+                <div>Nomor Aju: {{ $importNotification->header['nomor_aju'] ?? '-' }}</div>
                 <div>Nomor: {{ $h['nomor_dokumen'] ?? '-' }}</div>
                 <div>Tanggal: {{ $h['tanggal'] ?? '-' }}</div>
                 <div>KPPBC: {{ $h['kppbc'] ?? '-' }}</div>

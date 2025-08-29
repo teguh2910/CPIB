@@ -5,7 +5,7 @@
     <div class="bg-white rounded-2xl shadow p-4">
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl font-semibold">Daftar Pemberitahuan Impor</h1>
-            <a href="{{ route('wizard.show', 'header') }}" class="px-3 py-2 rounded bg-black text-white text-sm">Buat Baru</a>
+            <a href="{{ route('import.create') }}" class="px-3 py-2 rounded bg-black text-white text-sm">Buat Baru</a>
         </div>
 
         <div class="overflow-x-auto">
@@ -21,7 +21,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($records as $r)
+                    @forelse($importNotifications as $r)
                         @php
                             $h = $r->header ?? [];
                             $e = $r->entitas ?? [];
@@ -38,8 +38,6 @@
                                 <a href="{{ route('import.show', $r->id) }}" class="underline">Detail</a>
                                 <span class="mx-1">|</span>
                                 <a href="{{ route('import.edit', $r->id) }}" class="underline">Edit</a>
-                                <span class="mx-1">|</span>
-                                <a href="{{ route('import.export.pdf', $r->id) }}" class="underline">PDF</a>
                             </td>
                         </tr>
                     @empty
@@ -52,7 +50,7 @@
         </div>
 
         <div class="mt-4">
-            {{ $records->links() }}
+            {{ $importNotifications->links() }}
         </div>
     </div>
 @endsection
