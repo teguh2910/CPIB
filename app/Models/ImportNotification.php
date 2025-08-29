@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ImportNotification extends Model
 {
@@ -21,14 +22,22 @@ class ImportNotification extends Model
     ];
 
     protected $casts = [
-        'header'      => 'array',
-        'entitas'     => 'array',
-        'dokumen'     => 'array',
-        'pengangkut'  => 'array',
-        'kemasan'     => 'array',
-        'transaksi'   => 'array',
-        'barang'      => 'array',
-        'pungutan'    => 'array',
-        'pernyataan'  => 'array',
+        'header' => 'array',
+        'entitas' => 'array',
+        'dokumen' => 'array',
+        'pengangkut' => 'array',
+        'kemasan' => 'array',
+        'transaksi' => 'array',
+        'barang' => 'array',
+        'pungutan' => 'array',
+        'pernyataan' => 'array',
     ];
+
+    /**
+     * Relationship to the ImportHeader record (stored in separate table).
+     */
+    public function headerRecord(): HasOne
+    {
+        return $this->hasOne(ImportHeader::class, 'import_notification_id');
+    }
 }

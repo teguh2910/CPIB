@@ -1,12 +1,13 @@
 @php
+    $k = $draft ?? [];
     $opsJenisKemasan = config('import.jenis_kemasan');
     $opsUkuran = config('import.ukuran_petikemas');
     $opsJenisMuatan = config('import.jenis_muatan_petikemas');
     $opsTipe = config('import.tipe_petikemas');
 
-    // Get data from database instead of draft
-    $kemasanData = \App\Models\ImportKemasan::where('user_id', auth()->id())->get();
-    $petiKemasData = \App\Models\ImportPetiKemas::where('user_id', auth()->id())->get();
+    // Use draft data instead of database queries
+    $kemasanData = collect($k['kemasan'] ?? []);
+    $petiKemasData = collect($k['peti_kemas'] ?? []);
 @endphp
 
 <div class="space-y-6">

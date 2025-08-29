@@ -13,11 +13,11 @@ return [
     ],
     'jenis_impor' => [
         '1' => 'Untuk Dipakai',
-        '2'     => 'Sementara',
+        '2' => 'Sementara',
     ],
     'cara_pembayaran' => [
-        '1'          => 'Biasa',
-        '2'          => 'Berkala',
+        '1' => 'Biasa',
+        '2' => 'Berkala',
     ],
     'status_importir' => [
         'AEO' => 'AEO (Authorized Economic Operator)',
@@ -48,16 +48,16 @@ return [
         // tambahkan sesuai kebutuhan
     ],
     'jenis_dokumen' => [
-    'INV'   => 'Invoice',
-    'PL'    => 'Packing List',
-    'BLAWB' => 'Bill of Lading / Air Waybill',
-    'LC'    => 'Letter of Credit',
-    'COO'   => 'Certificate of Origin',
-    'INS'   => 'Insurance',
-    'OTH'   => 'Dokumen Lainnya',
+        'INV' => 'Invoice',
+        'PL' => 'Packing List',
+        'BLAWB' => 'Bill of Lading / Air Waybill',
+        'LC' => 'Letter of Credit',
+        'COO' => 'Certificate of Origin',
+        'INS' => 'Insurance',
+        'OTH' => 'Dokumen Lainnya',
     ],
     'cara_pengangkutan' => [
-        '1'  => 'Laut (Sea)',
+        '1' => 'Laut (Sea)',
         '2' => 'Udara (Air)',
     ],
     'negara' => [
@@ -83,9 +83,9 @@ return [
     'tps' => [
         'TPS01' => 'TPS01 - TPS Koja',
         'TPS02' => 'TPS02 - TPS Tanjung Priok',
-        'BOND01'=> 'BOND01 - Gudang Berikat A',
+        'BOND01' => 'BOND01 - Gudang Berikat A',
     ],
-     'jenis_kemasan' => [
+    'jenis_kemasan' => [
         'CT' => 'Carton',
         'BX' => 'Box',
         'PK' => 'Pack',
@@ -94,14 +94,14 @@ return [
         'DR' => 'Drum',
         'PL' => 'Pallet',
         'RL' => 'Roll',
-        'OTH'=> 'Lainnya',
+        'OTH' => 'Lainnya',
     ],
 
     // Ukuran peti kemas
     'ukuran_petikemas' => [
-        '20'  => '20 Feet',
-        '40'  => '40 Feet',
-        '45'  => '45 Feet',
+        '20' => '20 Feet',
+        '40' => '40 Feet',
+        '45' => '45 Feet',
         '20H' => '20 High Cube',
         '40H' => '40 High Cube',
     ],
@@ -116,12 +116,12 @@ return [
 
     // Tipe peti kemas
     'tipe_petikemas' => [
-        'GP'  => 'General Purpose (Dry)',
-        'HC'  => 'High Cube',
-        'RF'  => 'Reefer (Refrigerated)',
-        'OT'  => 'Open Top',
-        'FR'  => 'Flat Rack',
-        'TK'  => 'Tank',
+        'GP' => 'General Purpose (Dry)',
+        'HC' => 'High Cube',
+        'RF' => 'Reefer (Refrigerated)',
+        'OT' => 'Open Top',
+        'FR' => 'Flat Rack',
+        'TK' => 'Tank',
     ],
     'jenis_valuta' => [
         'IDR' => 'IDR - Rupiah',
@@ -154,22 +154,37 @@ return [
         'LAIN' => 'Lainnya',
     ],
     'kondisi_barang' => [
-        'BARU'     => 'Baru',
-        'BEKAS'    => 'Bekas',
-        'REMAN'    => 'Re-manufactured',
+        'BARU' => 'Baru',
+        'BEKAS' => 'Bekas',
+        'REMAN' => 'Re-manufactured',
     ],
     // satuan barang contoh
     'satuan_barang' => [
         'PCS' => 'PCS - Pieces',
         'SET' => 'SET - Set',
-        'KG'  => 'KG - Kilogram',
-        'M'   => 'M - Meter',
-        'L'   => 'L - Liter',
+        'KG' => 'KG - Kilogram',
+        'M' => 'M - Meter',
+        'L' => 'L - Liter',
         'BOX' => 'BOX - Box',
     ],
     // gunakan 'jenis_kemasan' & 'negara' yang sudah ada sebelumnya
-    'ket_bm'  => [ 'MFN' => 'MFN', 'FTA' => 'FTA', 'ANTI' => 'Anti Dumping', 'LAIN' => 'Lainnya'],
-    'ket_ppn' => [ 'PPN' => 'PPN Umum', 'PPNBM' => 'PPnBM', 'LAIN' => 'Lainnya'],
-    'ket_pph' => [ 'PPh22' => 'PPh 22 Impor', 'PPh23' => 'PPh 23', 'LAIN' => 'Lainnya'],
+    'ket_bm' => ['MFN' => 'MFN', 'FTA' => 'FTA', 'ANTI' => 'Anti Dumping', 'LAIN' => 'Lainnya'],
+    'ket_ppn' => ['PPN' => 'PPN Umum', 'PPNBM' => 'PPnBM', 'LAIN' => 'Lainnya'],
+    'ket_pph' => ['PPh22' => 'PPh 22 Impor', 'PPh23' => 'PPh 23', 'LAIN' => 'Lainnya'],
+    'spesifikasi_lain' => [
+        'STD' => 'Standard',
+        'PREM' => 'Premium',
+        'ECO' => 'Economy',
+        'LAIN' => 'Lainnya',
+    ],
+    'sarana_angkut' => [
+        'SHIP' => 'Kapal Laut',
+        'PLANE' => 'Pesawat',
+        'TRUCK' => 'Truk',
+        'TRAIN' => 'Kereta Api',
+        'LAIN' => 'Lainnya',
+    ],
 ];
 
+return [
+];

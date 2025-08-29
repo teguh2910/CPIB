@@ -10,29 +10,15 @@ class ImportDokumenController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'dokumen' => 'required|array|min:1',
-            'dokumen.*.seri' => 'required|integer|min:1',
-            'dokumen.*.jenis' => 'required|string',
-            'dokumen.*.nomor' => 'required|string|max:100',
-            'dokumen.*.tanggal' => 'required|date',
-        ]);
-
-        $userId = Auth::id();
-        $savedCount = 0;
-
-        foreach ($validated['dokumen'] as $dokumenData) {
-            ImportDokumen::create([
-                'user_id' => $userId,
-                'seri' => $dokumenData['seri'],
-                'jenis' => $dokumenData['jenis'],
-                'nomor' => $dokumenData['nomor'],
-                'tanggal' => $dokumenData['tanggal'],
-            ]);
-            $savedCount++;
-        }
-
-        return redirect()->back()->with('success', "{$savedCount} dokumen berhasil disimpan");
+        ImportDokumen::create([
+            'user_id' => 1,
+            'import_notification_id' => null,
+            'seri' => $request->seri,
+            'jenis' => $request->jenis,
+            'nomor' => $request->nomor,
+            'tanggal' => $request->tanggal,
+        ]);                
+        return redirect()->to('import/create?step=dokumen');
     }
 
     public function update(Request $request)

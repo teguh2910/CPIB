@@ -5,9 +5,14 @@
     $penjualSelected = $e['penjual']['party_id'] ?? null;
     $statusOpts = config('import.status_importir');
 
-    // Get parties for dropdown
-    $pengirimParties = \App\Models\Party::where('type', 'pengirim')->get();
-    $penjualParties = \App\Models\Party::where('type', 'penjual')->get();
+    // Get parties for dropdown - handle potential errors
+    try {
+        $pengirimParties = \App\Models\Party::where('type', 'pengirim')->get();
+        $penjualParties = \App\Models\Party::where('type', 'penjual')->get();
+    } catch (\Exception $ex) {
+        $pengirimParties = collect([]);
+        $penjualParties = collect([]);
+    }
 @endphp
 
 <div class="grid md:grid-cols-2 gap-4">

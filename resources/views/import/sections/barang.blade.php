@@ -1,4 +1,5 @@
 @php
+    $b = $draft ?? [];
     $opsNegara = config('import.negara');
     $opsSatuan = config('import.satuan_barang');
     $opsKemasan = config('import.jenis_kemasan');
@@ -7,101 +8,203 @@
     $opsKetBM = config('import.ket_bm');
     $opsKetPPN = config('import.ket_ppn');
     $opsKetPPH = config('import.ket_pph');
-
-    // Data sudah diterima dari controller via compact
-    // $barangData, $ndpbm, $dokList sudah tersedia
-
 @endphp
 
 <div class="space-y-6">
-    {{-- Form Tambah Barang --}}
+    {{-- Informasi Barang --}}
     <div class="bg-gray-50 border rounded-xl p-4">
-        <h3 class="font-semibold mb-3">Tambah Barang</h3>
+        <h3 class="font-semibold mb-3">Informasi Barang</h3>
 
-        <form method="POST" action="{{ route('import.barang.store') }}">
-            @csrf
-            <input type="hidden" name="ndpbm" value="{{ $ndpbm }}">
-            <input type="hidden" name="seri" value="{{ $barangData->count() + 1 }}">
+        <div class="grid md:grid-cols-2 gap-5">
+            {{-- ===== Informasi Dasar ===== --}}
+            <div class="space-y-3">
+                <h4 class="font-medium">Informasi Dasar</h4>
+                <div class="grid grid-cols-1 gap-3">
+                    <x-field label="POS Tarif / HS Code">
+                        <input name="barang[pos_tarif]" placeholder="HS Code"
+                            value="{{ old('barang.pos_tarif', $b['pos_tarif'] ?? '') }}"
+                            class="w-full border rounded px-3 py-2" required>
+                    </x-field>
 
-            <div class="grid md:grid-cols-2 gap-5">
-                {{-- ===== Informasi Dasar ===== --}}
-                <div class="space-y-3">
-                    <h4 class="font-medium">Informasi Dasar</h4>
-                    <div class="grid grid-cols-1 gap-3">
-                        <x-field label="POS Tarif">
-                            <input name="pos_tarif" placeholder="HS Code" class="w-full border rounded px-3 py-2"
-                                required>
-                        </x-field>
-
-                        <div>
-                            <label class="text-sm">Pernyataan Lartas</label>
-                            <div class="flex gap-5 mt-1">
-                                <label class="inline-flex items-center gap-2">
-                                    <input type="radio" name="lartas" value="1" required> <span>Ya</span>
-                                </label>
-                                <label class="inline-flex items-center gap-2">
-                                    <input type="radio" name="lartas" value="0" required> <span>Tidak</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <x-field label="Kode Barang">
-                            <input name="kode_barang" class="w-full border rounded px-3 py-2">
-                        </x-field>
-
-                        <x-field label="Uraian Jenis Barang">
-                            <textarea name="uraian" class="w-full border rounded px-3 py-2" rows="2" required></textarea>
-                        </x-field>
-
-                        <div class="grid md:grid-cols-2 gap-3">
-                            <x-field label="Spesifikasi Lain">
-                                <input name="spesifikasi" class="w-full border rounded px-3 py-2">
-                            </x-field>
-                            <x-field label="Kondisi Barang">
-                                <select name="kondisi" class="w-full border rounded px-3 py-2">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($opsKond as $k => $v)
-                                        <option value="{{ $k }}">{{ $v }}</option>
-                                    @endforeach
-                                </select>
-                            </x-field>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-3">
-                            <x-field label="Negara Asal">
-                                <select name="negara_asal" class="w-full border rounded px-3 py-2">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($opsNegara as $k => $v)
-                                        <option value="{{ $k }}">{{ $v }}</option>
-                                    @endforeach
-                                </select>
-                            </x-field>
-                            <x-field label="Berat Bersih (Kg)">
-                                <input type="number" step="0.001" name="berat_bersih"
-                                    class="w-full border rounded px-3 py-2" required>
-                            </x-field>
+                    <div>
+                        <label class="text-sm">Pernyataan Lartas</label>
+                        <div class="flex gap-5 mt-1">
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" name="barang[lartas]" value="1"
+                                    {{ (old('barang.lartas', $b['lartas'] ?? '') == '1') ? 'checked' : '' }} required>
+                                <span>Ya</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" name="barang[lartas]" value="0"
+                                    {{ (old('barang.lartas', $b['lartas'] ?? '') == '0') ? 'checked' : '' }} required>
+                                <span>Tidak</span>
+                            </label>
                         </div>
                     </div>
-                </div>
 
-                {{-- ===== Jumlah & Kemasan + Nilai & Keuangan ===== --}}
-                <div class="space-y-3">
-                    <h4 class="font-medium">Jumlah & Kemasan</h4>
-                    <div class="grid grid-cols-1 gap-3">
-                        <div class="grid md:grid-cols-2 gap-3">
-                            <x-field label="Jumlah Satuan Barang">
-                                <input type="number" step="0.000001" name="jumlah"
-                                    class="w-full border rounded px-3 py-2" required>
-                            </x-field>
-                            <x-field label="Jenis Satuan">
-                                <select name="satuan" class="w-full border rounded px-3 py-2">
-                                    <option value="">-- Pilih --</option>
-                                    @foreach ($opsSatuan as $k => $v)
-                                        <option value="{{ $k }}">{{ $v }}</option>
-                                    @endforeach
-                                </select>
-                            </x-field>
-                        </div>
+                    <x-field label="Kode Barang">
+                        <input name="barang[kode_barang]"
+                            value="{{ old('barang.kode_barang', $b['kode_barang'] ?? '') }}"
+                            class="w-full border rounded px-3 py-2">
+                    </x-field>
+
+                    <x-field label="Uraian Jenis Barang">
+                        <textarea name="barang[uraian]" class="w-full border rounded px-3 py-2" rows="2" required>{{ old('barang.uraian', $b['uraian'] ?? '') }}</textarea>
+                    </x-field>
+
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <x-field label="Spesifikasi Lain">
+                            <input name="barang[spesifikasi]"
+                                value="{{ old('barang.spesifikasi', $b['spesifikasi'] ?? '') }}"
+                                class="w-full border rounded px-3 py-2">
+                        </x-field>
+                        <x-field label="Kondisi Barang">
+                            <select name="barang[kondisi]" class="w-full border rounded px-3 py-2">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($opsKond as $k => $v)
+                                    <option value="{{ $k }}" @if ((string) old('barang.kondisi', $b['kondisi'] ?? '') === (string) $k) selected @endif>
+                                        {{ $v }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <x-field label="Negara Asal">
+                            <select name="barang[negara_asal]" class="w-full border rounded px-3 py-2">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($opsNegara as $k => $v)
+                                    <option value="{{ $k }}" @if ((string) old('barang.negara_asal', $b['negara_asal'] ?? '') === (string) $k) selected @endif>
+                                        {{ $v }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                        <x-field label="Berat Bersih (Kg)">
+                            <input type="number" step="0.001" name="barang[berat_bersih]"
+                                value="{{ old('barang.berat_bersih', $b['berat_bersih'] ?? '') }}"
+                                class="w-full border rounded px-3 py-2" required>
+                        </x-field>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ===== Jumlah & Kemasan ===== --}}
+            <div class="space-y-3">
+                <h4 class="font-medium">Jumlah & Kemasan</h4>
+                <div class="grid grid-cols-1 gap-3">
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <x-field label="Jumlah Satuan Barang">
+                            <input type="number" step="0.000001" name="barang[jumlah]"
+                                value="{{ old('barang.jumlah', $b['jumlah'] ?? '') }}"
+                                class="w-full border rounded px-3 py-2" required>
+                        </x-field>
+                        <x-field label="Jenis Satuan">
+                            <select name="barang[satuan]" class="w-full border rounded px-3 py-2">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($opsSatuan as $k => $v)
+                                    <option value="{{ $k }}" @if ((string) old('barang.satuan', $b['satuan'] ?? '') === (string) $k) selected @endif>
+                                        {{ $v }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <x-field label="Jumlah Kemasan">
+                            <input type="number" name="barang[jumlah_kemasan]"
+                                value="{{ old('barang.jumlah_kemasan', $b['jumlah_kemasan'] ?? '') }}"
+                                class="w-full border rounded px-3 py-2">
+                        </x-field>
+                        <x-field label="Jenis Kemasan">
+                            <select name="barang[jenis_kemasan]" class="w-full border rounded px-3 py-2">
+                                <option value="">-- Pilih --</option>
+                                @foreach ($opsKemasan as $k => $v)
+                                    <option value="{{ $k }}" @if ((string) old('barang.jenis_kemasan', $b['jenis_kemasan'] ?? '') === (string) $k) selected @endif>
+                                        {{ $v }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </x-field>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- ===== Nilai & Keuangan ===== --}}
+        <div class="mt-6">
+            <h4 class="font-medium mb-3">Nilai & Keuangan</h4>
+            <div class="grid md:grid-cols-3 gap-4">
+                <x-field label="Harga Penyerahan">
+                    <input type="number" step="0.01" name="barang[harga_penyerahan]"
+                        value="{{ old('barang.harga_penyerahan', $b['harga_penyerahan'] ?? '') }}"
+                        class="w-full border rounded px-3 py-2" required>
+                </x-field>
+                <x-field label="Harga Perolehan">
+                    <input type="number" step="0.01" name="barang[harga_perolehan]"
+                        value="{{ old('barang.harga_perolehan', $b['harga_perolehan'] ?? '') }}"
+                        class="w-full border rounded px-3 py-2">
+                </x-field>
+                <x-field label="Harga CIF">
+                    <input type="number" step="0.01" name="barang[harga_cif]"
+                        value="{{ old('barang.harga_cif', $b['harga_cif'] ?? '') }}"
+                        class="w-full border rounded px-3 py-2">
+                </x-field>
+            </div>
+        </div>
+
+        {{-- ===== Tarif & Pajak ===== --}}
+        <div class="mt-6">
+            <h4 class="font-medium mb-3">Tarif & Pajak</h4>
+            <div class="grid md:grid-cols-3 gap-4">
+                <x-field label="BM (%)">
+                    <input type="number" step="0.01" name="barang[bm_persen]"
+                        value="{{ old('barang.bm_persen', $b['bm_persen'] ?? '') }}"
+                        class="w-full border rounded px-3 py-2">
+                </x-field>
+                <x-field label="Ket. BM">
+                    <select name="barang[ket_bm]" class="w-full border rounded px-3 py-2">
+                        <option value="">-- Pilih --</option>
+                        @foreach ($opsKetBM as $k => $v)
+                            <option value="{{ $k }}" @if ((string) old('barang.ket_bm', $b['ket_bm'] ?? '') === (string) $k) selected @endif>
+                                {{ $v }}
+                            </option>
+                        @endforeach
+                    </select>
+                </x-field>
+                <x-field label="PPN (%)">
+                    <input type="number" step="0.01" name="barang[ppn_persen]"
+                        value="{{ old('barang.ppn_persen', $b['ppn_persen'] ?? '') }}"
+                        class="w-full border rounded px-3 py-2">
+                </x-field>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 mt-3">
+                <x-field label="Ket. PPN">
+                    <select name="barang[ket_ppn]" class="w-full border rounded px-3 py-2">
+                        <option value="">-- Pilih --</option>
+                        @foreach ($opsKetPPN as $k => $v)
+                            <option value="{{ $k }}" @if ((string) old('barang.ket_ppn', $b['ket_ppn'] ?? '') === (string) $k) selected @endif>
+                                {{ $v }}
+                            </option>
+                        @endforeach
+                    </select>
+                </x-field>
+                <x-field label="Ket. PPh">
+                    <select name="barang[ket_pph]" class="w-full border rounded px-3 py-2">
+                        <option value="">-- Pilih --</option>
+                        @foreach ($opsKetPPH as $k => $v)
+                            <option value="{{ $k }}" @if ((string) old('barang.ket_pph', $b['ket_pph'] ?? '') === (string) $k) selected @endif>
+                                {{ $v }}
+                            </option>
+                        @endforeach
+                    </select>
+                </x-field>
+            </div>
+        </div>
+    </div>
+</div>
 
                         <div class="grid md:grid-cols-2 gap-3">
                             <x-field label="Jumlah Kemasan">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -26,19 +27,29 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Email atau password salah'])->withInput();
         }
 
-        $request->session()->put('user_id', $user->id);
-        $request->session()->put('user_name', $user->name);
+    // Store some session values used by app
+    $request->session()->put('user_id', $user->id);
+    $request->session()->put('user_name', $user->name);
 
-        // reset draft wizard saat login (opsional)
-        $request->session()->forget('wizard_import');
+    // Also log in the user into Laravel's authentication system so Auth::check()/Auth::id() work
+    Auth::login($user);
 
-        return redirect()->route('import.index');
+    // Prevent session fixation
+    $request->session()->regenerate();
+
+    // reset draft wizard saat login (opsional)
+    $request->session()->forget('wizard_import');
+
+    return redirect()->route('import.index');
     }
 
     public function logout(Request $request)
     {
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('login.form');
+    // Logout from Laravel auth and clear session
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return redirect()->route('login.form');
     }
 }
