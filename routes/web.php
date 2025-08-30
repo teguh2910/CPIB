@@ -45,6 +45,7 @@ Route::middleware('auth.session')->group(function () {
     Route::post('barang', [ImportBarangController::class, 'store'])->name('barang.store');
     // CSV/Excel upload
     Route::post('barang/upload', [ImportBarangController::class, 'upload'])->name('barang.upload');
+    // Update all barang derived/calculated fields
     Route::get('barang/template', [ImportBarangController::class, 'templateCsv'])->name('barang.template');
     Route::get('barang/{id}/edit', [ImportBarangController::class, 'edit'])->name('barang.edit');
     Route::put('barang/{id}', [ImportBarangController::class, 'update'])->name('barang.update');

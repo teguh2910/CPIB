@@ -4,6 +4,7 @@
     <a href="{{ route('barang.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
         + Tambah Barang
     </a>
+
 </div>
 
 {{-- Upload CSV / Excel (CSV) --}}
@@ -24,12 +25,15 @@
             </div>
         @endif
         @csrf
-        <input type="file" name="file" required class="border rounded px-2 py-1 text-sm" />
+        <input type="file" name="file" class="border rounded px-2 py-1 text-sm" />
         <button type="submit" name="action" value="import"
             class="px-3 py-1 bg-green-600 text-white rounded text-sm">Upload Excel
             (CSV)</button>
         <a href="{{ route('barang.template') }}" class="ml-2 text-sm text-blue-600 underline">Download Template
             CSV</a>
+        <button type="submit" name="action" value="updateAll"
+            class="ml-2 px-3 py-1 bg-green-600 text-white rounded text-sm">Generate Pungutan</button>
+        <span id="update-all-status" class="ml-3 text-sm"></span>
     </div>
 @endif
 

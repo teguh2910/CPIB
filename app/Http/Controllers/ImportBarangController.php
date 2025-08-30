@@ -209,7 +209,7 @@ class ImportBarangController extends Controller
             'biaya_pph' => $validated['tarif_pph']/100*$validated['nilai_barang']*$ndpbm,
         ]);
 
-        return redirect()->route('import.create', ['step' => 'barang'])
+        return redirect()->back()
             ->with('success', 'Barang berhasil diperbarui');
     }
 
@@ -233,6 +233,8 @@ class ImportBarangController extends Controller
             'ppn_tarif','ket_ppn','bayar_ppn',
             // PPh
             'ket_pph','tarif_pph','bayar_pph',
+            'nilai_pabean_rp',
+            'NDPMB',
         ];
 
         $filename = 'barang-template.csv';
@@ -247,5 +249,7 @@ class ImportBarangController extends Controller
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ]);
     }
+
+    
 
 }

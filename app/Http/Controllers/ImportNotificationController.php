@@ -843,7 +843,35 @@ class ImportNotificationController extends Controller
 
             return redirect()->back()->with('success', "Import finished: {$created} created, {$skipped} skipped.");
         }
+        if($action == 'updateAll')
+        {
+        $userId = 1;
 
-        return redirect()->route('import.edit', $importNotification);
+        // Get current NDPMB/harga_ndpbm
+        $transaksiData = ImportTransaksi::where('import_notification_id', $importNotification->id)->first();
+        $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
+
+        $barangs = ImportBarang::where('user_id', $userId)->get();
+        $updated = 0;
+        foreach ($barangs as $b) {
+            $nilaiBarang = $b->nilai_barang ?? 0;
+            $tarifBm = $b->tarif_bm ?? 0;
+            $tarifPpn = $b->ppn_tarif ?? 0;
+            $tarifPph = $b->tarif_pph ?? 0;
+            $b->import_notification_id = $importNotification->id;
+            $b->nilai_pabean_rp = $nilaiBarang * $ndpbm;
+            $b->biaya_bm = ($tarifBm / 100) * $nilaiBarang * $ndpbm;
+            $b->biaya_ppn = ($tarifPpn / 100) * $nilaiBarang * $ndpbm;
+            $b->biaya_pph = ($tarifPph / 100) * $nilaiBarang * $ndpbm;
+
+            if ($b->isDirty()) {
+                $b->save();
+                $updated++;
+            }
+        } 
+        return redirect()->back()->with('success', "Selesai: {$updated} baris diperbarui");         
+        }
+
+        
     }
 }
