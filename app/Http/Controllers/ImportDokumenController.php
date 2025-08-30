@@ -18,7 +18,8 @@ class ImportDokumenController extends Controller
             'tanggal' => $request->tanggal,
         ]);
 
-        return redirect()->to('import/create?step=dokumen');
+        return redirect()->to(url()->previous())
+            ->with('success', 'Dokumen berhasil disimpan');
     }
 
     public function edit($id)
@@ -46,7 +47,7 @@ class ImportDokumenController extends Controller
             'tanggal' => $validated['tanggal'],
         ]);
 
-        return redirect()->route('import.create', ['step' => 'dokumen'])
+        return redirect()->to(url()->previous())
             ->with('success', 'Dokumen berhasil diperbarui');
     }
 

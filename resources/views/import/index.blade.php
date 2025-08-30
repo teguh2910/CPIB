@@ -12,37 +12,31 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="text-left border-b">
-                        <th class="py-2">ID</th>
-                        <th class="py-2">Nomor Dokumen</th>
-                        <th class="py-2">Tanggal</th>
-                        <th class="py-2">Importir</th>
+                        <th class="py-2">Nomor Aju</th>
+                        <th class="py-2">Supplier</th>
                         <th class="py-2">Status</th>
                         <th class="py-2"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($importNotifications as $r)
-                        @php
-                            $h = $r->header ?? [];
-                            $e = $r->entitas ?? [];
-                        @endphp
                         <tr class="border-b">
-                            <td class="py-2">{{ $r->id }}</td>
-                            <td class="py-2">{{ $h['nomor_dokumen'] ?? '-' }}</td>
-                            <td class="py-2">{{ $h['tanggal'] ?? '-' }}</td>
-                            <td class="py-2">{{ $e['importir_nama'] ?? '-' }}</td>
+                            <td class="py-2">{{ $r->headerRecord->nomor_aju ?? '-' }}</td>
+                            <td class="py-2">{{ $r->entitasRecord->pengirimParty->name ?? '-' }}</td>
                             <td class="py-2">
                                 <span class="px-2 py-1 rounded text-xs border">{{ $r->status }}</span>
                             </td>
                             <td class="py-2">
-                                <a href="{{ route('import.show', $r->id) }}" class="underline">Detail</a>
-                                <span class="mx-1">|</span>
-                                <a href="{{ route('import.edit', $r->id) }}" class="underline">Edit</a>
+                                <a href="{{ route('import.edit', $r->id) }}"
+                                    class="px-2 py-1 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition duration-200">Edit</a>
+                                <a href=""
+                                    class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Kirim
+                                    CIESA</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="py-4 text-center text-gray-500">Belum ada data.</td>
+                            <td colspan="4" class="py-4 text-center text-gray-500">Belum ada data.</td>
                         </tr>
                     @endforelse
                 </tbody>

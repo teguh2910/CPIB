@@ -56,4 +56,12 @@ class ImportNotification extends Model
     {
         return $this->hasOne(ImportTransaksi::class, 'import_notification_id');
     }
+
+    /**
+     * Relationship to ImportEntitas record.
+     */
+    public function entitasRecord()
+    {
+        return $this->hasOne(ImportEntitas::class, 'import_notification_id');
+    }
 }

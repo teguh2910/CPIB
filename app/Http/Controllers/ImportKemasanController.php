@@ -25,7 +25,8 @@ class ImportKemasanController extends Controller
             'merek' => $validated['merek'],
         ]);
 
-        return redirect()->route('import.create', ['step' => 'kemasan'])->with('success', 'Kemasan berhasil ditambahkan');
+        return redirect()->to(url()->previous())
+            ->with('success', 'Kemasan berhasil ditambahkan');
     }
 
     public function edit_kemasan($id)
@@ -44,7 +45,7 @@ class ImportKemasanController extends Controller
             'merek' => 'nullable|string|max:100',
         ]);
 
-        $kemasan = ImportKemasan::where('import_notification_id', null)->findOrFail($id);
+        $kemasan = ImportKemasan::findOrFail($id);
 
         $kemasan->update([
             'seri' => $validated['seri'],
@@ -53,7 +54,7 @@ class ImportKemasanController extends Controller
             'merek' => $validated['merek'],
         ]);
 
-        return redirect()->route('import.create', ['step' => 'kemasan'])
+        return redirect()->to(url()->previous())
             ->with('success', 'Kemasan berhasil diperbarui');
     }
 

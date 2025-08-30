@@ -28,7 +28,7 @@ class ImportPetiKemasController extends Controller
             'tipe' => $request->tipe,
         ]);
 
-        return redirect()->route('import.create', ['step' => 'kemasan'])->with('success', 'Peti Kemas berhasil ditambahkan');
+        return redirect()->to(url()->previous())->with('success', 'Peti Kemas berhasil ditambahkan');
     }
 
     public function edit_petikemas($id)
@@ -58,7 +58,7 @@ class ImportPetiKemasController extends Controller
             'tipe' => $request->tipe,
         ]);
 
-        return redirect()->route('import.create', ['step' => 'kemasan'])
+        return redirect()->to(url()->previous())
             ->with('success', 'Peti Kemas berhasil diperbarui');
     }
 
@@ -67,6 +67,6 @@ class ImportPetiKemasController extends Controller
         $petikemas = ImportPetiKemas::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
         $petikemas->delete();
 
-        return redirect()->route('import.create', ['step' => 'kemasan'])->with('success', 'Peti Kemas berhasil dihapus');
+        return redirect()->to(url()->previous())->with('success', 'Peti Kemas berhasil dihapus');
     }
 }

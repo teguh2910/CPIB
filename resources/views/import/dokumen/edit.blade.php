@@ -60,10 +60,6 @@
                         <button type="submit" class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800">
                             Update Dokumen
                         </button>
-                        <a href="{{ route('import.create', ['step' => 'dokumen']) }}"
-                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                            Batal
-                        </a>
                     </div>
                 </form>
             </div>

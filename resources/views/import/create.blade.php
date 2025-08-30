@@ -79,7 +79,7 @@
                 </div>
 
                 <!-- Form -->
-                <form action="{{ route('import.store') }}" method="POST" class="p-6">
+                <form action="{{ route('import.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
 
                     @if ($errors->any())
@@ -96,7 +96,10 @@
                     <!-- Step Content -->
                     <div class="mb-6">
                         <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ $labels[$current] }}</h2>
-                        @include('import.sections.' . $current, ['draft' => $draft[$current] ?? []])
+                        @include('import.sections.' . $current, [
+                            'draft' => $draft[$current] ?? [],
+                            'showUpload' => $current === 'barang' ? false : null,
+                        ])
                     </div>
 
                     <!-- Hidden step indicator -->

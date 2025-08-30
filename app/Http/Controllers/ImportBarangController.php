@@ -7,6 +7,7 @@ use App\Models\ImportDokumen;
 use App\Models\ImportTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ImportBarangController extends Controller
 {
@@ -112,9 +113,9 @@ class ImportBarangController extends Controller
             'ket_pph' => $validated['ket_pph'],
             'tarif_pph' => $validated['tarif_pph'],
             'bayar_pph' => $validated['status_pph'],
-            'biaya_bm' => $validated['tarif_bm']/100*$validated['nilai_pabean_rp'],
-            'biaya_ppn' => $validated['tarif_ppn']/100*$validated['nilai_pabean_rp'],
-            'biaya_pph' => $validated['tarif_pph']/100*$validated['nilai_pabean_rp'],
+            'biaya_bm' => $validated['tarif_bm']/100*$validated['nilai_barang']*$ndpbm,
+            'biaya_ppn' => $validated['tarif_ppn']/100*$validated['nilai_barang']*$ndpbm,
+            'biaya_pph' => $validated['tarif_pph']/100*$validated['nilai_barang']*$ndpbm,
         ]);
 
         return redirect()->route('import.create', ['step' => 'barang'])
@@ -203,9 +204,9 @@ class ImportBarangController extends Controller
             'ket_ppn' => $validated['ket_ppn'],
             'tarif_pph' => $validated['tarif_pph'],
             'bayar_pph' => $validated['status_pph'],
-            'biaya_bm' => $validated['tarif_bm']/100*$validated['nilai_pabean_rp'],
-            'biaya_ppn' => $validated['tarif_ppn']/100*$validated['nilai_pabean_rp'],
-            'biaya_pph' => $validated['tarif_pph']/100*$validated['nilai_pabean_rp'],
+            'biaya_bm' => $validated['tarif_bm']/100*$validated['nilai_barang']*$ndpbm,
+            'biaya_ppn' => $validated['tarif_ppn']/100*$validated['nilai_barang']*$ndpbm,
+            'biaya_pph' => $validated['tarif_pph']/100*$validated['nilai_barang']*$ndpbm,
         ]);
 
         return redirect()->route('import.create', ['step' => 'barang'])
@@ -218,4 +219,33 @@ class ImportBarangController extends Controller
 
         return redirect()->back()->with('success', 'Barang berhasil dihapus');
     }
+
+    /**
+     * Return a downloadable CSV template for barang import.
+     */
+    public function templateCsv()
+    {
+        $columns = [
+            'seri','pos_tarif','lartas','kode_barang','uraian','spesifikasi','kondisi','negara_asal','berat_bersih','jumlah','satuan','jml_kemasan','jenis_kemasan','nilai_barang','fob','freight','asuransi','harga_satuan','dokumen_fasilitas',
+            // BM
+            'ket_bm','tarif_bm','bayar_bm',
+            // PPN
+            'ppn_tarif','ket_ppn','bayar_ppn',
+            // PPh
+            'ket_pph','tarif_pph','bayar_pph',
+        ];
+
+        $filename = 'barang-template.csv';
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $columns);
+        rewind($handle);
+        $content = stream_get_contents($handle);
+        fclose($handle);
+
+        return response($content, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ]);
+    }
+
 }

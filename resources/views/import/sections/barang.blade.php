@@ -6,6 +6,33 @@
     </a>
 </div>
 
+{{-- Upload CSV / Excel (CSV) --}}
+@php $showUpload = $showUpload ?? true; @endphp
+@if ($showUpload)
+    <div class="mb-4">
+        @if (session('import_success'))
+            <div class="p-2 bg-green-100 text-green-800 rounded mb-2 text-sm">{{ session('import_success') }}</div>
+        @endif
+        @if (session('import_errors'))
+            <div class="p-2 bg-yellow-100 text-yellow-800 rounded mb-2 text-sm">
+                <strong>Beberapa baris gagal diimpor:</strong>
+                <ul class="list-disc pl-5 mt-1 text-xs">
+                    @foreach (session('import_errors') as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        @csrf
+        <input type="file" name="file" required class="border rounded px-2 py-1 text-sm" />
+        <button type="submit" name="action" value="import"
+            class="px-3 py-1 bg-green-600 text-white rounded text-sm">Upload Excel
+            (CSV)</button>
+        <a href="{{ route('barang.template') }}" class="ml-2 text-sm text-blue-600 underline">Download Template
+            CSV</a>
+    </div>
+@endif
+
 {{-- Tabel List Barang --}}
 <div class="bg-white border rounded-xl">
     <div class="overflow-x-auto">
@@ -41,9 +68,6 @@
                         </td>
                     </tr>
                 @empty
-                    <tr>
-                        <td colspan="8" class="py-4 px-3 text-center text-gray-500">Belum ada item barang.</td>
-                    </tr>
                 @endforelse
             </tbody>
         </table>

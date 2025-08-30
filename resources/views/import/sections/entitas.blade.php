@@ -1,5 +1,8 @@
 @php
     $e = $draft ?? [];
+    // Also expose a normalized entitas array from the session draft for backward compatibility
+    $_sessionDraft = session('import_draft', []);
+    $ent = $_sessionDraft['entitas'] ?? [];
     $negaraOpts = config('import.negara');
     $pengirimSelected = $e['pengirim']['party_id'] ?? null;
     $penjualSelected = $e['penjual']['party_id'] ?? null;
@@ -120,10 +123,11 @@
 
                 {{-- Select Pengirim --}}
                 <x-field label="Nama (Master)">
-                    <select name="pengirim[party_id]" class="w-full border rounded px-3 py-2" required>
+                    <select id="pengirim_party_id" name="pengirim[party_id]" class="w-full border rounded px-3 py-2"
+                        required>
                         <option value="">-- Pilih Pengirim --</option>
                         @foreach ($pengirimParties as $party)
-                            <option value="{{ $party->id }}" @if ($pengirimSelected == $party->id) selected @endif>
+                            <option value="{{ $party->id }}" @if (($ent['pengirim_party_id'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach
@@ -133,13 +137,14 @@
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Alamat">
                         <input name="pengirim[alamat]" id="pengirim_alamat" class="w-full border rounded px-3 py-2"
-                            value="{{ old('pengirim.alamat', $e['pengirim']['alamat'] ?? '') }}" required>
+                            value="{{ old('pengirim.alamat', $e['pengirim']['alamat'] ?? ($ent['pengirim_alamat'] ?? '')) }}"
+                            required>
                     </x-field>
                     <x-field label="Negara">
                         <select name="pengirim[negara]" id="pengirim_negara" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($negaraOpts as $k => $v)
-                                <option value="{{ $k }}" @selected(old('pengirim.negara', $e['pengirim']['negara'] ?? '') === $k)>{{ $v }}
+                                <option value="{{ $k }}" @selected(old('pengirim.negara', $e['pengirim']['negara'] ?? ($ent['pengirim_negara'] ?? '')) === $k)>{{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -155,10 +160,11 @@
 
                 {{-- Select Penjual --}}
                 <x-field label="Nama (Master)">
-                    <select name="penjual[party_id]" class="w-full border rounded px-3 py-2" required>
+                    <select id="penjual_party_id" name="penjual[party_id]" class="w-full border rounded px-3 py-2"
+                        required>
                         <option value="">-- Pilih Penjual --</option>
                         @foreach ($penjualParties as $party)
-                            <option value="{{ $party->id }}" @if ($penjualSelected == $party->id) selected @endif>
+                            <option value="{{ $party->id }}" @if (($ent['penjual_party_id'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach
@@ -168,13 +174,14 @@
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Alamat">
                         <input name="penjual[alamat]" id="penjual_alamat" class="w-full border rounded px-3 py-2"
-                            value="{{ old('penjual.alamat', $e['penjual']['alamat'] ?? '') }}" required>
+                            value="{{ old('penjual.alamat', $e['penjual']['alamat'] ?? ($ent['penjual_alamat'] ?? '')) }}"
+                            required>
                     </x-field>
                     <x-field label="Negara">
                         <select name="penjual[negara]" id="penjual_negara" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($negaraOpts as $k => $v)
-                                <option value="{{ $k }}" @selected(old('penjual.negara', $e['penjual']['negara'] ?? '') === $k)>{{ $v }}
+                                <option value="{{ $k }}" @selected(old('penjual.negara', $e['penjual']['negara'] ?? ($ent['penjual_negara'] ?? '')) === $k)>{{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -184,3 +191,57 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    <script>
+        (function() {
+            // Build maps for pengirim and penjual from server-side collections
+            const pengirimMap = {
+                @foreach ($pengirimParties as $p)
+                    "{{ $p->id }}": {
+                        alamat: {!! json_encode($p->address ?? '') !!},
+                        negara: {!! json_encode($p->country ?? '') !!}
+                    },
+                @endforeach
+            };
+
+            const penjualMap = {
+                @foreach ($penjualParties as $p)
+                    "{{ $p->id }}": {
+                        alamat: {!! json_encode($p->address ?? '') !!},
+                        negara: {!! json_encode($p->country ?? '') !!}
+                    },
+                @endforeach
+            };
+
+            function applyPartyToFields(prefix, map, selectedId) {
+                const alamatEl = document.querySelector(`#${prefix}_alamat`);
+                const negaraEl = document.querySelector(`#${prefix}_negara`);
+                if (!alamatEl || !negaraEl) return;
+                const data = map[selectedId];
+                if (data) {
+                    alamatEl.value = data.alamat || '';
+                    negaraEl.value = data.negara || '';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const pengirimSel = document.getElementById('pengirim_party_id');
+                const penjualSel = document.getElementById('penjual_party_id');
+                if (pengirimSel) {
+                    pengirimSel.addEventListener('change', function() {
+                        applyPartyToFields('pengirim', pengirimMap, this.value);
+                    });
+                    // apply initial value
+                    applyPartyToFields('pengirim', pengirimMap, pengirimSel.value);
+                }
+                if (penjualSel) {
+                    penjualSel.addEventListener('change', function() {
+                        applyPartyToFields('penjual', penjualMap, this.value);
+                    });
+                    applyPartyToFields('penjual', penjualMap, penjualSel.value);
+                }
+            });
+        })();
+    </script>
+@endpush
