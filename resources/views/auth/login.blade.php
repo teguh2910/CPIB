@@ -19,8 +19,8 @@
         <form method="POST" action="{{ route('login.attempt') }}" class="space-y-4">
             @csrf
             <div>
-                <label class="block text-sm mb-1">Email</label>
-                <input type="email" name="email" class="w-full border rounded px-3 py-2" value="{{ old('email') }}" required>
+                <label class="block text-sm mb-1">Username</label>
+                <input type="text" name="username" class="w-full border rounded px-3 py-2" value="{{ old('username') }}" required>
             </div>
             <div>
                 <label class="block text-sm mb-1">Password</label>

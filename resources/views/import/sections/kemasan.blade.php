@@ -20,8 +20,8 @@
                     @csrf
                     <div class="grid md:grid-cols-4 gap-3">
                         <x-field label="Seri">
-                            <input type="number" id="kem_seri" name="seri" min="1"
-                                class="w-full border rounded px-3 py-2" required>
+                            <input type="number" id="kem_seri" name="seri" readonly
+                                class="w-full border rounded px-3 py-2 bg-gray-100" required>
                         </x-field>
                         <x-field label="Jumlah">
                             <input type="number" id="kem_jumlah" name="jumlah" min="0" step="0.0001"
@@ -96,8 +96,8 @@
                     @csrf
                     <div class="grid md:grid-cols-5 gap-3">
                         <x-field label="Seri">
-                            <input type="number" id="peti_seri" name="seri" min="1"
-                                class="w-full border rounded px-3 py-2" required>
+                            <input type="number" id="peti_seri" name="seri" readonly
+                                class="w-full border rounded px-3 py-2 bg-gray-100" required>
                         </x-field>
                         <x-field label="No. Cont">
                             <input id="peti_nomor" name="nomor" placeholder="MSCU1234567"
@@ -185,6 +185,34 @@
 
 <script>
     (function() {
+        // Function to generate next seri number for kemasan
+        function generateNextKemasanSeri() {
+            const existingKemasan = @json($kemasan ?? []);
+            let maxSeri = 0;
+            existingKemasan.forEach(item => {
+                if (item.seri > maxSeri) {
+                    maxSeri = item.seri;
+                }
+            });
+            return maxSeri + 1;
+        }
+
+        // Function to generate next seri number for peti kemas
+        function generateNextPetiKemasSeri() {
+            const existingPetiKemas = @json($petiKemas ?? []);
+            let maxSeri = 0;
+            existingPetiKemas.forEach(item => {
+                if (item.seri > maxSeri) {
+                    maxSeri = item.seri;
+                }
+            });
+            return maxSeri + 1;
+        }
+
+        // Initialize seri fields on page load
+        document.getElementById('kem_seri').value = generateNextKemasanSeri();
+        document.getElementById('peti_seri').value = generateNextPetiKemasSeri();
+
         // Kemasan Form Handler
         const addKemasanBtn = document.getElementById('addKemasanBtn');
         const kemasanUrl = '{{ route('kemasan.store') }}';

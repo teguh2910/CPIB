@@ -17,23 +17,24 @@ return new class extends Migration
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // BC 1.1 Section
-            $table->string('bc11_no_tutup_pu', 50)->nullable();
-            $table->integer('bc11_pos_1')->nullable();
-            $table->integer('bc11_pos_2')->nullable();
-            $table->integer('bc11_pos_3')->nullable();
+            $table->string('kode_tutup_pu')->nullable();
+            $table->string('nomor_bc_11')->nullable();
+            $table->string('tanggal_bc_11')->nullable();
+            $table->string('nomor_pos')->nullable();
+            $table->string('nomor_sub_pos')->nullable();
 
             // Pengangkutan Section
             $table->string('angkut_cara');
             $table->string('angkut_nama', 120)->nullable();
             $table->string('angkut_voy', 50)->nullable();
             $table->string('angkut_bendera')->nullable();
-            $table->date('angkut_eta')->nullable();
+            $table->date('tanggal_tiba')->nullable();
 
             // Pelabuhan & Tempat Penimbunan
-            $table->string('pelabuhan_muat')->nullable();
-            $table->string('pelabuhan_transit')->nullable();
-            $table->string('pelabuhan_tujuan')->nullable();
-            $table->string('tps_kode')->nullable();
+            $table->string('kode_pelabuhan_muat')->nullable();
+            $table->string('kode_pelabuhan_transit')->nullable();
+            $table->string('kode_pelabuhan_tujuan')->nullable();
+            $table->string('kode_tps')->nullable();
 
             $table->timestamps();
         });

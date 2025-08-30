@@ -1,6 +1,7 @@
 @php
     $d = $draft ?? [];
     $jenisOpts = config('import.jenis_dokumen');
+    $fasilitasOpts = config('import.kode_fasilitas');
     $existingDokumen = $d['items'] ?? [];
 @endphp
 
@@ -12,13 +13,11 @@
             @csrf
             <div class="grid md:grid-cols-4 gap-3">
                 <x-field label="Seri">
-                    <input type="number" id="dok_seri" name="seri" min="1"
-                        class="w-full border rounded px-3 py-2" required>
+                    <input type="text" id="dok_seri" name="seri" readonly
+                        class="w-full border rounded px-3 py-2 bg-gray-100" required>
                 </x-field>
-
                 <x-field label="Jenis Dokumen">
-                    <select id="dok_jenis" name="jenis" class="w-full border rounded px-3 py-2" required>
-                        <option value="">-- Pilih jenis dokumen --</option>
+                    <select id="dok_kode" name="kode_dokumen" class="w-full border rounded px-3 py-2" required>
                         @foreach ($jenisOpts as $k => $v)
                             <option value="{{ $k }}">{{ $v }}</option>
                         @endforeach
@@ -26,12 +25,19 @@
                 </x-field>
 
                 <x-field label="Nomor Dokumen">
-                    <input id="dok_nomor" name="nomor" class="w-full border rounded px-3 py-2" required>
+                    <input id="dok_nomor" name="nomor_dokumen" class="w-full border rounded px-3 py-2" required>
                 </x-field>
 
                 <x-field label="Tanggal Dokumen">
-                    <input type="date" id="dok_tanggal" name="tanggal" class="w-full border rounded px-3 py-2"
+                    <input type="date" id="dok_tanggal" name="tanggal_dokumen" class="w-full border rounded px-3 py-2"
                         required>
+                </x-field>
+                <x-field label="Kode Fasilitas">
+                    <select id="dok_fasilitas" name="kode_fasilitas" class="w-full border rounded px-3 py-2" required>
+                        @foreach ($fasilitasOpts as $k => $v)
+                            <option value="{{ $k }}">{{ $v }}</option>
+                        @endforeach
+                    </select>
                 </x-field>
             </div>
 
@@ -49,19 +55,21 @@
                 <thead>
                     <tr class="text-left border-b">
                         <th class="py-2 px-3">Seri</th>
-                        <th class="py-2 px-3">Jenis</th>
-                        <th class="py-2 px-3">Nomor</th>
-                        <th class="py-2 px-3">Tanggal</th>
+                        <th class="py-2 px-3">kode_dokumen</th>
+                        <th class="py-2 px-3">nomor_dokumen</th>
+                        <th class="py-2 px-3">tanggal_dokumen</th>
+                        <th class="py-2 px-3">kode_fasilitas</th>
                         <th class="py-2 px-3 w-28">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($dokument as $dok)
+                    @forelse ($dokument as $dok)
                         <tr class="border-b">
                             <td class="py-2 px-3">{{ $dok->seri }}</td>
-                            <td class="py-2 px-3">{{ $jenisOpts[$dok->jenis] ?? $dok->jenis }}</td>
-                            <td class="py-2 px-3">{{ $dok->nomor }}</td>
-                            <td class="py-2 px-3">{{ strftime('%d-%m-%Y', strtotime($dok->tanggal)) }}</td>
+                            <td class="py-2 px-3">{{ $jenisOpts[$dok->kode_dokumen] ?? $dok->kode_dokumen }}</td>
+                            <td class="py-2 px-3">{{ $dok->nomor_dokumen }}</td>
+                            <td class="py-2 px-3">{{ strftime('%d-%m-%Y', strtotime($dok->tanggal_dokumen)) }}</td>
+                            <td class="py-2 px-3">{{ $dok->kode_fasilitas }}</td>
                             <td class="py-2 px-3">
                                 <button type="button" class="text-blue-600 underline text-xs"
                                     onclick="editDokumen({{ $dok->id }})">Edit</button>
@@ -70,11 +78,12 @@
                                     onclick="deleteDokumen({{ $dok->id }})">Hapus</button>
                             </td>
                         </tr>
-                    @endforeach
-                    <tr>
-                        <td colspan="5" class="py-4 px-3 text-center text-gray-500">Belum ada dokumen. Tambahkan
-                            di atas.</td>
-                    </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-4 px-3 text-center text-gray-500">Belum ada dokumen. Tambahkan
+                                di atas.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -104,15 +113,45 @@
             itemsInput.value = JSON.stringify(items);
         }
 
+        function generateNextSeri() {
+            const existingDokumen = @json($dokument);
+            let maxSeri = 0;
+            existingDokumen.forEach(dok => {
+                if (dok.seri > maxSeri) {
+                    maxSeri = dok.seri;
+                }
+            });
+            return maxSeri + 1;
+        }
+
+        function updateSeriField() {
+            const nextSeri = generateNextSeri();
+            document.getElementById('dok_seri').value = nextSeri;
+        }
+
+        // Initialize Select2
+        $('#dok_kode').select2({
+            placeholder: '-- Pilih jenis dokumen --',
+            allowClear: true,
+            width: '100%'
+        });
+
+        $('#dok_fasilitas').select2({
+            placeholder: '-- Pilih kode fasilitas --',
+            allowClear: true,
+            width: '100%'
+        });
+
         function renderRow(dokumen, index) {
             const jenisOpts = @json($jenisOpts);
             const tr = document.createElement('tr');
             tr.className = 'border-b';
             tr.innerHTML = `
                 <td class="py-2 px-3">${dokumen.seri}</td>
-                <td class="py-2 px-3">${jenisOpts[dokumen.jenis] ?? dokumen.jenis}</td>
-                <td class="py-2 px-3">${dokumen.nomor}</td>
-                <td class="py-2 px-3">${dokumen.tanggal}</td>
+                <td class="py-2 px-3">${jenisOpts[dokumen.kode_dokumen] ?? dokumen.kode_dokumen}</td>
+                <td class="py-2 px-3">${dokumen.nomor_dokumen}</td>
+                <td class="py-2 px-3">${dokumen.tanggal_dokumen}</td>
+                <td class="py-2 px-3">${dokumen.kode_fasilitas}</td>
                 <td class="py-2 px-3">
                     <button type="button" class="text-blue-600 underline text-xs" onclick="editDokumen(${index})">Edit</button>
                     <span class="mx-1">|</span>
@@ -131,7 +170,12 @@
             const emptyRow = tbody.querySelector('tr td[colspan="5"]');
             if (emptyRow) emptyRow.parentElement.remove();
             tbody.appendChild(renderRow(dokumen, idx));
+            // Update seri field after adding
+            updateSeriField();
         }
+
+        // Initialize seri field on page load
+        updateSeriField();
 
         // Edit Dokumen Function
         window.editDokumen = function(id) {
@@ -166,12 +210,13 @@
 
         addBtn?.addEventListener('click', async function() {
             const seri = document.getElementById('dok_seri').value;
-            const jenis = document.getElementById('dok_jenis').value;
-            const nomor = document.getElementById('dok_nomor').value;
-            const tanggal = document.getElementById('dok_tanggal').value;
-
-            if (!seri || !jenis || !nomor || !tanggal) {
-                alert('Lengkapi semua field dokumen');
+            const kodeDokumen = document.getElementById('dok_kode').value;
+            const nomor_dokumen = document.getElementById('dok_nomor').value;
+            const tanggal_dokumen = document.getElementById('dok_tanggal').value;
+            const kodeFasilitas = document.getElementById('dok_fasilitas').value;
+            // console.log(seri, kodeDokumen, nomor_dokumen, tanggal_dokumen, kodeFasilitas);
+            if (!kodeDokumen || !nomor_dokumen || !tanggal_dokumen ) {
+                alert('Lengkapi semua field dokumen (Kode Dokumen, Nomor Dokumen, Tanggal Dokumen, dan Kode Fasilitas)');
                 return;
             }
 
@@ -188,15 +233,16 @@
                 tokenInput.value = csrf;
                 form.appendChild(tokenInput);
 
-                ['seri', 'jenis', 'nomor', 'tanggal'].forEach(function(name) {
+                ['seri', 'kode_dokumen', 'nomor_dokumen', 'tanggal_dokumen', 'kode_fasilitas'].forEach(function(name) {
                     const inp = document.createElement('input');
                     inp.type = 'hidden';
                     inp.name = name;
                     inp.value = ({
                         seri,
-                        jenis,
-                        nomor,
-                        tanggal
+                        kode_dokumen: kodeDokumen,
+                        nomor_dokumen,
+                        tanggal_dokumen,
+                        kode_fasilitas: kodeFasilitas
                     })[name];
                     form.appendChild(inp);
                 });

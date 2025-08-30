@@ -7,15 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportHeader extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'nomor_aju',
-        'kantor_pabean',
-        'jenis_pib',
-        'jenis_impor',
-        'cara_pembayaran',
-    ];
+    protected $guarded = [];
 
     public function user(): BelongsTo
     {

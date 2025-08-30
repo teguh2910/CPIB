@@ -18,8 +18,8 @@ return new class extends Migration
             // Common fields
             $table->integer('seri');
             // Kemasan fields
-            $table->decimal('jumlah', 15, 6)->nullable();
-            $table->string('jenis_kemasan')->nullable();
+            $table->decimal('jumlah_kemasan', 15, 6)->nullable();
+            $table->string('kode_kemasan')->nullable();
             $table->string('merek', 100)->nullable();
 
             $table->timestamps();

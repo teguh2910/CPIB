@@ -17,45 +17,29 @@ return new class extends Migration
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // Basic Info
-            $table->integer('seri');
-            $table->string('pos_tarif', 20);
-            $table->boolean('lartas');
+            $table->integer('seri_barang');
+            $table->string('hs', 20);
+            $table->boolean('pernyataan_lartas');
             $table->string('kode_barang', 50)->nullable();
             $table->string('uraian', 500);
-            $table->string('spesifikasi', 500)->nullable();
-            $table->string('kondisi')->nullable();
-            $table->char('negara_asal', 2);
-            $table->decimal('berat_bersih', 15, 6);
+            $table->string('spesifikasi_lain', 500)->nullable();
+            $table->char('kode_negara_asal', 2);
+            $table->decimal('netto', 15, 6);
 
             // Quantity & Packaging
-            $table->decimal('jumlah', 15, 6);
-            $table->string('satuan');
-            $table->decimal('jml_kemasan', 15, 2)->nullable();
-            $table->string('jenis_kemasan')->nullable();
+            $table->decimal('jumlah_satuan', 15, 6);
+            $table->string('kode_satuan');
+            $table->decimal('jumlah_kemasan', 15, 2)->nullable();
+            $table->string('kode_kemasan')->nullable();
 
             // Value & Finance
-            $table->decimal('nilai_barang', 15, 2);
+            $table->decimal('cif', 15, 2);
             $table->decimal('fob', 15, 2)->nullable();
             $table->decimal('freight', 15, 2)->nullable();
             $table->decimal('asuransi', 15, 2)->nullable();
             $table->decimal('harga_satuan', 15, 2);
-            $table->decimal('nilai_pabean_rp', 15, 2);
-            $table->string('dokumen_fasilitas', 150)->nullable();
-
-            // BM (Bea Masuk)
-            $table->string('ket_bm')->nullable();
-            $table->decimal('tarif_bm', 5, 2)->nullable();
-            $table->decimal('bayar_bm', 15, 2)->nullable();
-
-            // PPN
-            $table->tinyInteger('ppn_tarif')->nullable();
-            $table->string('ket_ppn')->nullable();
-            $table->decimal('bayar_ppn', 15, 2)->nullable();
-
-            // PPh
-            $table->string('ket_pph')->nullable();
-            $table->decimal('tarif_pph', 5, 2)->nullable();
-            $table->decimal('bayar_pph', 15, 2)->nullable();
+            $table->decimal('cif_rupiah', 15, 2);
+            $table->decimal('ndpbm', 15, 2)->nullable();
 
             $table->timestamps();
         });

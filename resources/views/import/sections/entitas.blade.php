@@ -6,7 +6,7 @@
     $negaraOpts = config('import.negara');
     $pengirimSelected = $e['pengirim']['party_id'] ?? null;
     $penjualSelected = $e['penjual']['party_id'] ?? null;
-    $statusOpts = config('import.status_importir');
+    $statusOpts = config('import.kode_status');
 
     // Get parties for dropdown - handle potential errors
     try {
@@ -26,9 +26,11 @@
             <h3 class="font-semibold">Importir</h3>
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
+                    <input type="hidden" name="kode_entitas" value="1">
+                    <input type="hidden" name="kode_jenis_identitas" value="6">
                     <x-field label="NPWP">
-                        <input name="importir[npwp]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('importir.npwp', $e['importir']['npwp'] ?? '001065305305500') }}" required>
+                        <input name="importir[nomor_identitas]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('importir.nomor_identitas', $e['importir']['nomor_identitas'] ?? '001065305305500') }}" required>
                     </x-field>
                     <x-field label="NITKU">
                         <input name="importir[nitku]" class="w-full border rounded px-3 py-2"
@@ -37,24 +39,24 @@
                 </div>
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Nama">
-                        <input name="importir[nama]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('importir.nama', $e['importir']['nama'] ?? 'AISIN INDONESIA') }}" required>
+                        <input name="importir[nama_identitas]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('importir.nama_identitas', $e['importir']['nama_identitas'] ?? 'AISIN INDONESIA') }}" required>
                     </x-field>
                     <x-field label="API/NIB">
-                        <input name="importir[api_nib]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('importir.api_nib', $e['importir']['api_nib'] ?? '8120006810093') }}">
+                        <input name="importir[nib_identitas]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('importir.nib_identitas', $e['importir']['nib_identitas'] ?? '8120006810093') }}">
                     </x-field>
                 </div>
                 <x-field label="Alamat">
-                    <input name="importir[alamat]" class="w-full border rounded px-3 py-2"
-                        value="{{ old('importir.alamat', $e['importir']['alamat'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}"
-                        required>
-                </x-field>
+                    <textarea name="importir[alamat_identitas]" class="w-full border rounded px-3 py-2"
+                        required>{{ old('importir.alamat_identitas', $e['importir']['alamat_identitas'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}</textarea>
+                    </x-field>
+                
                 <x-field label="Status">
-                    <select name="importir[status]" class="w-full border rounded px-3 py-2" required>
+                    <select name="importir[kode_status]" class="w-full border rounded px-3 py-2" required>
                         <option value="">-- Pilih Status --</option>
                         @foreach ($statusOpts as $k => $v)
-                            <option value="{{ $k }}" @if ((string) old('importir.status', $e['importir']['status'] ?? 'MITA') === (string) $k) selected @endif>
+                            <option value="{{ $k }}" @if ((string) old('importir.kode_status', $e['importir']['kode_status'] ?? 'MITA') === (string) $k) selected @endif>
                                 {{ $v }}
                             </option>
                         @endforeach
@@ -63,14 +65,16 @@
             </div>
         </div>
 
-        {{-- NPWP PEMUSATAN (opsional) --}}
+        {{-- NPWP PEMUSATAN --}}
         <div class="bg-gray-50 border rounded-xl p-4 space-y-3">
             <h3 class="font-semibold">NPWP Pemusatan</h3>
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
+                    <input type="hidden" name="kode_entitas2" value="11">
+                    <input type="hidden" name="kode_jenis_identitas2" value="6">
                     <x-field label="NPWP">
-                        <input name="pemusatan[npwp]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('pemusatan.npwp', $e['pemusatan']['npwp'] ?? '001065305305500') }}">
+                        <input name="pemusatan[nomor_identitas2]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('pemusatan.nomor_identitas2', $e['pemusatan']['nomor_identitas2'] ?? '001065305305500') }}">
                     </x-field>
                     <x-field label="NITKU">
                         <input name="pemusatan[nitku]" class="w-full border rounded px-3 py-2"
@@ -78,12 +82,12 @@
                     </x-field>
                 </div>
                 <x-field label="Nama">
-                    <input name="pemusatan[nama]" class="w-full border rounded px-3 py-2"
-                        value="{{ old('pemusatan.nama', $e['pemusatan']['nama'] ?? 'AISIN INDONESIA') }}">
+                    <input name="pemusatan[nama_identitas2]" class="w-full border rounded px-3 py-2"
+                        value="{{ old('pemusatan.nama_identitas2', $e['pemusatan']['nama_identitas2'] ?? 'AISIN INDONESIA') }}">
                 </x-field>
                 <x-field label="Alamat">
-                    <input name="pemusatan[alamat]" class="w-full border rounded px-3 py-2"
-                        value="{{ old('pemusatan.alamat', $e['pemusatan']['alamat'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}">
+                    <textarea name="pemusatan[alamat_identitas2]" class="w-full border rounded px-3 py-2"
+                        required>{{ old('pemusatan.alamat_identitas2', $e['pemusatan']['alamat_identitas2'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}</textarea>
                 </x-field>
             </div>
         </div>
@@ -91,14 +95,16 @@
 
     {{-- ====== KOLOM KANAN ====== --}}
     <div class="space-y-4">
-        {{-- PEMILIK BARANG (opsional) --}}
+        {{-- PEMILIK BARANG --}}
         <div class="bg-gray-50 border rounded-xl p-4 space-y-3">
             <h3 class="font-semibold">Pemilik Barang</h3>
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
+                    <input type="hidden" name="kode_entitas3" value="7">
+                    <input type="hidden" name="kode_jenis_identitas3" value="6">
                     <x-field label="NPWP">
-                        <input name="pemilik[npwp]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('pemilik.npwp', $e['pemilik']['npwp'] ?? '001065305305500') }}">
+                        <input name="pemilik[nomor_identitas3]" class="w-full border rounded px-3 py-2"
+                            value="{{ old('pemilik.nomor_identitas3', $e['pemilik']['nomor_identitas3'] ?? '001065305305500') }}">
                     </x-field>
                     <x-field label="NITKU">
                         <input name="pemilik[nitku]" class="w-full border rounded px-3 py-2"
@@ -106,12 +112,12 @@
                     </x-field>
                 </div>
                 <x-field label="Nama">
-                    <input name="pemilik[nama]" class="w-full border rounded px-3 py-2"
-                        value="{{ old('pemilik.nama', $e['pemilik']['nama'] ?? 'AISIN INDONESIA') }}">
+                    <input name="pemilik[nama_identitas3]" class="w-full border rounded px-3 py-2"
+                        value="{{ old('pemilik.nama_identitas3', $e['pemilik']['nama_identitas3'] ?? 'AISIN INDONESIA') }}">
                 </x-field>
                 <x-field label="Alamat">
-                    <input name="pemilik[alamat]" class="w-full border rounded px-3 py-2"
-                        value="{{ old('pemilik.alamat', $e['pemilik']['alamat'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}">
+                    <textarea name="pemilik[alamat_identitas3]" class="w-full border rounded px-3 py-2"
+                        required>{{ old('pemilik.alamat_identitas3', $e['pemilik']['alamat_identitas3'] ?? 'KAWASAN INDUSTRI EJIP PLOT 5J 000/000 SUKARESMI, CIKARANG SELATAN, BEKASI, JAWA BARAT') }}</textarea>
                 </x-field>
             </div>
         </div>
@@ -123,11 +129,12 @@
 
                 {{-- Select Pengirim --}}
                 <x-field label="Nama (Master)">
-                    <select id="pengirim_party_id" name="pengirim[party_id]" class="w-full border rounded px-3 py-2"
+                    <input type="hidden" name="kode_entitas4" value="9">
+                    <select id="pengirim_party_id" name="pengirim[nama_identitas4]" class="w-full border rounded px-3 py-2"
                         required>
                         <option value="">-- Pilih Pengirim --</option>
                         @foreach ($pengirimParties as $party)
-                            <option value="{{ $party->id }}" @if (($ent['pengirim_party_id'] ?? null) == $party->id) selected @endif>
+                            <option value="{{ $party->id }}" @if (($entitas_pengirim[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach
@@ -136,15 +143,14 @@
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Alamat">
-                        <input name="pengirim[alamat]" id="pengirim_alamat" class="w-full border rounded px-3 py-2"
-                            value="{{ old('pengirim.alamat', $e['pengirim']['alamat'] ?? ($ent['pengirim_alamat'] ?? '')) }}"
-                            required>
+                        <textarea name="pengirim[alamat_identitas4]" id="pengirim_alamat" class="w-full border rounded px-3 py-2"
+                            required>{{ old('pengirim.alamat_identitas4', $e['pengirim']['alamat_identitas4'] ?? ($ent['alamat_identitas4'] ?? '')) }}</textarea>
                     </x-field>
                     <x-field label="Negara">
-                        <select name="pengirim[negara]" id="pengirim_negara" class="w-full border rounded px-3 py-2">
+                        <select name="pengirim[kode_negara]" id="pengirim_negara" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($negaraOpts as $k => $v)
-                                <option value="{{ $k }}" @selected(old('pengirim.negara', $e['pengirim']['negara'] ?? ($ent['pengirim_negara'] ?? '')) === $k)>{{ $v }}
+                                <option value="{{ $k }}" @selected(old('pengirim.kode_negara', $e['pengirim']['kode_negara'] ?? ($ent['kode_negara'] ?? '')) === $k)>{{ $v }}
                                 </option>
                             @endforeach
                         </select>
@@ -160,11 +166,12 @@
 
                 {{-- Select Penjual --}}
                 <x-field label="Nama (Master)">
-                    <select id="penjual_party_id" name="penjual[party_id]" class="w-full border rounded px-3 py-2"
+                    <input type="hidden" name="kode_entitas5" value="10">
+                    <select id="penjual_party_id" name="penjual[nama_identitas5]" class="w-full border rounded px-3 py-2"
                         required>
                         <option value="">-- Pilih Penjual --</option>
                         @foreach ($penjualParties as $party)
-                            <option value="{{ $party->id }}" @if (($ent['penjual_party_id'] ?? null) == $party->id) selected @endif>
+                            <option value="{{ $party->id }}" @if (($entitas_penjual[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach
@@ -173,15 +180,14 @@
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Alamat">
-                        <input name="penjual[alamat]" id="penjual_alamat" class="w-full border rounded px-3 py-2"
-                            value="{{ old('penjual.alamat', $e['penjual']['alamat'] ?? ($ent['penjual_alamat'] ?? '')) }}"
-                            required>
+                        <textarea name="penjual[alamat_identitas5]" id="penjual_alamat" class="w-full border rounded px-3 py-2"
+                            required>{{ old('penjual.alamat_identitas5', $e['penjual']['alamat_identitas5'] ?? ($ent['penjual_alamat'] ?? '')) }}</textarea>
                     </x-field>
                     <x-field label="Negara">
-                        <select name="penjual[negara]" id="penjual_negara" class="w-full border rounded px-3 py-2">
+                        <select name="penjual[kode_negara2]" id="penjual_negara" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($negaraOpts as $k => $v)
-                                <option value="{{ $k }}" @selected(old('penjual.negara', $e['penjual']['negara'] ?? ($ent['penjual_negara'] ?? '')) === $k)>{{ $v }}
+                                <option value="{{ $k }}" @selected(old('penjual.kode_negara2', $e['penjual']['kode_negara2'] ?? ($ent['penjual_kode_negara2'] ?? '')) === $k)>{{ $v }}
                                 </option>
                             @endforeach
                         </select>

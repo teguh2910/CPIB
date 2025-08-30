@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create Import Notification')
+@section('title', 'Create Pemberitahuan Impor Barang')
 
 @php
     $steps = ['header', 'entitas', 'dokumen', 'pengangkut', 'kemasan', 'transaksi', 'barang', 'pungutan', 'pernyataan'];
@@ -34,7 +34,7 @@
         <div class="max-w-6xl mx-auto">
             <div class="bg-white rounded-lg shadow-md">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h1 class="text-2xl font-bold text-gray-800">Create Import Notification</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Create Pemberitahuan Impor Barang (PIB)</h1>
                     <p class="text-gray-600 mt-1">Fill in the details for the new import notification - Step
                         {{ $stepIndex + 1 }} of {{ count($steps) }}</p>
                 </div>
@@ -97,8 +97,7 @@
                     <div class="mb-6">
                         <h2 class="text-xl font-semibold text-gray-800 mb-4">{{ $labels[$current] }}</h2>
                         @include('import.sections.' . $current, [
-                            'draft' => $draft[$current] ?? [],
-                            'showUpload' => $current === 'barang' ? false : null,
+                            'draft' => $draft[$current] ?? []
                         ])
                     </div>
 

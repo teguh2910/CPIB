@@ -1,8 +1,8 @@
 @php
-    $kpOptions = config('import.kantor_pabean');
-    $pibOptions = config('import.jenis_pib');
-    $impOptions = config('import.jenis_impor');
-    $payOptions = config('import.cara_pembayaran');
+    $kpOptions = config('import.kode_kantor');
+    $pibOptions = config('import.kode_jenis_prosedur');
+    $impOptions = config('import.kode_jenis_impor');
+    $payOptions = config('import.kode_cara_bayar');
     $h = $draft ?? [];
 @endphp
 
@@ -17,10 +17,10 @@
 
     {{-- Kantor Pabean --}}
     <x-field label="Kantor Pabean">
-    <select name="header[kantor_pabean]" class="w-full border rounded px-3 py-2" required>
+        <select id="kode_kantor" name="header[kode_kantor]" class="w-full border rounded px-3 py-2" required>
             <option value="">-- Pilih Kantor Pabean --</option>
             @foreach ($kpOptions as $val => $label)
-                <option value="{{ $val }}" @if ((string) old('header.kantor_pabean', $h['kantor_pabean'] ?? '') == (string) $val) selected @endif>
+                <option value="{{ $val }}" @if ((string) old('header.kode_kantor', $h['kode_kantor'] ?? '') == (string) $val) selected @endif>
                     {{ $label }}
                 </option>
             @endforeach
@@ -29,10 +29,10 @@
 
     {{-- Jenis PIB --}}
     <x-field label="Jenis PIB">
-    <select name="header[jenis_pib]" class="w-full border rounded px-3 py-2" required>
+    <select name="header[kode_jenis_prosedur]" class="w-full border rounded px-3 py-2" required>
             <option value="">-- Pilih Jenis PIB --</option>
             @foreach ($pibOptions as $val => $label)
-                <option value="{{ $val }}" @if ((string) old('header.jenis_pib', $h['jenis_pib'] ?? '') == (string) $val) selected @endif>
+                <option value="{{ $val }}" @if ((string) old('header.kode_jenis_prosedur', $h['kode_jenis_prosedur'] ?? '') == (string) $val) selected @endif>
                     {{ $label }}
                 </option>
             @endforeach
@@ -41,10 +41,10 @@
 
     {{-- Jenis Impor --}}
     <x-field label="Jenis Impor">
-    <select name="header[jenis_impor]" class="w-full border rounded px-3 py-2" required>
+    <select name="header[kode_jenis_impor]" class="w-full border rounded px-3 py-2" required>
             <option value="">-- Pilih Jenis Impor --</option>
             @foreach ($impOptions as $val => $label)
-                <option value="{{ $val }}" @if ((string) old('header.jenis_impor', $h['jenis_impor'] ?? '') == (string) $val) selected @endif>
+                <option value="{{ $val }}" @if ((string) old('header.kode_jenis_impor', $h['kode_jenis_impor'] ?? '') == (string) $val) selected @endif>
                     {{ $label }}
                 </option>
             @endforeach
@@ -53,13 +53,25 @@
 
     {{-- Cara Pembayaran --}}
     <x-field label="Cara Pembayaran">
-    <select name="header[cara_pembayaran]" class="w-full border rounded px-3 py-2" required>
+    <select name="header[kode_cara_bayar]" class="w-full border rounded px-3 py-2" required>
             <option value="">-- Pilih Cara Pembayaran --</option>
             @foreach ($payOptions as $val => $label)
-                <option value="{{ $val }}" @if ((string) old('header.cara_pembayaran', $h['cara_pembayaran'] ?? '') == (string) $val) selected @endif>
+                <option value="{{ $val }}" @if ((string) old('header.kode_cara_bayar', $h['kode_cara_bayar'] ?? '') == (string) $val) selected @endif>
                     {{ $label }}
                 </option>
             @endforeach
         </select>
     </x-field>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('#kode_kantor').select2({
+            placeholder: '-- Pilih Kantor Pabean --',
+            allowClear: true,
+            width: '100%'
+        });
+    });
+</script>
+@endpush

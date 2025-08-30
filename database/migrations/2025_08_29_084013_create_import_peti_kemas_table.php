@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete;
             $table->integer('seri');
-            $table->string('nomor', 11); // Format: AAAA1234567
-            $table->string('ukuran');
-            $table->string('jenis_muatan');
-            $table->string('tipe');
+            $table->string('nomor_kontainer');
+            $table->string('kode_ukuran_kontainer');
+            $table->string('kode_jenis_kontainer');
+            $table->string('kode_tipe_kontainer');
             $table->timestamps();
 
             $table->index(['user_id', 'seri']);

@@ -13,9 +13,10 @@ class ImportDokumenController extends Controller
             'user_id' => 1,
             'import_notification_id' => null,
             'seri' => $request->seri,
-            'jenis' => $request->jenis,
-            'nomor' => $request->nomor,
-            'tanggal' => $request->tanggal,
+            'kode_dokumen' => $request->kode_dokumen,
+            'nomor_dokumen' => $request->nomor_dokumen,
+            'tanggal_dokumen' => $request->tanggal_dokumen,
+            'kode_fasilitas' => $request->kode_fasilitas,
         ]);
 
         return redirect()->to(url()->previous())
@@ -33,18 +34,20 @@ class ImportDokumenController extends Controller
     {
         $validated = $request->validate([
             'seri' => 'required|integer|min:1',
-            'jenis' => 'required|string',
-            'nomor' => 'required|string|max:100',
-            'tanggal' => 'required|date',
+            'kode_dokumen' => 'required|string',
+            'nomor_dokumen' => 'required|string|max:100',
+            'tanggal_dokumen' => 'required|date',
+            'kode_fasilitas' => 'nullable|string',
         ]);
 
         $dokumen = ImportDokumen::findOrFail($id);
 
         $dokumen->update([
             'seri' => $validated['seri'],
-            'jenis' => $validated['jenis'],
-            'nomor' => $validated['nomor'],
-            'tanggal' => $validated['tanggal'],
+            'kode_dokumen' => $validated['kode_dokumen'],
+            'nomor_dokumen' => $validated['nomor_dokumen'],
+            'tanggal_dokumen' => $validated['tanggal_dokumen'],
+            'kode_fasilitas' => $validated['kode_fasilitas'],
         ]);
 
         return redirect()->to(url()->previous())

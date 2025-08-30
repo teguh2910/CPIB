@@ -17,10 +17,10 @@ return new class extends Migration
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // Statement declaration
-            $table->string('nama', 150);
-            $table->string('jabatan', 100)->nullable();
-            $table->string('tempat', 150);
-            $table->date('tanggal')->nullable();
+            $table->string('nama_pernyataan', 150);
+            $table->string('jabatan_pernyataan', 100)->nullable();
+            $table->string('kota_pernyataan', 150);
+            $table->date('tanggal_pernyataan')->nullable();
 
             $table->timestamps();
         });

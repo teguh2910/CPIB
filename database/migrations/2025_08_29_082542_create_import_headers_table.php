@@ -18,10 +18,10 @@ return new class extends Migration
 
             // Header fields
             $table->string('nomor_aju')->unique();
-            $table->string('kantor_pabean');
-            $table->string('jenis_pib');
-            $table->string('jenis_impor');
-            $table->string('cara_pembayaran');
+            $table->string('kode_kantor');
+            $table->string('kode_jenis_impor');
+            $table->string('kode_jenis_prosedur');
+            $table->string('kode_cara_bayar');
 
             $table->timestamps();
         });

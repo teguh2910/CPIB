@@ -7,14 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportDokumen extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'seri',
-        'jenis',
-        'nomor',
-        'tanggal',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'tanggal' => 'date',

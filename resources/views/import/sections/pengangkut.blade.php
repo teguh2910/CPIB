@@ -46,11 +46,11 @@
                     <label class="block text-sm mb-1">Nomor Pos</label>
                     <div class="grid grid-cols-3 gap-2">
                         <input type="number" name="bc11[pos_1]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('bc11.pos_1', $bc['pos_1'] ?? $pengan['bc11_pos_1']) }}" placeholder="Pos">
+                            value="{{ old('bc11.pos_1', $bc['pos_1'] ?? ($pengan['bc11_pos_1'] ?? '')) }}" placeholder="Pos">
                         <input type="number" name="bc11[pos_2]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('bc11.pos_2', $bc['pos_2'] ?? $pengan['bc11_pos_2']) }}" placeholder="Subpos">
+                            value="{{ old('bc11.pos_2', $bc['pos_2'] ?? ($pengan['bc11_pos_2'] ?? '')) }}" placeholder="Subpos">
                         <input type="number" name="bc11[pos_3]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('bc11.pos_3', $bc['pos_3'] ?? $pengan['bc11_pos_3']) }}"
+                            value="{{ old('bc11.pos_3', $bc['pos_3'] ?? ($pengan['bc11_pos_3'] ?? '')) }}"
                             placeholder="Sub-subpos">
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                         <select name="angkut[cara]" class="w-full border rounded px-3 py-2" required>
                             <option value="">-- Pilih Cara --</option>
                             @foreach ($opsCara as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? $pengan['angkut_cara']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? ($pengan['angkut_cara'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}
                                 </option>
                             @endforeach
@@ -75,21 +75,21 @@
 
                     <x-field label="Nama Sarana Angkut">
                         <input type="text" name="angkut[nama]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('angkut.nama', $ang['nama'] ?? $pengan['angkut_nama']) }}">
+                            value="{{ old('angkut.nama', $ang['nama'] ?? ($pengan['angkut_nama'] ?? '')) }}">
                     </x-field>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Nomor Voy/Flight">
                         <input name="angkut[voy]" class="w-full border rounded px-3 py-2"
-                            value="{{ old('angkut.voy', $ang['voy'] ?? $pengan['angkut_voy']) }}">
+                            value="{{ old('angkut.voy', $ang['voy'] ?? ($pengan['angkut_voy'] ?? '')) }}">
                     </x-field>
 
                     <x-field label="Bendera">
                         <select name="angkut[bendera]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih Negara --</option>
                             @foreach ($opsNegara as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('angkut.bendera', $ang['bendera'] ?? $pengan['angkut_bendera']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('angkut.bendera', $ang['bendera'] ?? ($pengan['angkut_bendera'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}</option>
                             @endforeach
                         </select>
@@ -115,7 +115,7 @@
                         <select name="pelabuhan[muat]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('pelabuhan.muat', $pel['muat'] ?? $pengan['pelabuhan_muat']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.muat', $pel['muat'] ?? ($pengan['pelabuhan_muat'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}</option>
                             @endforeach
                         </select>
@@ -124,7 +124,7 @@
                         <select name="pelabuhan[transit]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('pelabuhan.transit', $pel['transit'] ?? $pengan['pelabuhan_transit']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.transit', $pel['transit'] ?? ($pengan['pelabuhan_transit'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}</option>
                             @endforeach
                         </select>
@@ -133,7 +133,7 @@
                         <select name="pelabuhan[tujuan]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsPort as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('pelabuhan.tujuan', $pel['tujuan'] ?? $pengan['pelabuhan_tujuan']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('pelabuhan.tujuan', $pel['tujuan'] ?? ($pengan['pelabuhan_tujuan'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}</option>
                             @endforeach
                         </select>
@@ -142,7 +142,7 @@
                         <select name="tps[kode]" class="w-full border rounded px-3 py-2">
                             <option value="">-- Pilih --</option>
                             @foreach ($opsTps as $k => $v)
-                                <option value="{{ $k }}" @if ((string) old('tps.kode', $tps['kode'] ?? $pengan['tps_kode']) === (string) $k) selected @endif>
+                                <option value="{{ $k }}" @if ((string) old('tps.kode', $tps['kode'] ?? ($pengan['tps_kode'] ?? '')) === (string) $k) selected @endif>
                                     {{ $v }}</option>
                             @endforeach
                         </select>

@@ -33,11 +33,11 @@
                         </x-field>
 
                         <x-field label="Jenis Dokumen">
-                            <select name="jenis" class="w-full border rounded px-3 py-2" required>
+                            <select id="edit_kode_dokumen" name="kode_dokumen" class="w-full border rounded px-3 py-2" required>
                                 <option value="">-- Pilih jenis dokumen --</option>
                                 @foreach (config('import.jenis_dokumen') as $key => $value)
                                     <option value="{{ $key }}"
-                                        {{ old('jenis', $dokumen->jenis) == $key ? 'selected' : '' }}>
+                                        {{ old('kode_dokumen', $dokumen->kode_dokumen) == $key ? 'selected' : '' }}>
                                         {{ $value }}
                                     </option>
                                 @endforeach
@@ -45,24 +45,57 @@
                         </x-field>
 
                         <x-field label="Nomor Dokumen">
-                            <input type="text" name="nomor" value="{{ old('nomor', $dokumen->nomor) }}"
+                            <input type="text" name="nomor_dokumen" value="{{ old('nomor_dokumen', $dokumen->nomor_dokumen) }}"
                                 class="w-full border rounded px-3 py-2" required>
                         </x-field>
 
                         <x-field label="Tanggal Dokumen">
-                            <input type="date" name="tanggal"
-                                value="{{ old('tanggal') ?: date('Y-m-d', strtotime($dokumen->tanggal)) }}"
+                            <input type="date" name="tanggal_dokumen"
+                                value="{{ old('tanggal_dokumen') ?: date('Y-m-d', strtotime($dokumen->tanggal_dokumen)) }}"
                                 class="w-full border rounded px-3 py-2" required>
+                        </x-field>
+
+                        <x-field label="Dokumen Fasilitas">
+                            <select id="edit_kode_fasilitas" name="kode_fasilitas" class="w-full border rounded px-3 py-2" required>
+                                <option value="">-- Pilih kode fasilitas --</option>
+                                @foreach (config('import.kode_fasilitas') as $key => $value)
+                                    <option value="{{ $key }}"
+                                        {{ old('kode_fasilitas', $dokumen->kode_fasilitas) == $key ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </x-field>
                     </div>
 
                     <div class="flex gap-4 pt-4">
                         <button type="submit" class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800">
                             Update Dokumen
+                        </button>                        
+                        <button type="button" onclick="history.back()" class="px-6 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
+                            Kembali
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 for Jenis Dokumen
+            $('#edit_kode_dokumen').select2({
+                placeholder: '-- Pilih jenis dokumen --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Kode Fasilitas
+            $('#edit_kode_fasilitas').select2({
+                placeholder: '-- Pilih kode fasilitas --',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
 @endsection

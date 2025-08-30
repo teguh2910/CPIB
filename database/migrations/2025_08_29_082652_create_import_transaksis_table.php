@@ -17,25 +17,26 @@ return new class extends Migration
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // Harga
-            $table->string('harga_valuta');
-            $table->decimal('harga_ndpbm', 15, 2);
-            $table->string('harga_jenis');
-            $table->string('harga_incoterm');
-            $table->decimal('harga_barang', 15, 2);
-            $table->decimal('harga_nilai_pabean', 15, 2);
+            $table->string('kode_valuta');
+            $table->string('kode_incoterm');
+            $table->string('kode_jenis_nilai');
+            $table->decimal('ndpbm', 15, 2);
+            $table->string('fob');
+            $table->string('nilai_incoterm');
+            $table->decimal('nilai_barang', 15, 2);
+            $table->decimal('cif', 15, 2);
 
             // Biaya Lainnya
-            $table->decimal('biaya_penambah', 15, 2)->nullable();
+            $table->decimal('biaya_tambahan', 15, 2)->nullable();
             $table->decimal('biaya_pengurang', 15, 2)->nullable();
-            $table->decimal('biaya_freight', 15, 2)->nullable();
-            $table->string('biaya_jenis_asuransi');
-            $table->decimal('biaya_asuransi', 15, 2)->nullable();
-            $table->boolean('biaya_voluntary_on')->nullable();
-            $table->decimal('biaya_voluntary_amt', 15, 2)->nullable();
+            $table->decimal('freight', 15, 2)->nullable();
+            $table->string('kode_asuransi');
+            $table->decimal('asuransi', 15, 2)->nullable();
+            $table->decimal('vd', 15, 2)->nullable();
 
             // Berat
-            $table->decimal('berat_kotor', 15, 2);
-            $table->decimal('berat_bersih', 15, 2);
+            $table->decimal('bruto', 15, 2);
+            $table->decimal('netto', 15, 2);
 
             $table->timestamps();
         });

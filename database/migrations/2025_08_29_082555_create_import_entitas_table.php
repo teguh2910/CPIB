@@ -16,35 +16,15 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
-            // Importir
-            $table->string('importir_npwp', 32);
-            $table->string('importir_nitku', 32)->nullable();
-            $table->string('importir_nama', 150);
-            $table->text('importir_alamat');
-            $table->string('importir_api_nib', 50)->nullable();
-            $table->string('importir_status');
-
-            // NPWP Pemusatan (optional)
-            $table->string('pemusatan_npwp', 32)->nullable();
-            $table->string('pemusatan_nitku', 32)->nullable();
-            $table->string('pemusatan_nama', 150)->nullable();
-            $table->text('pemusatan_alamat')->nullable();
-
-            // Pemilik Barang (optional)
-            $table->string('pemilik_npwp', 32)->nullable();
-            $table->string('pemilik_nitku', 32)->nullable();
-            $table->string('pemilik_nama', 150)->nullable();
-            $table->text('pemilik_alamat')->nullable();
-
-            // Pengirim
-            $table->foreignId('pengirim_party_id')->constrained('parties')->cascadeOnDelete();
-            $table->text('pengirim_alamat');
-            $table->char('pengirim_negara', 2);
-
-            // Penjual
-            $table->foreignId('penjual_party_id')->constrained('parties')->cascadeOnDelete();
-            $table->text('penjual_alamat');
-            $table->char('penjual_negara', 2);
+            $table->string('kode_entitas')->nullable();
+            $table->string('kode_jenis_identitas')->nullable();
+            $table->string('nomor_identitas')->nullable();
+            $table->string('nama_identitas')->nullable();
+            $table->string('alamat_identitas')->nullable();
+            $table->string('nib_identitas')->nullable();
+            $table->string('kode_jenis_api')->nullable();
+            $table->string('kode_negara')->nullable();
+            $table->string('kode_status')->nullable();
 
             $table->timestamps();
         });
