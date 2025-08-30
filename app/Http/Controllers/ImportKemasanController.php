@@ -8,159 +8,59 @@ use Illuminate\Support\Facades\Auth;
 
 class ImportKemasanController extends Controller
 {
-    public function store(Request $request)
+    public function store_kemasan(Request $request)
     {
         $validated = $request->validate([
-            'kemasan' => 'required|array',
-            'kemasan.*.seri' => 'required|integer|min:1',
-            'kemasan.*.jumlah' => 'required|numeric|min:0.0001',
-            'kemasan.*.jenis' => 'required|string',
-            'kemasan.*.merek' => 'nullable|string|max:100',
-
-            'petikemas' => 'required|array',
-            'petikemas.*.seri' => 'required|integer|min:1',
-            'petikemas.*.nomor' => 'required|string|max:20',
-            'petikemas.*.ukuran' => 'required|string',
-            'petikemas.*.jenis_muatan' => 'required|string',
-            'petikemas.*.tipe' => 'required|string',
+            'seri' => 'required|integer|min:1',
+            'jumlah' => 'required|numeric|min:0.0001',
+            'jenis_kemasan' => 'required|string',
+            'merek' => 'nullable|string|max:100',
+        ]);
+        ImportKemasan::create([
+            'user_id' => Auth::id() ?? 1,
+            'import_notification_id' => null,
+            'seri' => $validated['seri'],
+            'jumlah' => $validated['jumlah'],
+            'jenis_kemasan' => $validated['jenis_kemasan'],
+            'merek' => $validated['merek'],
         ]);
 
-        $userId = Auth::id();
-        $savedKemasan = 0;
-        $savedPetikemas = 0;
-
-        // Save kemasan
-        foreach ($validated['kemasan'] as $kemasanData) {
-            ImportKemasan::create([
-                'user_id' => $userId,
-                'type' => 'kemasan',
-                'seri' => $kemasanData['seri'],
-                'jumlah' => $kemasanData['jumlah'],
-                'jenis_kemasan' => $kemasanData['jenis'],
-                'merek' => $kemasanData['merek'] ?? null,
-            ]);
-            $savedKemasan++;
-        }
-
-        // Save peti kemas
-        foreach ($validated['petikemas'] as $petikemasData) {
-            ImportKemasan::create([
-                'user_id' => $userId,
-                'type' => 'petikemas',
-                'seri' => $petikemasData['seri'],
-                'nomor' => $petikemasData['nomor'],
-                'ukuran' => $petikemasData['ukuran'],
-                'jenis_muatan' => $petikemasData['jenis_muatan'],
-                'tipe' => $petikemasData['tipe'],
-            ]);
-            $savedPetikemas++;
-        }
-
-        return redirect()->back()->with('success', "{$savedKemasan} kemasan dan {$savedPetikemas} peti kemas berhasil disimpan");
+        return redirect()->route('import.create', ['step' => 'kemasan'])->with('success', 'Kemasan berhasil ditambahkan');
     }
 
-    public function update(Request $request)
+    public function edit_kemasan($id)
+    {
+        $kemasan = ImportKemasan::findOrFail($id);
+
+        return view('import.kemasan.edit', compact('kemasan'));
+    }
+
+    public function update_kemasan(Request $request, $id)
     {
         $validated = $request->validate([
-            'kemasan' => 'required|array',
-            'kemasan.*.id' => 'nullable|exists:import_kemasans,id',
-            'kemasan.*.seri' => 'required|integer|min:1',
-            'kemasan.*.jumlah' => 'required|numeric|min:0.0001',
-            'kemasan.*.jenis' => 'required|string',
-            'kemasan.*.merek' => 'nullable|string|max:100',
-
-            'petikemas' => 'required|array',
-            'petikemas.*.id' => 'nullable|exists:import_kemasans,id',
-            'petikemas.*.seri' => 'required|integer|min:1',
-            'petikemas.*.nomor' => 'required|string|max:20',
-            'petikemas.*.ukuran' => 'required|string',
-            'petikemas.*.jenis_muatan' => 'required|string',
-            'petikemas.*.tipe' => 'required|string',
+            'seri' => 'required|integer|min:1',
+            'jumlah' => 'required|numeric|min:0.0001',
+            'jenis_kemasan' => 'required|string',
+            'merek' => 'nullable|string|max:100',
         ]);
 
-        $userId = Auth::id();
-        $savedKemasan = 0;
-        $updatedKemasan = 0;
-        $savedPetikemas = 0;
-        $updatedPetikemas = 0;
+        $kemasan = ImportKemasan::where('import_notification_id', null)->findOrFail($id);
 
-        // Update kemasan
-        foreach ($validated['kemasan'] as $kemasanData) {
-            if (isset($kemasanData['id'])) {
-                $kemasan = ImportKemasan::where('user_id', $userId)->findOrFail($kemasanData['id']);
-                $kemasan->update([
-                    'seri' => $kemasanData['seri'],
-                    'jumlah' => $kemasanData['jumlah'],
-                    'jenis_kemasan' => $kemasanData['jenis'],
-                    'merek' => $kemasanData['merek'] ?? null,
-                ]);
-                $updatedKemasan++;
-            } else {
-                ImportKemasan::create([
-                    'user_id' => $userId,
-                    'type' => 'kemasan',
-                    'seri' => $kemasanData['seri'],
-                    'jumlah' => $kemasanData['jumlah'],
-                    'jenis_kemasan' => $kemasanData['jenis'],
-                    'merek' => $kemasanData['merek'] ?? null,
-                ]);
-                $savedKemasan++;
-            }
-        }
+        $kemasan->update([
+            'seri' => $validated['seri'],
+            'jumlah' => $validated['jumlah'],
+            'jenis_kemasan' => $validated['jenis_kemasan'],
+            'merek' => $validated['merek'],
+        ]);
 
-        // Update peti kemas
-        foreach ($validated['petikemas'] as $petikemasData) {
-            if (isset($petikemasData['id'])) {
-                $petikemas = ImportKemasan::where('user_id', $userId)->findOrFail($petikemasData['id']);
-                $petikemas->update([
-                    'seri' => $petikemasData['seri'],
-                    'nomor' => $petikemasData['nomor'],
-                    'ukuran' => $petikemasData['ukuran'],
-                    'jenis_muatan' => $petikemasData['jenis_muatan'],
-                    'tipe' => $petikemasData['tipe'],
-                ]);
-                $updatedPetikemas++;
-            } else {
-                ImportKemasan::create([
-                    'user_id' => $userId,
-                    'type' => 'petikemas',
-                    'seri' => $petikemasData['seri'],
-                    'nomor' => $petikemasData['nomor'],
-                    'ukuran' => $petikemasData['ukuran'],
-                    'jenis_muatan' => $petikemasData['jenis_muatan'],
-                    'tipe' => $petikemasData['tipe'],
-                ]);
-                $savedPetikemas++;
-            }
-        }
-
-        $message = '';
-        if ($savedKemasan > 0) {
-            $message .= "{$savedKemasan} kemasan baru disimpan. ";
-        }
-        if ($updatedKemasan > 0) {
-            $message .= "{$updatedKemasan} kemasan diperbarui. ";
-        }
-        if ($savedPetikemas > 0) {
-            $message .= "{$savedPetikemas} peti kemas baru disimpan. ";
-        }
-        if ($updatedPetikemas > 0) {
-            $message .= "{$updatedPetikemas} peti kemas diperbarui. ";
-        }
-
-        return redirect()->back()->with('success', trim($message));
+        return redirect()->route('import.create', ['step' => 'kemasan'])
+            ->with('success', 'Kemasan berhasil diperbarui');
     }
 
-    public function destroy(ImportKemasan $kemasan)
+    public function destroy_kemasan(ImportKemasan $kemasan)
     {
-        // Ensure user owns this kemasan
-        if ($kemasan->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $type = $kemasan->type;
         $kemasan->delete();
 
-        return redirect()->back()->with('success', ucfirst($type).' berhasil dihapus');
+        return redirect()->route('import.create', ['step' => 'kemasan'])->with('success', 'Kemasan berhasil dihapus');
     }
 }

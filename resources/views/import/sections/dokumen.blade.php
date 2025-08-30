@@ -12,7 +12,8 @@
             @csrf
             <div class="grid md:grid-cols-4 gap-3">
                 <x-field label="Seri">
-                    <input type="number" id="dok_seri" name="seri" min="1" class="w-full border rounded px-3 py-2" required>
+                    <input type="number" id="dok_seri" name="seri" min="1"
+                        class="w-full border rounded px-3 py-2" required>
                 </x-field>
 
                 <x-field label="Jenis Dokumen">
@@ -29,12 +30,14 @@
                 </x-field>
 
                 <x-field label="Tanggal Dokumen">
-                    <input type="date" id="dok_tanggal" name="tanggal" class="w-full border rounded px-3 py-2" required>
+                    <input type="date" id="dok_tanggal" name="tanggal" class="w-full border rounded px-3 py-2"
+                        required>
                 </x-field>
             </div>
 
             <div class="mt-3">
-                <button type="button" id="addDokumenBtn" class="px-3 py-2 rounded bg-black text-white text-sm">Tambah Dokumen</button>
+                <button type="button" id="addDokumenBtn" class="px-3 py-2 rounded bg-black text-white text-sm">Tambah
+                    Dokumen</button>
             </div>
         </div>
     </div>
@@ -68,10 +71,10 @@
                             </td>
                         </tr>
                     @endforeach
-                        <tr>
-                            <td colspan="5" class="py-4 px-3 text-center text-gray-500">Belum ada dokumen. Tambahkan
-                                di atas.</td>
-                            </tr>
+                    <tr>
+                        <td colspan="5" class="py-4 px-3 text-center text-gray-500">Belum ada dokumen. Tambahkan
+                            di atas.</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -82,7 +85,7 @@
 </div>
 
 <script>
-    (function(){
+    (function() {
         const addBtn = document.getElementById('addDokumenBtn');
         const itemsInput = document.querySelector('input[name="items_json"]');
         const tbody = document.querySelector('table.w-full tbody');
@@ -130,7 +133,38 @@
             tbody.appendChild(renderRow(dokumen, idx));
         }
 
-        addBtn?.addEventListener('click', async function(){
+        // Edit Dokumen Function
+        window.editDokumen = function(id) {
+            // Redirect to edit page
+            window.location.href = '{{ route('dokumen.edit', ':id') }}'.replace(':id', id);
+        };
+
+        // Delete Dokumen Function
+        window.deleteDokumen = function(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ url('dokumen') }}/' + id;
+                form.style.display = 'none';
+
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = '_token';
+                tokenInput.value = '{{ csrf_token() }}';
+                form.appendChild(tokenInput);
+
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                form.appendChild(methodInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        };
+
+        addBtn?.addEventListener('click', async function() {
             const seri = document.getElementById('dok_seri').value;
             const jenis = document.getElementById('dok_jenis').value;
             const nomor = document.getElementById('dok_nomor').value;
@@ -154,11 +188,16 @@
                 tokenInput.value = csrf;
                 form.appendChild(tokenInput);
 
-                ['seri','jenis','nomor','tanggal'].forEach(function(name){
+                ['seri', 'jenis', 'nomor', 'tanggal'].forEach(function(name) {
                     const inp = document.createElement('input');
                     inp.type = 'hidden';
                     inp.name = name;
-                    inp.value = ({seri,jenis,nomor,tanggal})[name];
+                    inp.value = ({
+                        seri,
+                        jenis,
+                        nomor,
+                        tanggal
+                    })[name];
                     form.appendChild(inp);
                 });
 
@@ -171,48 +210,3 @@
         });
     })();
 </script>
-
-{{-- Modal untuk Edit Dokumen --}}
-<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="font-semibold mb-4">Edit Dokumen</h3>
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="editIndex" name="index">
-
-                <div class="space-y-3">
-                    <x-field label="Seri">
-                        <input type="number" id="editSeri" name="seri" min="1"
-                            class="w-full border rounded px-3 py-2" required>
-                    </x-field>
-
-                    <x-field label="Jenis Dokumen">
-                        <select id="editJenis" name="jenis" class="w-full border rounded px-3 py-2" required>
-                            <option value="">-- Pilih jenis dokumen --</option>
-                            @foreach ($jenisOpts as $k => $v)
-                                <option value="{{ $k }}">{{ $v }}</option>
-                            @endforeach
-                        </select>
-                    </x-field>
-
-                    <x-field label="Nomor Dokumen">
-                        <input id="editNomor" name="nomor" class="w-full border rounded px-3 py-2" required>
-                    </x-field>
-
-                    <x-field label="Tanggal Dokumen">
-                        <input type="date" id="editTanggal" name="tanggal" class="w-full border rounded px-3 py-2"
-                            required>
-                    </x-field>
-                </div>
-
-                <div class="mt-4 flex gap-2">
-                    <button type="submit" class="px-4 py-2 rounded bg-black text-white">Update</button>
-                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded border">Batal</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ImportDokumen;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ImportDokumenController extends Controller
 {
@@ -17,66 +16,42 @@ class ImportDokumenController extends Controller
             'jenis' => $request->jenis,
             'nomor' => $request->nomor,
             'tanggal' => $request->tanggal,
-        ]);                
+        ]);
+
         return redirect()->to('import/create?step=dokumen');
     }
 
-    public function update(Request $request)
+    public function edit($id)
+    {
+        $dokumen = ImportDokumen::findOrFail($id);
+
+        return view('import.dokumen.edit', compact('dokumen'));
+    }
+
+    public function update(Request $request, $id)
     {
         $validated = $request->validate([
-            'dokumen' => 'required|array|min:1',
-            'dokumen.*.id' => 'nullable|exists:import_dokumens,id',
-            'dokumen.*.seri' => 'required|integer|min:1',
-            'dokumen.*.jenis' => 'required|string',
-            'dokumen.*.nomor' => 'required|string|max:100',
-            'dokumen.*.tanggal' => 'required|date',
+            'seri' => 'required|integer|min:1',
+            'jenis' => 'required|string',
+            'nomor' => 'required|string|max:100',
+            'tanggal' => 'required|date',
         ]);
 
-        $userId = Auth::id();
-        $savedCount = 0;
-        $updatedCount = 0;
+        $dokumen = ImportDokumen::findOrFail($id);
 
-        foreach ($validated['dokumen'] as $dokumenData) {
-            if (isset($dokumenData['id'])) {
-                // Update existing
-                $dokumen = ImportDokumen::where('user_id', $userId)->findOrFail($dokumenData['id']);
-                $dokumen->update([
-                    'seri' => $dokumenData['seri'],
-                    'jenis' => $dokumenData['jenis'],
-                    'nomor' => $dokumenData['nomor'],
-                    'tanggal' => $dokumenData['tanggal'],
-                ]);
-                $updatedCount++;
-            } else {
-                // Create new
-                ImportDokumen::create([
-                    'user_id' => $userId,
-                    'seri' => $dokumenData['seri'],
-                    'jenis' => $dokumenData['jenis'],
-                    'nomor' => $dokumenData['nomor'],
-                    'tanggal' => $dokumenData['tanggal'],
-                ]);
-                $savedCount++;
-            }
-        }
+        $dokumen->update([
+            'seri' => $validated['seri'],
+            'jenis' => $validated['jenis'],
+            'nomor' => $validated['nomor'],
+            'tanggal' => $validated['tanggal'],
+        ]);
 
-        $message = '';
-        if ($savedCount > 0) {
-            $message .= "{$savedCount} dokumen baru disimpan. ";
-        }
-        if ($updatedCount > 0) {
-            $message .= "{$updatedCount} dokumen diperbarui. ";
-        }
-
-        return redirect()->back()->with('success', trim($message));
+        return redirect()->route('import.create', ['step' => 'dokumen'])
+            ->with('success', 'Dokumen berhasil diperbarui');
     }
 
     public function destroy(ImportDokumen $dokumen)
     {
-        // Ensure user owns this dokumen
-        if ($dokumen->user_id !== Auth::id()) {
-            abort(403);
-        }
 
         $dokumen->delete();
 

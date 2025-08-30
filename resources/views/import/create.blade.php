@@ -35,7 +35,8 @@
             <div class="bg-white rounded-lg shadow-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h1 class="text-2xl font-bold text-gray-800">Create Import Notification</h1>
-                    <p class="text-gray-600 mt-1">Fill in the details for the new import notification - Step {{ $stepIndex + 1 }} of {{ count($steps) }}</p>
+                    <p class="text-gray-600 mt-1">Fill in the details for the new import notification - Step
+                        {{ $stepIndex + 1 }} of {{ count($steps) }}</p>
                 </div>
 
                 <!-- Progress Indicator -->
@@ -46,12 +47,13 @@
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2">
                         <div class="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                             style="width: {{ (($stepIndex + 1) / count($steps)) * 100 }}%"></div>
+                            style="width: {{ (($stepIndex + 1) / count($steps)) * 100 }}%"></div>
                     </div>
                     <div class="flex justify-between mt-2">
-                        @foreach($steps as $index => $step)
+                        @foreach ($steps as $index => $step)
                             <div class="flex flex-col items-center">
-                                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                                <div
+                                    class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
                                     {{ $index <= $stepIndex ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500' }}">
                                     {{ $index + 1 }}
                                 </div>
@@ -120,23 +122,24 @@
                             @endphp
 
                             @if ($nextStep)
-                                <button type="submit" name="action" value="save_continue"
-                                    id="saveContinueBtn"
-                                    data-next-step="{{ $nextStep }}"
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                    Save & Continue
-                                </button>
+                                @if ($current === 'dokumen' || $current === 'kemasan' || $current === 'barang')
+                                    <a href="{{ route('import.create') }}?step={{ $nextStep }}"
+                                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 inline-block">
+                                        Continue
+                                    </a>
+                                @else
+                                    <button type="submit" name="action" value="save_continue" id="saveContinueBtn"
+                                        data-next-step="{{ $nextStep }}"
+                                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                        Save & Continue
+                                    </button>
+                                @endif
                             @else
                                 <button type="submit" name="action" value="submit"
                                     class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">
                                     Create Import Notification
                                 </button>
                             @endif
-
-                            <a href="{{ route('import.index') }}"
-                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition duration-200">
-                                Cancel
-                            </a>
                         </div>
                     </div>
                 </form>

@@ -10,11 +10,10 @@ class ImportPernyataan extends Model
     protected $fillable = [
         'user_id',
         'import_notification_id',
-        'declared_by',
+        'nama',
         'jabatan',
-        'place_date',
-        'ttd_image_path',
-        'agree',
+        'tempat',
+        'tanggal',
     ];
 
     protected $casts = [

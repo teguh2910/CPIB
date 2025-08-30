@@ -40,4 +40,20 @@ class ImportNotification extends Model
     {
         return $this->hasOne(ImportHeader::class, 'import_notification_id');
     }
+
+    /**
+     * Relationship to ImportPetiKemas records.
+     */
+    public function petiKemas()
+    {
+        return $this->hasMany(ImportPetiKemas::class, 'import_notification_id');
+    }
+
+    /**
+     * Relationship to ImportTransaksi record.
+     */
+    public function transaksiRecord()
+    {
+        return $this->hasOne(ImportTransaksi::class, 'import_notification_id');
+    }
 }

@@ -11,6 +11,7 @@ class ImportPetiKemas extends Model
 
     protected $fillable = [
         'user_id',
+        'import_notification_id',
         'seri',
         'nomor',
         'ukuran',
@@ -25,5 +26,10 @@ class ImportPetiKemas extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function importNotification()
+    {
+        return $this->belongsTo(ImportNotification::class);
     }
 }

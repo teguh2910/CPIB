@@ -17,11 +17,10 @@ return new class extends Migration
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // Statement declaration
-            $table->string('declared_by', 150);
+            $table->string('nama', 150);
             $table->string('jabatan', 100)->nullable();
-            $table->string('place_date', 150);
-            $table->string('ttd_image_path', 255)->nullable();
-            $table->boolean('agree');
+            $table->string('tempat', 150);
+            $table->date('tanggal')->nullable();
 
             $table->timestamps();
         });

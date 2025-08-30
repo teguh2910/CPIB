@@ -53,11 +53,6 @@
                             @endforeach
                         </select>
                     </x-field>
-                    <option value="{{ $k }}" @if ((string) old('angkut.cara', $ang['cara'] ?? '') === (string) $k) selected @endif>
-                        {{ $v }}</option>
-                    @endforeach
-                    </select>
-                    </x-field>
 
                     <x-field label="Nama Sarana Angkut">
                         <input type="text" name="angkut[nama]" class="w-full border rounded px-3 py-2"

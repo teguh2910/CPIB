@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('import_peti_kemas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete;
             $table->integer('seri');
             $table->string('nomor', 11); // Format: AAAA1234567
             $table->string('ukuran');

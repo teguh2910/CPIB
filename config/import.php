@@ -1,7 +1,6 @@
 <?php
 
 return [
-    // contoh subset, silakan tambah sesuai kebutuhan
     'kantor_pabean' => [
         '020100' => '020100 - KPPBC Tipe Madya Pabean Tanjung Priok',
         '040300' => '040300 - KPPBC Soekarno-Hatta',
@@ -147,16 +146,12 @@ return [
         'DDP' => 'DDP - Delivered Duty Paid',
     ],
     'jenis_asuransi' => [
-        'NONE' => 'Tidak Ada',
-        'MARINE' => 'Marine Cargo',
-        'AIR' => 'Air Cargo',
-        'LAND' => 'Land Cargo',
-        'LAIN' => 'Lainnya',
+        'LN' => 'LUAR NEGERI',
+        'DN' => 'DALAM NEGERI',
     ],
     'kondisi_barang' => [
-        'BARU' => 'Baru',
-        'BEKAS' => 'Bekas',
-        'REMAN' => 'Re-manufactured',
+        'BAIK/BARU' => 'BAIK/BARU',
+        'BEKAS' => 'BEKAS',
     ],
     // satuan barang contoh
     'satuan_barang' => [
@@ -167,24 +162,4 @@ return [
         'L' => 'L - Liter',
         'BOX' => 'BOX - Box',
     ],
-    // gunakan 'jenis_kemasan' & 'negara' yang sudah ada sebelumnya
-    'ket_bm' => ['MFN' => 'MFN', 'FTA' => 'FTA', 'ANTI' => 'Anti Dumping', 'LAIN' => 'Lainnya'],
-    'ket_ppn' => ['PPN' => 'PPN Umum', 'PPNBM' => 'PPnBM', 'LAIN' => 'Lainnya'],
-    'ket_pph' => ['PPh22' => 'PPh 22 Impor', 'PPh23' => 'PPh 23', 'LAIN' => 'Lainnya'],
-    'spesifikasi_lain' => [
-        'STD' => 'Standard',
-        'PREM' => 'Premium',
-        'ECO' => 'Economy',
-        'LAIN' => 'Lainnya',
-    ],
-    'sarana_angkut' => [
-        'SHIP' => 'Kapal Laut',
-        'PLANE' => 'Pesawat',
-        'TRUCK' => 'Truk',
-        'TRAIN' => 'Kereta Api',
-        'LAIN' => 'Lainnya',
-    ],
-];
-
-return [
 ];

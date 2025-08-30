@@ -37,14 +37,17 @@ class ImportBarang extends Model
         'ket_bm',
         'tarif_bm',
         'bayar_bm',
+        'biaya_bm',
         // PPN
         'ppn_tarif',
         'ket_ppn',
         'bayar_ppn',
+        'biaya_ppn',
         // PPh
         'ket_pph',
         'tarif_pph',
         'bayar_pph',
+        'biaya_pph',
     ];
 
     protected $casts = [

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Barang')
+@section('title', 'Tambah Barang')
 
 @php
     $opsNegara = config('import.negara');
@@ -30,17 +30,11 @@
 @endphp
 
 @section('content')
-    <!-- Page Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Edit Barang</h1>
-        <p class="text-lg text-gray-600">Edit detail barang untuk import notification</p>
-    </div>
 
     <div class="bg-white rounded-lg shadow-md">
         <!-- Form -->
-        <form action="{{ route('barang.update', $barang->id) }}" method="POST" class="p-6">
+        <form action="{{ route('barang.store') }}" method="POST" class="p-6">
             @csrf
-            @method('PUT')
             <input type="hidden" name="ndpbm" value="{{ $ndpbm }}">
 
             @if ($errors->any())
@@ -64,13 +58,12 @@
                         {{-- Kolom Kiri --}}
                         <div class="space-y-4">
                             <x-field label="Seri">
-                                <input name="seri" placeholder="Seri" value="{{ old('seri', $barang->seri) }}"
+                                <input name="seri" placeholder="Seri" value="{{ old('seri') }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required>
                             </x-field>
                             <x-field label="POS Tarif / HS Code">
-                                <input name="pos_tarif" placeholder="HS Code"
-                                    value="{{ old('pos_tarif', $barang->pos_tarif) }}"
+                                <input name="pos_tarif" placeholder="HS Code" value="{{ old('pos_tarif') }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required>
                             </x-field>
@@ -81,13 +74,13 @@
                                 <div class="flex gap-6">
                                     <label class="inline-flex items-center">
                                         <input type="radio" name="lartas" value="1"
-                                            {{ old('lartas', $barang->lartas) == '1' ? 'checked' : '' }}
+                                            {{ old('lartas') == '1' ? 'checked' : '' }}
                                             class="text-blue-600 focus:ring-blue-500" required>
                                         <span class="ml-2 text-sm text-gray-700">Ya</span>
                                     </label>
                                     <label class="inline-flex items-center">
                                         <input type="radio" name="lartas" value="0"
-                                            {{ old('lartas', $barang->lartas) == '0' ? 'checked' : '' }}
+                                            {{ old('lartas', '0') == '0' ? 'checked' : '' }}
                                             class="text-blue-600 focus:ring-blue-500" required>
                                         <span class="ml-2 text-sm text-gray-700">Tidak</span>
                                     </label>
@@ -95,19 +88,19 @@
                             </div>
 
                             <x-field label="Kode Barang">
-                                <input name="kode_barang" value="{{ old('kode_barang', $barang->kode_barang) }}"
+                                <input name="kode_barang" value="{{ old('kode_barang') }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
 
                             <x-field label="Uraian Jenis Barang">
                                 <textarea name="uraian"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    rows="3" required>{{ old('uraian', $barang->uraian) }}</textarea>
+                                    rows="3" required>{{ old('uraian') }}</textarea>
                             </x-field>
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Spesifikasi Lain">
-                                    <input name="spesifikasi" value="{{ old('spesifikasi', $barang->spesifikasi) }}"
+                                    <input name="spesifikasi" value="{{ old('spesifikasi') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                                 <x-field label="Kondisi Barang">
@@ -116,7 +109,7 @@
                                         <option value="">-- Pilih --</option>
                                         @foreach ($opsKond as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('kondisi', $barang->kondisi) === (string) $k) selected @endif>
+                                                @if ((string) old('kondisi') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
@@ -134,7 +127,7 @@
                                         <option value="">-- Pilih --</option>
                                         @foreach ($opsNegara as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('negara_asal', $barang->negara_asal) === (string) $k) selected @endif>
+                                                @if ((string) old('negara_asal') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
@@ -142,7 +135,7 @@
                                 </x-field>
                                 <x-field label="Berat Bersih (Kg)">
                                     <input type="number" step="0.001" name="berat_bersih"
-                                        value="{{ old('berat_bersih', $barang->berat_bersih) }}"
+                                        value="{{ old('berat_bersih') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
@@ -151,7 +144,7 @@
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Jumlah Satuan Barang">
                                     <input type="number" step="0.000001" name="jumlah" id="jumlah"
-                                        value="{{ old('jumlah', $barang->jumlah) }}"
+                                        value="{{ old('jumlah') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
@@ -161,7 +154,7 @@
                                         <option value="">-- Pilih --</option>
                                         @foreach ($opsSatuan as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('satuan', $barang->satuan) === (string) $k) selected @endif>
+                                                @if ((string) old('satuan') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
@@ -170,8 +163,8 @@
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Jumlah Kemasan">
-                                    <input type="number" step="0.000001" name="jml_kemasan"
-                                        value="{{ old('jml_kemasan', $barang->jml_kemasan) }}"
+                                    <input type="number" step="0.000001" name="jumlah_kemasan"
+                                        value="{{ old('jumlah_kemasan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
@@ -181,7 +174,7 @@
                                         <option value="">-- Pilih --</option>
                                         @foreach ($opsKemasan as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('jenis_kemasan', $barang->jenis_kemasan) === (string) $k) selected @endif>
+                                                @if ((string) old('jenis_kemasan') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
@@ -192,48 +185,40 @@
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Nilai Barang">
                                     <input type="number" step="0.01" name="nilai_barang" id="nilai_barang"
-                                        value="{{ old('nilai_barang', $barang->nilai_barang) }}"
+                                        value="{{ old('nilai_barang') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                                 <x-field label="FOB">
-                                    <input type="number" step="0.01" name="fob"
-                                        value="{{ old('fob', $barang->fob) }}"
+                                    <input type="number" step="0.01" name="fob" value="{{ old('fob') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Freight">
                                     <input type="number" step="0.01" name="freight"
-                                        value="{{ old('freight', $barang->freight) }}"
+                                        value="{{ old('freight') ?? '0' }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                                 <x-field label="Asuransi">
                                     <input type="number" step="0.01" name="asuransi"
-                                        value="{{ old('asuransi', $barang->asuransi) }}"
+                                        value="{{ old('asuransi') ?? '0' }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Harga Satuan">
                                     <input type="number" step="0.01" name="harga_satuan" id="harga_satuan"
-                                        value="{{ old('harga_satuan', $barang->harga_satuan) }}"
+                                        value="{{ old('harga_satuan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
                                         readonly>
                                 </x-field>
-                                <x-field label="Nilai Pabean Rupiah">
-                                    <input type="number" step="0.01" name="nilai_pabean_rp"
-                                        value="{{ old('nilai_pabean_rp', $barang->nilai_pabean_rp) }}"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </x-field>
-                            </div>
-                            <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Dokumen Fasilitas">
                                     <select name="dokumen_fasilitas"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">-- Pilih Dokumen --</option>
                                         @foreach ($dokument as $dok)
                                             <option value="{{ $dok }}"
-                                                @if ((string) old('dokumen_fasilitas', $barang->dokumen_fasilitas) === (string) $dok) selected @endif>
+                                                @if (old('dokumen_fasilitas') === $dok) selected @endif>
                                                 {{ $dok }}
                                             </option>
                                         @endforeach
@@ -253,25 +238,18 @@
                             <h4 class="text-md font-medium text-gray-800">BM (Bea Masuk)</h4>
                             <x-field label="% Tarif">
                                 <input type="number" step="0.01" name="tarif_bm"
-                                    value="{{ old('tarif_bm', $barang->tarif_bm) }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
                             <x-field label="">
                                 <select name="status_bm"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1"
-                                        {{ old('status_bm', $barang->status_bm) == '1' ? 'selected' : '' }}>Dibayar
-                                    </option>
-                                    <option value="2"
-                                        {{ old('status_bm', $barang->status_bm) == '2' ? 'selected' : '' }}>Tidak Dibayar
-                                    </option>
-                                    <option value="3"
-                                        {{ old('status_bm', $barang->status_bm) == '3' ? 'selected' : '' }}>Bebas</option>
+                                    <option value="1">Dibayar</option>
+                                    <option value="2">Tidak Dibayar</option>
+                                    <option value="3">Bebas</option>
                                 </select>
                             </x-field>
                             <x-field label="(%)">
-                                <input type="number" step="0.01" name="ket_bm"
-                                    value="{{ old('ket_bm', $barang->ket_bm) }}"
+                                <input type="number" value="100" step="0.01" name="ket_bm"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
                         </div>
@@ -282,31 +260,21 @@
                             <x-field label="% Tarif (11% / 12%)">
                                 <select name="tarif_ppn"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="0"
-                                        {{ old('tarif_ppn', $barang->ppn_tarif) == '0' ? 'selected' : '' }}>0</option>
-                                    <option value="11"
-                                        {{ old('tarif_ppn', $barang->ppn_tarif) == '11' ? 'selected' : '' }}>11</option>
-                                    <option value="12"
-                                        {{ old('tarif_ppn', $barang->ppn_tarif) == '12' ? 'selected' : '' }}>12</option>
+                                    <option value="0">0</option>
+                                    <option value="11" selected>11</option>
+                                    <option value="12">12</option>
                                 </select>
                             </x-field>
                             <x-field label="">
                                 <select name="status_ppn"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1"
-                                        {{ old('status_ppn', $barang->status_ppn) == '1' ? 'selected' : '' }}>Dibayar
-                                    </option>
-                                    <option value="2"
-                                        {{ old('status_ppn', $barang->status_ppn) == '2' ? 'selected' : '' }}>Tidak Dibayar
-                                    </option>
-                                    <option value="3"
-                                        {{ old('status_ppn', $barang->status_ppn) == '3' ? 'selected' : '' }}>Bebas
-                                    </option>
+                                    <option value="1">Dibayar</option>
+                                    <option value="2">Tidak Dibayar</option>
+                                    <option value="3">Bebas</option>
                                 </select>
                             </x-field>
                             <x-field label="(%)">
-                                <input type="number" step="0.01" name="ket_ppn"
-                                    value="{{ old('ket_ppn', $barang->ket_ppn) }}"
+                                <input type="number" value="100" step="0.01" name="ket_ppn"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
                         </div>
@@ -315,27 +283,19 @@
                         <div class="bg-white border border-gray-300 rounded-lg p-4 space-y-4">
                             <h4 class="text-md font-medium text-gray-800">PPh</h4>
                             <x-field label="% Tarif">
-                                <input type="number" step="0.01" name="tarif_pph"
-                                    value="{{ old('tarif_pph', $barang->tarif_pph) }}"
+                                <input type="number" step="0.01" name="tarif_pph" value="2.5"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
                             <x-field label="">
                                 <select name="status_pph"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1"
-                                        {{ old('status_pph', $barang->status_pph) == '1' ? 'selected' : '' }}>Dibayar
-                                    </option>
-                                    <option value="2"
-                                        {{ old('status_pph', $barang->status_pph) == '2' ? 'selected' : '' }}>Tidak Dibayar
-                                    </option>
-                                    <option value="3"
-                                        {{ old('status_pph', $barang->status_pph) == '3' ? 'selected' : '' }}>Bebas
-                                    </option>
+                                    <option value="1">Dibayar</option>
+                                    <option value="2">Tidak Dibayar</option>
+                                    <option value="3">Bebas</option>
                                 </select>
                             </x-field>
                             <x-field label="(%)">
-                                <input type="number" step="0.01" name="ket_pph"
-                                    value="{{ old('ket_pph', $barang->ket_pph) }}"
+                                <input type="number" value="100" step="0.01" name="ket_pph"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </x-field>
                         </div>
@@ -346,7 +306,7 @@
                 <div class="flex gap-4 pt-6 border-t border-gray-200">
                     <button type="submit"
                         class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">
-                        Rubah Barang
+                        Simpan Barang
                     </button>
                     <a href="{{ route('import.create', ['step' => 'barang']) }}"
                         class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">

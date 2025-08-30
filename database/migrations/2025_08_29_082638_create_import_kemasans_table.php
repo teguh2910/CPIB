@@ -15,23 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
-
-            // Type discriminator: 'kemasan' or 'petikemas'
-            $table->enum('type', ['kemasan', 'petikemas']);
-
             // Common fields
             $table->integer('seri');
-
             // Kemasan fields
             $table->decimal('jumlah', 15, 6)->nullable();
             $table->string('jenis_kemasan')->nullable();
             $table->string('merek', 100)->nullable();
-
-            // Peti Kemas fields
-            $table->string('nomor', 20)->nullable();
-            $table->string('ukuran')->nullable();
-            $table->string('jenis_muatan')->nullable();
-            $table->string('tipe')->nullable();
 
             $table->timestamps();
         });
