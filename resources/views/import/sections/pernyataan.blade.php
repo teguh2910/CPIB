@@ -13,21 +13,21 @@
 </div>
 
 <div class="grid md:grid-cols-2 gap-4">
-    <x-field label="Nama">
-        <input name="nama" class="w-full border rounded px-3 py-2"
-            value="{{ old('nama', $draft['nama'] ?? 'Herlina Trisnawati') }}" required>
+    <x-field label="Nama Pernyataan">
+        <input name="nama_pernyataan" class="w-full border rounded px-3 py-2"
+            value="{{ old('nama_pernyataan', $draft['nama_pernyataan'] ?? 'Herlina Trisnawati') }}" required>
     </x-field>
-    <x-field label="Jabatan">
-        <input name="jabatan" class="w-full border rounded px-3 py-2"
-            value="{{ old('jabatan', $draft['jabatan'] ?? 'Direktur') }}">
+    <x-field label="Jabatan Pernyataan">
+        <input name="jabatan_pernyataan" class="w-full border rounded px-3 py-2"
+            value="{{ old('jabatan_pernyataan', $draft['jabatan_pernyataan'] ?? 'Direktur') }}">
     </x-field>
-    <x-field label="Tempat">
-        <input name="place" class="w-full border rounded px-3 py-2"
-            value="{{ old('place', $draft['place'] ?? 'Bekasi') }}" required>
+    <x-field label="Kota Pernyataan">
+        <input name="kota_pernyataan" class="w-full border rounded px-3 py-2"
+            value="{{ old('kota_pernyataan', $draft['kota_pernyataan'] ?? 'Bekasi') }}" required>
     </x-field>
-    <x-field label="Tanggal">
-        <input type="date" name="tanggal" class="w-full border rounded px-3 py-2"
-            value="{{ old('tanggal', $draft['tanggal'] ?? date('Y-m-d')) }}" required>
+    <x-field label="Tanggal Pernyataan">
+        <input type="date" name="tanggal_pernyataan" class="w-full border rounded px-3 py-2"
+            value="{{ old('tanggal_pernyataan', $draft['tanggal_pernyataan'] ?? date('Y-m-d')) }}" required>
     </x-field>
 
 </div>

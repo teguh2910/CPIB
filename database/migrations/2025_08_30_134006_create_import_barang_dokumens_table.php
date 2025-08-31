@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('import_barang_dokumens', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('import_barang_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('import_notification_id')->nullable()->constrained()->nullOnDelete();
 
             // Document fields
             $table->integer('seri_barang');

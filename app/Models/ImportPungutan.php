@@ -7,17 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportPungutan extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'bm_percent',
-        'ppn_percent',
-        'pph_percent',
-        'bea_masuk',
-        'ppn',
-        'pph',
-        'total_pungutan',
-    ];
+    protected $guarded = [];
 
     public function user(): BelongsTo
     {

@@ -27,9 +27,9 @@
         @csrf
         <input type="file" name="file" class="border border-gray-300 rounded px-2 py-1 text-sm" />
         <button type="submit" name="action" value="import"
-            class="px-3 py-1 bg-green-600 text-white rounded text-sm">Upload Excel
+            class="px-3 py-1 bg-red-600 text-white rounded text-sm">Upload Excel
             </button>
-        <a href="{{ route('barang.template') }}" class="ml-2 text-sm text-blue-600 underline">Download Template
+        <a href="{{ url('/template.xlsx') }}" class="ml-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">Download Template
             </a>
         <button type="submit" name="action" value="updateAll"
             class="ml-2 px-3 py-1 bg-green-600 text-white rounded text-sm">Generate Pungutan</button>

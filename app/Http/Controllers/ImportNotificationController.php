@@ -13,6 +13,9 @@ use App\Models\ImportPernyataan;
 use App\Models\ImportPetiKemas;
 use App\Models\ImportPungutan;
 use App\Models\ImportTransaksi;
+use App\Models\ImportBarangDokumen;
+use App\Models\ImportBarangTarif;
+use App\Models\ImportBarangVd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -53,10 +56,11 @@ class ImportNotificationController extends Controller
             ->get();
         $barangData = ImportBarang::where('import_notification_id', null)
             ->get();
-        $BM = ImportBarang::whereNull('import_notification_id')->sum('biaya_bm');
-        $PPN = ImportBarang::whereNull('import_notification_id')->sum('biaya_ppn');
-        $PPH = ImportBarang::whereNull('import_notification_id')->sum('biaya_pph');
+        $BM = ImportBarangTarif::whereNull('import_notification_id')->where('kode_pungutan', 'BM')->sum('nilai_bayar');
+        $PPN = ImportBarangTarif::whereNull('import_notification_id')->where('kode_pungutan', 'PPN')->sum('nilai_bayar');
+        $PPH = ImportBarangTarif::whereNull('import_notification_id')->where('kode_pungutan', 'PPH')->sum('nilai_bayar');
         $total = $BM + $PPN + $PPH;
+
         return view('import.create', compact('header', 'transaksi', 'dokument', 'entitas_pengirim', 'entitas_penjual', 'pengangkut', 'kemasan', 'petiKemas', 'barangData', 'BM', 'PPN', 'PPH', 'total'));
     }
 
@@ -196,7 +200,7 @@ class ImportNotificationController extends Controller
                 $existingPengangkut = ImportPengangkut::whereNull('import_notification_id')
                     ->first();
                 if ($existingPengangkut) {
-                    $existingPengangkut->update($request->except(['_token', 'current_step','action']));
+                    $existingPengangkut->update($request->except(['_token', 'current_step', 'action']));
                     $savedPengangkut = $existingPengangkut;
                 } else {
                     $savedPengangkut = ImportPengangkut::create([
@@ -219,7 +223,7 @@ class ImportNotificationController extends Controller
 
                     ]);
                 }
-                
+
                 session(['import_draft' => $draft]);
             }
             // Handle transaksi step saving
@@ -227,56 +231,69 @@ class ImportNotificationController extends Controller
                 $existingTransaksi = ImportTransaksi::whereNull('import_notification_id')
                     ->first();
                 if ($existingTransaksi) {
-                    $existingTransaksi->update($request->except(['_token', 'current_step','action']));
+                    $existingTransaksi->update($request->except(['_token', 'current_step', 'action']));
                     $savedTransaksi = $existingTransaksi;
                 } else {
-                ImportTransaksi::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_valuta' => $request->input('kode_valuta'),
-                    'ndpbm' => $request->input('ndpbm'),
-                    'kode_jenis_nilai' => $request->input('kode_jenis_nilai'),
-                    'kode_incoterm' => $request->input('kode_incoterm'),
-                    'cif' => $request->input('cif'),
-                    'fob' => $request->input('fob'),
-                    'bruto' => $request->input('bruto'),
-                    'netto' => $request->input('netto'),
-                    'nilai_incoterm' => 0,
-                    'nilai_barang' => 0,
-                    'biaya_tambahan' => $request->input('biaya_tambahan'),
-                    'biaya_pengurang' => $request->input('biaya_pengurang'),
-                    'freight' => $request->input('freight'),
-                    'kode_asuransi' => $request->input('kode_asuransi'),
-                    'asuransi' => $request->input('asuransi'),
-                    'vd' => $request->input('vd'),
-                ]);
-                session(['import_draft' => $draft]);
+                    ImportTransaksi::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_valuta' => $request->input('kode_valuta'),
+                        'ndpbm' => $request->input('ndpbm'),
+                        'kode_jenis_nilai' => $request->input('kode_jenis_nilai'),
+                        'kode_incoterm' => $request->input('kode_incoterm'),
+                        'cif' => $request->input('cif'),
+                        'fob' => $request->input('fob'),
+                        'bruto' => $request->input('bruto'),
+                        'netto' => $request->input('netto'),
+                        'nilai_incoterm' => 0,
+                        'nilai_barang' => 0,
+                        'biaya_tambahan' => $request->input('biaya_tambahan'),
+                        'biaya_pengurang' => $request->input('biaya_pengurang'),
+                        'freight' => $request->input('freight'),
+                        'kode_asuransi' => $request->input('kode_asuransi'),
+                        'asuransi' => $request->input('asuransi'),
+                        'vd' => $request->input('vd'),
+                    ]);
+                    session(['import_draft' => $draft]);
+                }
             }
-        }           
+            if ($currentStep === 'pungutan'){
+                $existingPungutan = ImportPungutan::whereNull('import_notification_id')
+                    ->first();
+                if ($existingPungutan) {
+                    $existingPungutan->update($request->except(['_token', 'current_step', 'action']));
+                    $savedPungutan = $existingPungutan;
+                } else {
+                    ImportPungutan::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'bea_masuk' => $request->input('bea_masuk'),
+                        'ppn' => $request->input('ppn'),
+                        'pph' => $request->input('pph'),
+                        'total_pungutan' => $request->input('total'),
+                    ]);
+                    session(['import_draft' => $draft]);
+                }
+            }
             return redirect()->route('import.create', ['step' => $nextStep])
                 ->with('success', ucfirst($currentStep).' data saved successfully. Please continue with the next step.');
         }
         if ($action === 'import') {
-            // Read uploaded CSV/Excel file from the form (input name="file").
-            // If no uploaded file is provided, fallback to storage/app/users.xlsx
             if ($request->hasFile('file') && $request->file('file')->isValid()) {
                 $uploaded = $request->file('file');
                 $path = $uploaded->getRealPath();
             }
 
             if (! file_exists($path)) {
-                return redirect()->back()->with('error', 'File not found: '.$path.' (expected in storage/app or upload).');
+                return redirect()->back()->with('error', 'File not found: '.$path);
             }
 
             $spreadsheet = IOFactory::load($path);
-
-            // Check available sheet names for debugging
             $availableSheets = $spreadsheet->getSheetNames();
-            // Try to get sheets with fallback options
             $sheet_barang = $spreadsheet->getSheetByName('BARANG') ?? $spreadsheet->getSheetByName('barang') ?? $spreadsheet->getActiveSheet();
             $sheet_barang_tarif = $spreadsheet->getSheetByName('BARANGTARIF') ?? $spreadsheet->getSheetByName('barangtarif');
             $sheet_barang_dokumen = $spreadsheet->getSheetByName('BARANGDOKUMEN') ?? $spreadsheet->getSheetByName('barangdokumen');
-
+            $sheet_barang_vd = $spreadsheet->getSheetByName('BARANGVD') ?? $spreadsheet->getSheetByName('barangvd');
             // Check if required sheets exist
             if (! $sheet_barang) {
                 return redirect()->back()->with('error', 'Sheet "BARANG" tidak ditemukan. Sheet yang tersedia: '.implode(', ', $availableSheets));
@@ -284,9 +301,8 @@ class ImportNotificationController extends Controller
             $rows_barang = $sheet_barang->toArray(); // numeric-indexed rows
             $rows_barang_tarif = $sheet_barang_tarif->toArray(); // numeric-indexed rows
             $rows_barang_dokumen = $sheet_barang_dokumen->toArray(); // numeric-indexed rows
-            if (count($rows_barang) < 2) {
-                return redirect()->back()->with('error', 'Spreadsheet has no data rows.');
-            }
+            $rows_barang_vd = $sheet_barang_vd->toArray(); // numeric-indexed rows
+
             // Normalize headers
             $rawHeaders_barang = $rows_barang[0];
             $headers_barang = [];
@@ -296,37 +312,81 @@ class ImportNotificationController extends Controller
                 $norm = trim($norm, '_');
                 $headers_barang[] = $norm;
             }
+            // Normalize barang tarif
+            $rawHeaders_barang_tarif = $rows_barang_tarif[0] ?? [];
+            $headers_barang_tarif = [];
+            foreach ($rawHeaders_barang_tarif as $h) {
+                $norm = strtolower(trim((string) $h));
+                $norm = preg_replace('/[^a-z0-9]+/', '_', $norm);
+                $norm = trim($norm, '_');
+                $headers_barang_tarif[] = $norm;
+            }
+            // Normalize barang dokumen
+            $rawHeaders_barang_dokumen = $rows_barang_dokumen[0] ?? [];
+            $headers_barang_dokumen = [];
+            foreach ($rawHeaders_barang_dokumen as $h) {
+                $norm = strtolower(trim((string) $h));
+                $norm = preg_replace('/[^a-z0-9]+/', '_', $norm);
+                $norm = trim($norm, '_');
+                $headers_barang_dokumen[] = $norm;
+            }
+            // Normalize barang vd
+            $rawHeaders_barang_vd = $rows_barang_vd[0] ?? [];
+            $headers_barang_vd = [];
+            foreach ($rawHeaders_barang_vd as $h) {
+                $norm = strtolower(trim((string) $h));
+                $norm = preg_replace('/[^a-z0-9]+/', '_', $norm);
+                $norm = trim($norm, '_');
+                $headers_barang_vd[] = $norm;
+            }
             // Simple header -> model field map (extend as needed)
-            $map = [
-                'seri_barang' => 'seri',
-                'hs' => 'pos_tarif',
-                'pernyataan_lartas' => 'lartas',
+            $map_barang = [
+                'seri_barang' => 'seri_barang',
+                'hs' => 'hs',
+                'pernyataan_lartas' => 'pernyataan_lartas',
                 'kode_barang' => 'kode_barang',
                 'uraian' => 'uraian',
-                'tipe' => 'spesifikasi',
-                'spesifikasi_lain' => 'kondisi',
-                'kode_negara_asal' => 'negara_asal',
-                'netto' => 'berat_bersih',
-                'jumlah_satuan' => 'jumlah',
-                'cif_rupiah' => 'nilai_pabean_rp',
-                'kode_satuan' => 'satuan',
-                'jumlah_kemasan' => 'jml_kemasan',
-                'kode_kemasan' => 'jenis_kemasan',
-                'cif' => 'nilai_barang',
+                'spesifikasi_lain' => 'spesifikasi_lain',
+                'kode_negara_asal' => 'kode_negara_asal',
+                'netto' => 'netto',
+                'jumlah_satuan' => 'jumlah_satuan',
+                'kode_satuan' => 'kode_satuan',
+                'jumlah_kemasan' => 'jumlah_kemasan',
+                'kode_kemasan' => 'kode_kemasan',
+                'cif' => 'cif',
                 'fob' => 'fob',
                 'freight' => 'freight',
                 'asuransi' => 'asuransi',
                 'harga_satuan' => 'harga_satuan',
+                'cif_rupiah' => 'cif_rupiah',
+                'ndpbm' => 'ndpbm',
             ];
-
+            $map_barang_tarif = [
+                'seri_barang' => 'seri_barang',
+                'kode_tarif' => 'kode_tarif',
+                'kode_pungutan' => 'kode_pungutan',
+                'tarif' => 'tarif',
+                'kode_fasilitas' => 'kode_fasilitas',
+                'tarif_fasilitas' => 'tarif_fasilitas',
+                'nilai_bayar' => 'nilai_bayar',
+            ];
+            $map_barang_dokumen = [
+                'seri_barang' => 'seri_barang',
+                'seri_dokumen' => 'seri_dokumen',
+            ];
+            $map_barang_vd = [
+                'seri_barang' => 'seri_barang',
+                'kode_vd' => 'kode_vd',
+                'nilai_barang' => 'nilai_barang',
+            ];
             $created = 0;
             $skipped = 0;
-            // Process data rows (skip header at index 0)
+            // Process create data barang
             for ($i = 1; $i < count($rows_barang); $i++) {
                 $row = $rows_barang[$i];
                 // Build payload
                 $payload = [
-                    'user_id' => 1,
+                    'user_id' => Auth::user()->id,
                     'import_notification_id' => null,
                 ];
 
@@ -336,13 +396,97 @@ class ImportNotificationController extends Controller
                         continue;
                     }
 
-                    if (isset($map[$hkey])) {
-                        $field = $map[$hkey];
+                    if (isset($map_barang[$hkey])) {
+                        $field = $map_barang[$hkey];
                         $payload[$field] = $value;
                     }
                 }
                 try {
-                    \App\Models\ImportBarang::create($payload);
+                    ImportBarang::create($payload);
+                    $created++;
+                } catch (\Exception $e) {
+                    dd('error', $e->getMessage());
+                    $skipped++;
+                }
+            }
+            // Prosess create data barang tarif
+            for ($i = 1; $i < count($rows_barang_tarif); $i++) {
+                $row = $rows_barang_tarif[$i];
+                // Build payload
+                $payload = [
+                    'user_id' => Auth::user()->id,
+                    'import_notification_id' => null,
+                ];
+
+                foreach ($headers_barang_tarif as $colIndex => $hkey) {
+                    $value = $row[$colIndex] ?? null;
+                    if ($value === null || $value === '') {
+                        continue;
+                    }
+
+                    if (isset($map_barang_tarif[$hkey])) {
+                        $field = $map_barang_tarif[$hkey];
+                        $payload[$field] = $value;
+                    }
+                }
+                try {
+                    ImportBarangTarif::create($payload);
+                    $created++;
+                } catch (\Exception $e) {
+                    dd('error', $e->getMessage());
+                    $skipped++;
+                }
+            }
+            // Prosess create data barang dokumen
+            for ($i = 1; $i < count($rows_barang_dokumen); $i++) {
+                $row = $rows_barang_dokumen[$i];
+                // Build payload
+                $payload = [
+                    'user_id' => Auth::user()->id,
+                    'import_notification_id' => null,
+                ];
+
+                foreach ($headers_barang_dokumen as $colIndex => $hkey) {
+                    $value = $row[$colIndex] ?? null;
+                    if ($value === null || $value === '') {
+                        continue;
+                    }
+
+                    if (isset($map_barang_dokumen[$hkey])) {
+                        $field = $map_barang_dokumen[$hkey];
+                        $payload[$field] = $value;
+                    }
+                }
+                try {
+                    ImportBarangDokumen::create($payload);
+                    $created++;
+                } catch (\Exception $e) {
+                    dd('error', $e->getMessage());
+                    $skipped++;
+                }
+            }
+            // Prosess create data barang vd
+            for ($i = 1; $i < count($rows_barang_vd); $i++) {
+                $row = $rows_barang_vd[$i];
+                // Build payload
+                $payload = [
+                    'user_id' => Auth::user()->id,
+                    'import_notification_id' => null,
+                ];
+
+                foreach ($headers_barang_vd as $colIndex => $hkey) {
+                    $value = $row[$colIndex] ?? null;
+                    if ($value === null || $value === '') {
+                        continue;
+                    }
+
+                    if (isset($map_barang_vd[$hkey])) {
+                        $field = $map_barang_vd[$hkey];
+                        $payload[$field] = $value;
+                    }
+                }
+                try {
+                    ImportBarangVd::create($payload);
                     $created++;
                 } catch (\Exception $e) {
                     dd('error', $e->getMessage());
@@ -350,7 +494,7 @@ class ImportNotificationController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success', "Import finished: {$created} created, {$skipped} skipped.");
+            return redirect()->back()->with('success', "Import finished: {$created} created, {$skipped} skipped/Gagal.");
         }
         if ($action === 'submit') {
             // Create the main ImportNotification record first
@@ -366,12 +510,10 @@ class ImportNotificationController extends Controller
             // Update all related records with the new import_notification_id
             // Update ImportHeader
             ImportHeader::whereNull('import_notification_id')
-                ->where('user_id', Auth::id() ?? 1)
                 ->update(['import_notification_id' => $notificationId]);
 
             // Update ImportEntitas
             ImportEntitas::whereNull('import_notification_id')
-                ->where('user_id', Auth::id() ?? 1)
                 ->update(['import_notification_id' => $notificationId]);
 
             // Update ImportDokumen
@@ -380,46 +522,55 @@ class ImportNotificationController extends Controller
 
             // Update ImportPengangkut
             ImportPengangkut::whereNull('import_notification_id')
-                ->where('user_id', 1)
                 ->update(['import_notification_id' => $notificationId]);
 
             // Update ImportKemasan
             ImportKemasan::whereNull('import_notification_id')
                 ->update(['import_notification_id' => $notificationId]);
 
+            // Update ImportPetiKemas
+            ImportPetiKemas::whereNull('import_notification_id')
+                ->update(['import_notification_id' => $notificationId]);
+
             // Update ImportTransaksi
             ImportTransaksi::whereNull('import_notification_id')
-                ->where('user_id', Auth::id() ?? 1)
                 ->update(['import_notification_id' => $notificationId]);
 
             // Update ImportBarang
             ImportBarang::whereNull('import_notification_id')
                 ->update(['import_notification_id' => $notificationId]);
 
+            // Update ImportBarangTarif
+            ImportBarangTarif::whereNull('import_notification_id')
+                ->update(['import_notification_id' => $notificationId]);
+            
+            // Update ImportBarangDokumen
+            ImportBarangDokumen::whereNull('import_notification_id')
+                ->update(['import_notification_id' => $notificationId]);
+            
+            // Update ImportBarangVd
+            ImportBarangVd::whereNull('import_notification_id')
+                ->update(['import_notification_id' => $notificationId]);
+
             // Update ImportPungutan
             ImportPungutan::whereNull('import_notification_id')
-                ->where('user_id', 1)
                 ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportPetiKemas
-            ImportPetiKemas::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
-
-            // Create and update ImportPernyataan
+            // Create ImportPernyataan
             $pernyataan = ImportPernyataan::create([
-                'user_id' => 1,
+                'user_id' => Auth::user()->id,
                 'import_notification_id' => $notificationId,
-                'nama' => $request->input('nama'),
-                'jabatan' => $request->input('jabatan'),
-                'tempat' => $request->input('place'),
-                'tanggal' => $request->input('tanggal'),
+                'nama_pernyataan' => $request->input('nama_pernyataan'),
+                'jabatan_pernyataan' => $request->input('jabatan_pernyataan'),
+                'kota_pernyataan' => $request->input('kota_pernyataan'),
+                'tanggal_pernyataan' => $request->input('tanggal_pernyataan'),
             ]);
 
             // Clear the session draft after successful submission
             session()->forget('import_draft');
         }
 
-        return redirect()->route('import.index')->with('success', 'Import notification created successfully.');
+        return redirect()->route('import.index')->with('success', 'PIB created successfully.');
     }
 
     /**
@@ -888,9 +1039,9 @@ class ImportNotificationController extends Controller
      */
     public function searchTps(Request $request)
     {
-        
+
         $header = ImportHeader::select('kode_kantor')->where('import_notification_id', null)->first();
-        $kodeKantor = $header->kode_kantor;        
+        $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', ''); // Get search term from request
         $apiUrl = config('services.pelabuhan_api.url');
         $apiToken = config('services.pelabuhan_api.token');
@@ -934,7 +1085,6 @@ class ImportNotificationController extends Controller
         }
     }
 
-
     /**
      * Search Pelabuhan Tujuan from external API based on kodeKantor
      */
@@ -961,7 +1111,7 @@ class ImportNotificationController extends Controller
             ]);
 
             $data = json_decode($response->getBody(), true);
-            
+
             // Filter results based on search term if provided
             if (! empty($searchTerm) && isset($data['data']) && is_array($data['data'])) {
                 $filteredData = array_filter($data['data'], function ($item) use ($searchTerm) {
@@ -984,7 +1134,6 @@ class ImportNotificationController extends Controller
             ], 500);
         }
     }
-
 
     /**
      * Search Negara (Countries) from config
@@ -1060,7 +1209,7 @@ class ImportNotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'ERROR',
-                'message' => 'Failed to fetch kurs: ' . $e->getMessage()
+                'message' => 'Failed to fetch kurs: '.$e->getMessage(),
             ]);
         }
     }
