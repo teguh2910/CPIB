@@ -87,7 +87,7 @@
         if (confirm('Apakah Anda yakin ingin menghapus barang ini?')) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '{{ url('barang') }}/' + id;
+            form.action = '/dokumen/' + id;
             form.style.display = 'none';
 
             const tokenInput = document.createElement('input');
