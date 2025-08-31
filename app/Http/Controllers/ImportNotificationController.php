@@ -20,6 +20,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ImportNotificationController extends Controller
 {
@@ -28,9 +30,158 @@ class ImportNotificationController extends Controller
      */
     public function index()
     {
-        $importNotifications = ImportNotification::with(['headerRecord', 'entitasRecord.pengirimParty'])->latest()->paginate(10);
-
+        $importNotifications = \DB::table('import_notifications')
+        ->join('import_entitas', 'import_notifications.id', '=', 'import_entitas.import_notification_id')
+        ->join('import_headers', 'import_notifications.id', '=', 'import_headers.import_notification_id')
+        ->join('import_pengangkuts', 'import_notifications.id', '=', 'import_pengangkuts.import_notification_id')
+        ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
+        ->where('kode_entitas', 9)
+            ->get();
         return view('import.index', compact('importNotifications'));
+    }
+
+    /**
+     * Export multiple tables into one Excel file where each table is a separate sheet.
+     */
+    public function exportAll()
+    {
+        // List of models and sheet names to export
+        $sheets = [
+            'IMPORT_NOTIFICATION' => \App\Models\ImportNotification::all()->toArray(),
+            'IMPORT_HEADER' => \App\Models\ImportHeader::all()->toArray(),
+            'IMPORT_ENTITAS' => \App\Models\ImportEntitas::all()->toArray(),
+            'IMPORT_DOKUMEN' => \App\Models\ImportDokumen::all()->toArray(),
+            'IMPORT_PENGANGKUT' => \App\Models\ImportPengangkut::all()->toArray(),
+            'IMPORT_KEMASAN' => \App\Models\ImportKemasan::all()->toArray(),
+            'IMPORT_PETIKEMAS' => \App\Models\ImportPetiKemas::all()->toArray(),
+            'IMPORT_TRANSAKSI' => \App\Models\ImportTransaksi::all()->toArray(),
+            'IMPORT_BARANG' => \App\Models\ImportBarang::all()->toArray(),
+            'IMPORT_BARANG_TARIF' => \App\Models\ImportBarangTarif::all()->toArray(),
+            'IMPORT_BARANG_DOKUMEN' => \App\Models\ImportBarangDokumen::all()->toArray(),
+            'IMPORT_BARANG_VD' => \App\Models\ImportBarangVd::all()->toArray(),
+            'IMPORT_PUNGUTAN' => \App\Models\ImportPungutan::all()->toArray(),
+            'IMPORT_PERNYATAAN' => \App\Models\ImportPernyataan::all()->toArray(),
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheetIndex = 0;
+
+        foreach ($sheets as $name => $rows) {
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setTitle(substr($name, 0, 31));
+            } else {
+                $sheet = $spreadsheet->createSheet();
+                $sheet->setTitle(substr($name, 0, 31));
+            }
+
+            if (empty($rows)) {
+                $sheet->fromArray([['No data']], null, 'A1');
+                $sheetIndex++;
+                continue;
+            }
+
+            // Use keys from first row as headers
+            $headers = array_keys($rows[0]);
+            $sheet->fromArray($headers, null, 'A1');
+
+            // Write data starting from row 2
+            $rowNumber = 2;
+            foreach ($rows as $r) {
+                $col = 'A';
+                foreach ($headers as $h) {
+                    $value = $r[$h] ?? null;
+                    $sheet->setCellValue($col.$rowNumber, $value);
+                    $col++;
+                }
+                $rowNumber++;
+            }
+
+            $sheetIndex++;
+        }
+
+        // Set first sheet active
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'export_all_tables_'.date('Ymd_His').'.xlsx';
+
+        // Stream to browser
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
+    }
+
+    /**
+     * Export data related to a single import notification id into Excel (one sheet per related table)
+     */
+    public function exportByNotification(int $importNotificationId)
+    {
+        $sheets = [
+            'IMPORT_NOTIFICATION' => \App\Models\ImportNotification::where('id', $importNotificationId)->get()->toArray(),
+            'IMPORT_HEADER' => \App\Models\ImportHeader::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_ENTITAS' => \App\Models\ImportEntitas::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_DOKUMEN' => \App\Models\ImportDokumen::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_PENGANGKUT' => \App\Models\ImportPengangkut::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_KEMASAN' => \App\Models\ImportKemasan::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_PETIKEMAS' => \App\Models\ImportPetiKemas::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_TRANSAKSI' => \App\Models\ImportTransaksi::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_BARANG' => \App\Models\ImportBarang::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_BARANG_TARIF' => \App\Models\ImportBarangTarif::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_BARANG_DOKUMEN' => \App\Models\ImportBarangDokumen::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_BARANG_VD' => \App\Models\ImportBarangVd::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_PUNGUTAN' => \App\Models\ImportPungutan::where('import_notification_id', $importNotificationId)->get()->toArray(),
+            'IMPORT_PERNYATAAN' => \App\Models\ImportPernyataan::where('import_notification_id', $importNotificationId)->get()->toArray(),
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheetIndex = 0;
+
+        foreach ($sheets as $name => $rows) {
+            if ($sheetIndex === 0) {
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setTitle(substr($name, 0, 31));
+            } else {
+                $sheet = $spreadsheet->createSheet();
+                $sheet->setTitle(substr($name, 0, 31));
+            }
+
+            if (empty($rows)) {
+                $sheet->fromArray([['No data']], null, 'A1');
+                $sheetIndex++;
+                continue;
+            }
+
+            $headers = array_keys($rows[0]);
+            $sheet->fromArray($headers, null, 'A1');
+
+            $rowNumber = 2;
+            foreach ($rows as $r) {
+                $col = 'A';
+                foreach ($headers as $h) {
+                    $value = $r[$h] ?? null;
+                    $sheet->setCellValue($col.$rowNumber, $value);
+                    $col++;
+                }
+                $rowNumber++;
+            }
+
+            $sheetIndex++;
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $writer = new Xlsx($spreadsheet);
+        $fileName = 'export_import_notification_'.$importNotificationId.'_'.date('Ymd_His').'.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 
     /**
@@ -581,74 +732,22 @@ class ImportNotificationController extends Controller
         $id = $importNotification->id;
 
         // Include records that belong to this notification or are still unlinked (null)
-        $dokument = ImportDokumen::where(function ($q) use ($id) {
-            $q->whereNull('import_notification_id')->orWhere('import_notification_id', $id);
-        })->get();
-
-        $kemasan = ImportKemasan::where(function ($q) use ($id) {
-            $q->whereNull('import_notification_id')->orWhere('import_notification_id', $id);
-        })->get();
-
-        $petiKemas = ImportPetiKemas::where(function ($q) use ($id) {
-            $q->whereNull('import_notification_id')->orWhere('import_notification_id', $id);
-        })->get();
-
-        $barangData = ImportBarang::where(function ($q) use ($id) {
-            $q->whereNull('import_notification_id')->orWhere('import_notification_id', $id);
-        })->get();
-
-        // Totals for this notification (only include linked items)
-        $BM = ImportBarang::where('import_notification_id', $id)->sum('biaya_bm');
-        $PPN = ImportBarang::where('import_notification_id', $id)->sum('biaya_ppn');
-        $PPH = ImportBarang::where('import_notification_id', $id)->sum('biaya_pph');
+        $header = ImportHeader::where('import_notification_id', $id)->get();
+        $entitas_pengirim = ImportEntitas::where('import_notification_id', $id)->where('kode_entitas', 9)->get();
+        $entitas_penjual = ImportEntitas::where('import_notification_id', $id)->where('kode_entitas', 10)->get();
+        $dokument = ImportDokumen::where('import_notification_id', $id)->get();
+        $kemasan = ImportKemasan::where('import_notification_id', $id)->get();
+        $petiKemas = ImportPetiKemas::where('import_notification_id', $id)->get();
+        $pengangkut = ImportPengangkut::where('import_notification_id', $id)->get();
+        $transaksi = ImportTransaksi::where('import_notification_id', $id)->get();
+        $barangData = ImportBarang::where('import_notification_id', $id)->get();
+        $pungutan = ImportPungutan::where('import_notification_id', $id)->get();
+        $pernyataan = ImportPernyataan::where('import_notification_id', $id)->get();
+        $BM = $pungutan->first()->bm ?? 0;
+        $PPN = $pungutan->first()->ppn ?? 0;
+        $PPH = $pungutan->first()->pph ?? 0;
         $total = $BM + $PPN + $PPH;
-
-        // Build a draft array from existing related tables so the edit view can reuse the create UI
-        $draft = [];
-
-        $header = ImportHeader::where('import_notification_id', $id)->first();
-        $draft['header'] = $header ? [
-            'nomor_aju' => $header->nomor_aju,
-            'kantor_pabean' => $header->kantor_pabean,
-            'jenis_pib' => $header->jenis_pib,
-            'jenis_impor' => $header->jenis_impor,
-            'cara_pembayaran' => $header->cara_pembayaran,
-        ] : ($importNotification->header ?? []);
-
-        $entitas = ImportEntitas::where('import_notification_id', $id)->first();
-        $draft['entitas'] = $entitas ? $entitas->toArray() : ($importNotification->entitas ?? []);
-
-        $docs = ImportDokumen::where('import_notification_id', $id)->get();
-        $draft['dokumen'] = $docs->map(function ($d) {
-            return $d->toArray();
-        })->all();
-
-        $peng = ImportPengangkut::where('import_notification_id', $id)->first();
-        $draft['pengangkut'] = $peng ? $peng->toArray() : ($importNotification->pengangkut ?? []);
-
-        $kms = ImportKemasan::where('import_notification_id', $id)->get();
-        $draft['kemasan'] = $kms->map(function ($k) {
-            return $k->toArray();
-        })->all();
-
-        $trans = ImportTransaksi::where('import_notification_id', $id)->first();
-        $draft['transaksi'] = $trans ? $trans->toArray() : ($importNotification->transaksi ?? []);
-
-        $brs = ImportBarang::where('import_notification_id', $id)->get();
-        $draft['barang'] = $brs->map(function ($b) {
-            return $b->toArray();
-        })->all();
-
-        $pung = ImportPungutan::where('import_notification_id', $id)->first();
-        $draft['pungutan'] = $pung ? $pung->toArray() : ($importNotification->pungutan ?? []);
-
-        $per = ImportPernyataan::where('import_notification_id', $id)->first();
-        $draft['pernyataan'] = $per ? $per->toArray() : ($importNotification->pernyataan ?? []);
-
-        // Store draft in session so the existing create UI can render current values
-        session(['import_draft' => $draft]);
-
-        return view('import.edit', compact('dokument', 'kemasan', 'petiKemas', 'barangData', 'BM', 'PPN', 'PPH', 'total', 'importNotification'));
+        return view('import.edit', compact('header', 'entitas_pengirim', 'entitas_penjual', 'dokument', 'kemasan', 'petiKemas', 'barangData', 'importNotification', 'pengangkut', 'transaksi', 'pungutan', 'pernyataan', 'BM', 'PPN', 'PPH', 'total'));
     }
 
     /**

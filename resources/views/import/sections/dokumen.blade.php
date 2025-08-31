@@ -11,7 +11,7 @@
         <h3 class="font-semibold mb-3">Tambah Dokumen</h3>
         <div>
             @csrf
-            <div class="grid md:grid-cols-4 gap-3">
+            <div class="grid md:grid-cols-2 gap-3">
                 <x-field label="Seri">
                     <input type="text" id="dok_seri" name="seri" readonly
                         class="w-full border rounded px-3 py-2 bg-gray-100" required>

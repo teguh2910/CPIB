@@ -7,14 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportPernyataan extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'nama',
-        'jabatan',
-        'tempat',
-        'tanggal',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'agree' => 'boolean',

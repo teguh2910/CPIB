@@ -2,7 +2,7 @@
     $e = $draft ?? [];
     // Also expose a normalized entitas array from the session draft for backward compatibility
     $_sessionDraft = session('import_draft', []);
-    $ent = $_sessionDraft['entitas'] ?? [];
+    $ent = $entitas[0] ?? [];
     $negaraOpts = config('import.kode_negara');
     $pengirimSelected = $e['pengirim']['party_id'] ?? null;
     $penjualSelected = $e['penjual']['party_id'] ?? null;

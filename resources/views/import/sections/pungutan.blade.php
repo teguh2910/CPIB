@@ -6,18 +6,18 @@
         <div class="grid md:grid-cols-1 gap-4 mt-4">
             <x-field label="Bea Masuk">
                 <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100"
-                    value="{{ number_format($BM, 2, ',', '.') }}" readonly>
-                <input type="hidden" name="bea_masuk" value="{{ $BM }}">
+                    value="{{ number_format($BM, 2, ',', '.') ?? $pungutan->bm }}" readonly>
+                <input type="hidden" name="bea_masuk" value="{{ $BM ?? $pungutan->bm }}">
             </x-field>
             <x-field label="PPN">
                 <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100"
-                    value="{{ number_format($PPN, 2, ',', '.') }}" readonly>
-                <input type="hidden" name="ppn" value="{{ $PPN }}">
+                    value="{{ number_format($PPN, 2, ',', '.') ?? $pungutan->ppn }}" readonly>
+                <input type="hidden" name="ppn" value="{{ $PPN ?? $pungutan->ppn }}">
             </x-field>
             <x-field label="PPh">
                 <input type="text" class="w-full border rounded px-3 py-2 bg-gray-100"
-                    value="{{ number_format($PPH, 2, ',', '.') }}" readonly>
-                <input type="hidden" name="pph" value="{{ $PPH }}">
+                    value="{{ number_format($PPH, 2, ',', '.') ?? $pungutan->pph }}" readonly>
+                <input type="hidden" name="pph" value="{{ $PPH ?? $pungutan->pph }}">
             </x-field>
         </div>
 
@@ -25,8 +25,8 @@
             <div class="inline-flex items-center gap-2 font-semibold text-lg">
                 <span>Total Pungutan:</span>
                 <input type="text" class="w-48 border rounded px-3 py-2 bg-blue-50 text-right font-bold"
-                    value="{{ number_format($total, 2, ',', '.') }}" readonly>
-                <input type="hidden" name="total" value="{{ $total }}">
+                    value="{{ number_format($total, 2, ',', '.') ?? $pungutan->total }}" readonly>
+                <input type="hidden" name="total" value="{{ $total ?? $pungutan->total }}">
             </div>
         </div>
     </div>

@@ -3,7 +3,7 @@
     $pibOptions = config('import.kode_jenis_prosedur');
     $impOptions = config('import.kode_jenis_impor');
     $payOptions = config('import.kode_cara_bayar');
-    $h = $header[0];
+    $h = $header[0] ?? [];
 @endphp
 
 <div class="grid md:grid-cols-2 gap-4">

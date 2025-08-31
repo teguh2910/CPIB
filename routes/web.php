@@ -93,4 +93,11 @@ Route::middleware('auth.session')->group(function () {
         'destroy' => 'parties.destroy',
     ]);
 
+    // Export all tables to Excel (each table -> separate sheet)
+    Route::get('export/all', [ImportNotificationController::class, 'exportAll'])->name('import.exportAll');
+    // Export data for a single ImportNotification (by id) - each related table -> separate sheet
+    Route::get('export/{importNotification}', [ImportNotificationController::class, 'exportByNotification'])
+        ->whereNumber('importNotification')
+        ->name('import.export');
+
 });

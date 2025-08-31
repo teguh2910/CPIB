@@ -3,7 +3,7 @@
     $opsJenis = config('import.jenis_transaksi');
     $opsIncoterm = config('import.incoterm');
     $opsAsuransi = config('import.jenis_asuransi');
-    $t = $transaksi[0];
+    $t = $transaksi[0] ?? [];
     $apiUrl = config('services.pelabuhan_api.url');
     $apiToken = config('services.pelabuhan_api.token');
 @endphp
