@@ -7,48 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportBarang extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'seri',
-        // Basic Info
-        'pos_tarif',
-        'lartas',
-        'kode_barang',
-        'uraian',
-        'spesifikasi',
-        'kondisi',
-        'negara_asal',
-        'berat_bersih',
-        // Quantity & Packaging
-        'jumlah',
-        'satuan',
-        'jml_kemasan',
-        'jenis_kemasan',
-        // Value & Finance
-        'nilai_barang',
-        'fob',
-        'freight',
-        'asuransi',
-        'harga_satuan',
-        'nilai_pabean_rp',
-        'dokumen_fasilitas',
-        // BM
-        'ket_bm',
-        'tarif_bm',
-        'bayar_bm',
-        'biaya_bm',
-        // PPN
-        'ppn_tarif',
-        'ket_ppn',
-        'bayar_ppn',
-        'biaya_ppn',
-        // PPh
-        'ket_pph',
-        'tarif_pph',
-        'bayar_pph',
-        'biaya_pph',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'lartas' => 'boolean',

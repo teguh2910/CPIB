@@ -25,7 +25,6 @@ class ImportNotificationController extends Controller
      */
     public function index()
     {
-        // Use a query builder (not a Collection) so paginate() is available
         $importNotifications = ImportNotification::with(['headerRecord', 'entitasRecord.pengirimParty'])->latest()->paginate(10);
 
         return view('import.index', compact('importNotifications'));
@@ -36,15 +35,21 @@ class ImportNotificationController extends Controller
      */
     public function create()
     {
+        $header = ImportHeader::where('import_notification_id', null)
+            ->get();
         $dokument = ImportDokumen::where('import_notification_id', null)
             ->get();
-        $entitas_pengirim = ImportEntitas::where('import_notification_id', null)->where('kode_entitas',9)
+        $entitas_pengirim = ImportEntitas::where('import_notification_id', null)->where('kode_entitas', 9)
             ->get();
-        $entitas_penjual = ImportEntitas::where('import_notification_id', null)->where('kode_entitas',10)
+        $entitas_penjual = ImportEntitas::where('import_notification_id', null)->where('kode_entitas', 10)
+            ->get();
+        $pengangkut = ImportPengangkut::where('import_notification_id', null)
             ->get();
         $kemasan = ImportKemasan::where('import_notification_id', null)
             ->get();
         $petiKemas = ImportPetiKemas::where('import_notification_id', null)
+            ->get();
+        $transaksi = ImportTransaksi::where('import_notification_id', null)
             ->get();
         $barangData = ImportBarang::where('import_notification_id', null)
             ->get();
@@ -52,8 +57,7 @@ class ImportNotificationController extends Controller
         $PPN = ImportBarang::whereNull('import_notification_id')->sum('biaya_ppn');
         $PPH = ImportBarang::whereNull('import_notification_id')->sum('biaya_pph');
         $total = $BM + $PPN + $PPH;
-
-        return view('import.create', compact('dokument', 'entitas_pengirim', 'entitas_penjual', 'kemasan', 'petiKemas', 'barangData', 'BM', 'PPN', 'PPH', 'total'));
+        return view('import.create', compact('header', 'transaksi', 'dokument', 'entitas_pengirim', 'entitas_penjual', 'pengangkut', 'kemasan', 'petiKemas', 'barangData', 'BM', 'PPN', 'PPH', 'total'));
     }
 
     /**
@@ -74,8 +78,7 @@ class ImportNotificationController extends Controller
         if ($action === 'save_continue') {
             $currentIndex = array_search($currentStep, $steps, true);
             $nextStep = $currentIndex < count($steps) - 1 ? $steps[$currentIndex + 1] : $steps[0];
-            if ($currentStep === 'header' && ! empty($draft['header'])) 
-                {
+            if ($currentStep === 'header' && ! empty($draft['header'])) {
                 $hd = $draft['header'];
                 $payload = [
                     'user_id' => Auth::user()->id,
@@ -130,228 +133,126 @@ class ImportNotificationController extends Controller
             }
             // Handle entitas step saving: create or update parties and entitas
             if ($currentStep === 'entitas') {
-                $cek_input=ImportEntitas::where('import_notification_id', null)->where('kode_entitas', 9)->first();
-                if($cek_input){
+                $cek_input = ImportEntitas::where('import_notification_id', null)->where('kode_entitas', 9)->first();
+                if ($cek_input) {
                     session(['import_draft' => $draft]);
-                }else{
-                $entitas_importir = ImportEntitas::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_entitas' => $request->input('kode_entitas'),
-                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas'),
-                    'nomor_identitas' => $request->input('importir')['nomor_identitas'],
-                    'nama_identitas' => $request->input('importir')['nama_identitas'],
-                    'alamat_identitas' => $request->input('importir')['alamat_identitas'],
-                    'nib_identitas' => $request->input('importir')['nib_identitas'],
-                    'kode_jenis_api' => 02,
-                    'kode_status' => $request->input('importir')['kode_status'],
-                ]);
-                $entitas_pemusatan = ImportEntitas::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_entitas' => $request->input('kode_entitas2'),
-                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas2'),
-                    'nomor_identitas' => $request->input('pemusatan')['nomor_identitas2'],
-                    'nama_identitas' => $request->input('pemusatan')['nama_identitas2'],
-                    'alamat_identitas' => $request->input('pemusatan')['alamat_identitas2'],
-                    'kode_jenis_api' => 02,
-                    'kode_status' => $request->input('importir')['kode_status'],
-                ]);
-                $entitas_pemilik = ImportEntitas::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_entitas' => $request->input('kode_entitas3'),
-                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas3'),
-                    'nomor_identitas' => $request->input('pemilik')['nomor_identitas3'],
-                    'nama_identitas' => $request->input('pemilik')['nama_identitas3'],
-                    'alamat_identitas' => $request->input('pemilik')['alamat_identitas3'],
-                    'kode_jenis_api' => 02,
-                    'kode_status' => $request->input('importir')['kode_status'],
-                ]);
-                $entitas_pengirim = ImportEntitas::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_entitas' => $request->input('kode_entitas4'),
-                    'nama_identitas' => $request->input('pengirim')['nama_identitas4'],
-                    'alamat_identitas' => $request->input('pengirim')['alamat_identitas4'],
-                    'kode_negara' => $request->input('pengirim')['kode_negara'],
-                ]);
-                $entitas_penjual = ImportEntitas::create([
-                    'user_id' => Auth::user()->id ?? 1,
-                    'import_notification_id' => null,
-                    'kode_entitas' => $request->input('kode_entitas5'),
-                    'nama_identitas' => $request->input('penjual')['nama_identitas5'],
-                    'alamat_identitas' => $request->input('penjual')['alamat_identitas5'],
-                    'kode_negara' => $request->input('penjual')['kode_negara2'],
-                ]);
+                } else {
+                    $entitas_importir = ImportEntitas::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_entitas' => $request->input('kode_entitas'),
+                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas'),
+                        'nomor_identitas' => $request->input('importir')['nomor_identitas'],
+                        'nama_identitas' => $request->input('importir')['nama_identitas'],
+                        'alamat_identitas' => $request->input('importir')['alamat_identitas'],
+                        'nib_identitas' => $request->input('importir')['nib_identitas'],
+                        'kode_jenis_api' => 02,
+                        'kode_status' => $request->input('importir')['kode_status'],
+                    ]);
+                    $entitas_pemusatan = ImportEntitas::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_entitas' => $request->input('kode_entitas2'),
+                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas2'),
+                        'nomor_identitas' => $request->input('pemusatan')['nomor_identitas2'],
+                        'nama_identitas' => $request->input('pemusatan')['nama_identitas2'],
+                        'alamat_identitas' => $request->input('pemusatan')['alamat_identitas2'],
+                        'kode_jenis_api' => 02,
+                        'kode_status' => $request->input('importir')['kode_status'],
+                    ]);
+                    $entitas_pemilik = ImportEntitas::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_entitas' => $request->input('kode_entitas3'),
+                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas3'),
+                        'nomor_identitas' => $request->input('pemilik')['nomor_identitas3'],
+                        'nama_identitas' => $request->input('pemilik')['nama_identitas3'],
+                        'alamat_identitas' => $request->input('pemilik')['alamat_identitas3'],
+                        'kode_jenis_api' => 02,
+                        'kode_status' => $request->input('importir')['kode_status'],
+                    ]);
+                    $entitas_pengirim = ImportEntitas::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_entitas' => $request->input('kode_entitas4'),
+                        'nama_identitas' => $request->input('pengirim')['nama_identitas4'],
+                        'alamat_identitas' => $request->input('pengirim')['alamat_identitas4'],
+                        'kode_negara' => $request->input('pengirim')['kode_negara'],
+                    ]);
+                    $entitas_penjual = ImportEntitas::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_entitas' => $request->input('kode_entitas5'),
+                        'nama_identitas' => $request->input('penjual')['nama_identitas5'],
+                        'alamat_identitas' => $request->input('penjual')['alamat_identitas5'],
+                        'kode_negara' => $request->input('penjual')['kode_negara2'],
+                    ]);
 
-                session(['import_draft' => $draft]);
-            }
+                    session(['import_draft' => $draft]);
+                }
             }
             // Handle pengangkut step saving
             if ($currentStep === 'pengangkut') {
-                // Start with existing draft pengangkut if any
-                $peng = $draft['pengangkut'] ?? [];
-
-                // If the form submitted pengangkut-related data
-                if ($request->has('bc11') || $request->has('angkut') || $request->has('pelabuhan') || $request->has('tps')) {
-                    $inputPeng = [
-                        'bc11' => $request->input('bc11', []),
-                        'angkut' => $request->input('angkut', []),
-                        'pelabuhan' => $request->input('pelabuhan', []),
-                        'tps' => $request->input('tps', []),
-                    ];
-
-                    // Merge nested arrays into draft pengangkut
-                    $peng = array_merge($peng, $inputPeng);
-
-                    // Persist normalized pengangkut back into session draft immediately so view sees it
-                    $draft['pengangkut'] = $peng;
-                    session(['import_draft' => $draft]);
-                }
-
-                // Prepare pengangkut payload
-                $pengangkutPayload = [
-                    'user_id' => 1,
-                    'import_notification_id' => null,
-                    // BC 1.1 data
-                    'bc11_no_tutup_pu' => $peng['bc11']['no_tutup_pu'] ?? null,
-                    'bc11_pos_1' => $peng['bc11']['pos_1'] ?? null,
-                    'bc11_pos_2' => $peng['bc11']['pos_2'] ?? null,
-                    'bc11_pos_3' => $peng['bc11']['pos_3'] ?? null,
-                    // Pengangkutan data
-                    'angkut_cara' => $peng['angkut']['cara'] ?? null,
-                    'angkut_nama' => $peng['angkut']['nama'] ?? null,
-                    'angkut_voy' => $peng['angkut']['voy'] ?? null,
-                    'angkut_bendera' => $peng['angkut']['bendera'] ?? null,
-                    'angkut_eta' => $peng['angkut']['eta'] ?? null,
-                    // Pelabuhan data
-                    'pelabuhan_muat' => $peng['pelabuhan']['muat'] ?? null,
-                    'pelabuhan_transit' => $peng['pelabuhan']['transit'] ?? null,
-                    'pelabuhan_tujuan' => $peng['pelabuhan']['tujuan'] ?? null,
-                    // TPS data
-                    'tps_kode' => $peng['tps']['kode'] ?? null,
-                ];
-                // Try to reuse existing pengangkut for same user and null import_notification_id
-                $existingPengangkut = \App\Models\ImportPengangkut::whereNull('import_notification_id')
+                $existingPengangkut = ImportPengangkut::whereNull('import_notification_id')
                     ->first();
                 if ($existingPengangkut) {
-                    $existingPengangkut->update(array_filter($pengangkutPayload));
+                    $existingPengangkut->update($request->except(['_token', 'current_step','action']));
                     $savedPengangkut = $existingPengangkut;
                 } else {
-                    $savedPengangkut = \App\Models\ImportPengangkut::create($pengangkutPayload);
-                }
+                    $savedPengangkut = ImportPengangkut::create([
+                        'user_id' => Auth::user()->id ?? 1,
+                        'import_notification_id' => null,
+                        'kode_tutup_pu' => $request->input('kode_tutup_pu'),
+                        'nomor_bc_11' => $request->input('nomor_bc_11'),
+                        'tanggal_bc_11' => $request->input('tanggal_bc_11'),
+                        'nomor_pos' => $request->input('nomor_pos'),
+                        'nomor_sub_pos' => $request->input('nomor_sub_pos'),
+                        'angkut_cara' => $request->input('angkut_cara'),
+                        'angkut_nama' => $request->input('angkut_nama'),
+                        'angkut_voy' => $request->input('angkut_voy'),
+                        'angkut_bendera' => $request->input('angkut_bendera'),
+                        'tanggal_tiba' => $request->input('tanggal_tiba'),
+                        'kode_pelabuhan_muat' => $request->input('kode_pelabuhan_muat'),
+                        'kode_pelabuhan_transit' => $request->input('kode_pelabuhan_transit'),
+                        'kode_pelabuhan_tujuan' => $request->input('kode_pelabuhan_tujuan'),
+                        'kode_tps' => $request->input('kode_tps'),
 
-                // Persist generated id into session draft
-                $draft['pengangkut'] = array_merge($draft['pengangkut'] ?? [], [
-                    'id' => $savedPengangkut->id,
-                ]);
+                    ]);
+                }
+                
                 session(['import_draft' => $draft]);
             }
             // Handle transaksi step saving
             if ($currentStep === 'transaksi') {
-                // Start with existing draft transaksi if any
-                $trans = $draft['transaksi'] ?? [];
-
-                // If the form submitted transaksi-related data
-                if ($request->has('harga_valuta') || $request->has('berat_kotor') || $request->has('biaya_penambah')) {
-                    $inputTrans = [
-                        'harga_valuta' => $request->input('harga_valuta'),
-                        'harga_ndpbm' => $request->input('harga_ndpbm'),
-                        'harga_jenis' => $request->input('harga_jenis'),
-                        'harga_incoterm' => $request->input('harga_incoterm'),
-                        'harga_barang' => $request->input('harga_barang'),
-                        'harga_nilai_pabean' => $request->input('harga_nilai_pabean'),
-                        'berat_kotor' => $request->input('berat_kotor'),
-                        'berat_bersih' => $request->input('berat_bersih'),
-                        'biaya_penambah' => $request->input('biaya_penambah'),
-                        'biaya_pengurang' => $request->input('biaya_pengurang'),
-                        'biaya_freight' => $request->input('biaya_freight'),
-                        'biaya_jenis_asuransi' => $request->input('biaya_jenis_asuransi'),
-                        'biaya_asuransi' => $request->input('biaya_asuransi'),
-                        'biaya_voluntary_on' => $request->input('biaya_voluntary_on'),
-                        'biaya_voluntary_amt' => $request->input('biaya_voluntary_amt'),
-                    ];
-
-                    // Merge input data into draft transaksi
-                    $trans = array_merge($trans, $inputTrans);
-
-                    // Persist normalized transaksi back into session draft immediately so view sees it
-                    $draft['transaksi'] = $trans;
-                    session(['import_draft' => $draft]);
-                }
-
-                // Prepare transaksi payload
-                $transaksiPayload = [
-                    'user_id' => Auth::id() ?? 1,
-                    'import_notification_id' => null,
-                    // Harga
-                    'harga_valuta' => $trans['harga_valuta'] ?? null,
-                    'harga_ndpbm' => $trans['harga_ndpbm'] ?? null,
-                    'harga_jenis' => $trans['harga_jenis'] ?? null,
-                    'harga_incoterm' => $trans['harga_incoterm'] ?? null,
-                    'harga_barang' => $trans['harga_barang'] ?? null,
-                    'harga_nilai_pabean' => $trans['harga_nilai_pabean'] ?? null,
-                    // Berat
-                    'berat_kotor' => $trans['berat_kotor'] ?? null,
-                    'berat_bersih' => $trans['berat_bersih'] ?? null,
-                    // Biaya
-                    'biaya_penambah' => $trans['biaya_penambah'] ?? null,
-                    'biaya_pengurang' => $trans['biaya_pengurang'] ?? null,
-                    'biaya_freight' => $trans['biaya_freight'] ?? null,
-                    'biaya_jenis_asuransi' => $trans['biaya_jenis_asuransi'] ?? null,
-                    'biaya_asuransi' => $trans['biaya_asuransi'] ?? null,
-                    'biaya_voluntary_on' => $trans['biaya_voluntary_on'] ?? false,
-                    'biaya_voluntary_amt' => $trans['biaya_voluntary_amt'] ?? null,
-                ];
-
-                // Try to reuse existing transaksi for same user and null import_notification_id
-                $existingTransaksi = \App\Models\ImportTransaksi::where('user_id', $transaksiPayload['user_id'])
-                    ->whereNull('import_notification_id')
+                $existingTransaksi = ImportTransaksi::whereNull('import_notification_id')
                     ->first();
-
                 if ($existingTransaksi) {
-                    $existingTransaksi->update(array_filter($transaksiPayload));
+                    $existingTransaksi->update($request->except(['_token', 'current_step','action']));
                     $savedTransaksi = $existingTransaksi;
                 } else {
-                    $savedTransaksi = \App\Models\ImportTransaksi::create($transaksiPayload);
-                }
-
-                // Persist generated id into session draft
-                $draft['transaksi'] = array_merge($draft['transaksi'] ?? [], [
-                    'id' => $savedTransaksi->id,
-                ]);
-                session(['import_draft' => $draft]);
-            }
-            // Handle pungutan step saving
-            if ($currentStep === 'pungutan') {
-                // Start with existing draft pungutan if any
-                $pungutanPayload = [
-                    'user_id' => 1,
+                ImportTransaksi::create([
+                    'user_id' => Auth::user()->id ?? 1,
                     'import_notification_id' => null,
-                    'bea_masuk' => $request->input('bea_masuk') ?? null,
-                    'ppn' => $request->input('ppn') ?? null,
-                    'pph' => $request->input('pph') ?? null,
-                    'total_pungutan' => $request->input('total') ?? null,
-                ];
-                // Try to reuse existing pungutan for same user and null import_notification_id
-                $existingPungutan = ImportPungutan::whereNull('import_notification_id')
-                    ->first();
-
-                if ($existingPungutan) {
-                    $existingPungutan->update(array_filter($pungutanPayload));
-                    $savedPungutan = $existingPungutan;
-                } else {
-                    $savedPungutan = ImportPungutan::create($pungutanPayload);
-                }
-
-                // Persist generated id into session draft
-                $draft['pungutan'] = array_merge($draft['pungutan'] ?? [], [
-                    'id' => $savedPungutan->id,
+                    'kode_valuta' => $request->input('kode_valuta'),
+                    'ndpbm' => $request->input('ndpbm'),
+                    'kode_jenis_nilai' => $request->input('kode_jenis_nilai'),
+                    'kode_incoterm' => $request->input('kode_incoterm'),
+                    'cif' => $request->input('cif'),
+                    'fob' => $request->input('fob'),
+                    'bruto' => $request->input('bruto'),
+                    'netto' => $request->input('netto'),
+                    'nilai_incoterm' => 0,
+                    'nilai_barang' => 0,
+                    'biaya_tambahan' => $request->input('biaya_tambahan'),
+                    'biaya_pengurang' => $request->input('biaya_pengurang'),
+                    'freight' => $request->input('freight'),
+                    'kode_asuransi' => $request->input('kode_asuransi'),
+                    'asuransi' => $request->input('asuransi'),
+                    'vd' => $request->input('vd'),
                 ]);
                 session(['import_draft' => $draft]);
             }
-
+        }           
             return redirect()->route('import.create', ['step' => $nextStep])
                 ->with('success', ucfirst($currentStep).' data saved successfully. Please continue with the next step.');
         }
@@ -946,5 +847,221 @@ class ImportNotificationController extends Controller
             return redirect()->back()->with('success', "Selesai: {$updated} baris diperbarui");
         }
 
+    }
+
+    /**
+     * Search pelabuhan from external API
+     */
+    public function searchPelabuhan(Request $request)
+    {
+        $query = $request->get('q', '');
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = config('services.pelabuhan_api.token');
+
+        if (empty($query) || empty($apiUrl) || empty($apiToken)) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client;
+            $response = $client->get("{$apiUrl}/openapi/pelabuhan/kata/{$query}", [
+                'headers' => [
+                    'Authorization' => "Bearer {$apiToken}",
+                    'Accept' => 'application/json',
+                ],
+                'timeout' => 10,
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch pelabuhan data: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Search TPS from external API
+     */
+    public function searchTps(Request $request)
+    {
+        
+        $header = ImportHeader::select('kode_kantor')->where('import_notification_id', null)->first();
+        $kodeKantor = $header->kode_kantor;        
+        $searchTerm = $request->get('q', ''); // Get search term from request
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = config('services.pelabuhan_api.token');
+
+        if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client;
+            $response = $client->get("{$apiUrl}/openapi/gudangTPS/kodeKantor/{$kodeKantor}", [
+                'headers' => [
+                    'Authorization' => "Bearer {$apiToken}",
+                    'Accept' => 'application/json',
+                ],
+                'timeout' => 10,
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            // Filter results based on search term if provided
+            if (! empty($searchTerm) && isset($data['data']) && is_array($data['data'])) {
+                $filteredData = array_filter($data['data'], function ($item) use ($searchTerm) {
+                    $searchLower = strtolower($searchTerm);
+                    $namaGudang = strtolower($item['namaGudang'] ?? '');
+                    $kodeGudang = strtolower($item['kodeGudang'] ?? '');
+
+                    return strpos($namaGudang, $searchLower) !== false ||
+                           strpos($kodeGudang, $searchLower) !== false;
+                });
+
+                $data['data'] = array_values($filteredData);
+            }
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch TPS data: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Search Pelabuhan Tujuan from external API based on kodeKantor
+     */
+    public function searchPelabuhanTujuan(Request $request)
+    {
+        $kodeKantor = ImportHeader::select('kode_kantor')->where('import_notification_id', null)->first();
+        $kodeKantor = $kodeKantor->kode_kantor;
+        $searchTerm = $request->get('q', '');
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = config('services.pelabuhan_api.token');
+
+        if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client;
+            $response = $client->get("{$apiUrl}/openapi/pelabuhan/kodeKantor/{$kodeKantor}", [
+                'headers' => [
+                    'Authorization' => "Bearer {$apiToken}",
+                    'Accept' => 'application/json',
+                ],
+                'timeout' => 10,
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+            
+            // Filter results based on search term if provided
+            if (! empty($searchTerm) && isset($data['data']) && is_array($data['data'])) {
+                $filteredData = array_filter($data['data'], function ($item) use ($searchTerm) {
+                    $searchLower = strtolower($searchTerm);
+                    $namaPelabuhan = strtolower($item['namaPelabuhan'] ?? '');
+                    $kodePelabuhan = strtolower($item['kodePelabuhan'] ?? '');
+
+                    return strpos($namaPelabuhan, $searchLower) !== false ||
+                           strpos($kodePelabuhan, $searchLower) !== false;
+                });
+
+                $data['data'] = array_values($filteredData);
+            }
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch pelabuhan tujuan data: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+    /**
+     * Search Negara (Countries) from config
+     */
+    public function searchNegara(Request $request)
+    {
+        $searchTerm = $request->get('q', '');
+        $countries = config('import.kode_negara', []);
+
+        // Filter countries based on search term if provided
+        if (! empty($searchTerm)) {
+            $searchLower = strtolower($searchTerm);
+            $filteredCountries = [];
+
+            foreach ($countries as $code => $name) {
+                $nameLower = strtolower($name);
+                $codeLower = strtolower($code);
+
+                if (strpos($nameLower, $searchLower) !== false ||
+                    strpos($codeLower, $searchLower) !== false) {
+                    $filteredCountries[$code] = $name;
+                }
+            }
+
+            $countries = $filteredCountries;
+        }
+
+        // Convert to format expected by Select2
+        $results = [];
+        foreach ($countries as $code => $name) {
+            $results[] = [
+                'id' => $code,
+                'text' => $name.' ('.$code.')',
+                'kodeNegara' => $code,
+                'namaNegara' => $name,
+            ];
+        }
+
+        return response()->json([
+            'status' => 'OK',
+            'data' => $results,
+        ]);
+    }
+
+    /**
+     * Get kurs from external API
+     */
+    public function getKurs(Request $request)
+    {
+        $kodeValuta = $request->get('kode_valuta');
+        $tanggal = $request->get('tanggal', date('Y-m-d'));
+
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = config('services.pelabuhan_api.token');
+
+        if (empty($kodeValuta) || empty($apiUrl) || empty($apiToken)) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
+        }
+
+        try {
+            $client = new \GuzzleHttp\Client;
+            $response = $client->get("{$apiUrl}/openapi/kurs/{$kodeValuta}?tanggal={$tanggal}", [
+                'headers' => [
+                    'Authorization' => "Bearer {$apiToken}",
+                    'Accept' => 'application/json',
+                ],
+                'timeout' => 10,
+            ]);
+
+            $data = json_decode($response->getBody(), true);
+
+            return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'ERROR',
+                'message' => 'Failed to fetch kurs: ' . $e->getMessage()
+            ]);
+        }
     }
 }

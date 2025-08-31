@@ -7,21 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ImportKemasan extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'type', // 'kemasan' or 'petikemas'
-        'seri',
-        // Kemasan fields
-        'jumlah',
-        'jenis_kemasan',
-        'merek',
-        // Peti Kemas fields
-        'nomor',
-        'ukuran',
-        'jenis_muatan',
-        'tipe',
-    ];
+    protected $guarded = '';
 
     public function user(): BelongsTo
     {

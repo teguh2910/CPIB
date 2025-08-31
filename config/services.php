@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'pelabuhan_api' => [
+        'url' => env('PELABUHAN_API_URL'),
+        'token' => env('PELABUHAN_API_TOKEN'),
+    ],
+
 ];

@@ -1,6 +1,6 @@
 @php
     $k = $draft ?? [];
-    $opsJenisKemasan = config('import.jenis_kemasan');
+    $Opskode_kemasan = config('import.kode_kemasan');
     $opsUkuran = config('import.ukuran_petikemas');
     $opsJenisMuatan = config('import.jenis_muatan_petikemas');
     $opsTipe = config('import.tipe_petikemas');
@@ -10,6 +10,44 @@
     $petiKemasData = collect($k['peti_kemas'] ?? []);
 @endphp
 
+<style>
+.select2-container--classic .select2-selection--single {
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    height: 42px;
+    padding: 0 0.75rem;
+}
+
+.select2-container--classic .select2-selection--single .select2-selection__rendered {
+    color: #374151;
+    line-height: 40px;
+    padding-left: 0;
+}
+
+.select2-container--classic .select2-selection--single .select2-selection__placeholder {
+    color: #6b7280;
+}
+
+.select2-container--classic .select2-selection--single .select2-selection__arrow {
+    height: 40px;
+    right: 8px;
+}
+
+.select2-dropdown {
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+}
+
+.select2-container--classic.select2-container--open .select2-selection--single {
+    border-color: #3b82f6;
+}
+
+.select2-container--classic .select2-results__option--highlighted[aria-selected] {
+    background-color: #3b82f6;
+}
+</style>
+
 <div class="space-y-6">
     <div class="grid md:grid-cols-2 gap-4">
         {{-- ================== KOLOM KIRI: KEMASAN ================== --}}
@@ -18,20 +56,19 @@
                 <h3 class="font-semibold mb-3">Tambah Kemasan</h3>
                 <div>
                     @csrf
-                    <div class="grid md:grid-cols-4 gap-3">
+                    <div class="grid md:grid-cols-2 gap-3">
                         <x-field label="Seri">
                             <input type="number" id="kem_seri" name="seri" readonly
                                 class="w-full border rounded px-3 py-2 bg-gray-100" required>
                         </x-field>
                         <x-field label="Jumlah">
-                            <input type="number" id="kem_jumlah" name="jumlah" min="0" step="0.0001"
+                            <input type="number" id="kem_jumlah_kemasan" name="jumlah_kemasan" min="0" step="0.0001"
                                 class="w-full border rounded px-3 py-2" required>
                         </x-field>
-                        <x-field label="Jenis">
-                            <select id="kem_jenis" name="jenis_kemasan" class="w-full border rounded px-3 py-2"
+                        <x-field label="kode_kemasan">
+                            <select id="kem_kode_kemasan" name="kode_kemasan" class="w-full select2 border rounded px-3 py-2"
                                 required>
-                                <option value="">-- Pilih Jenis --</option>
-                                @foreach ($opsJenisKemasan as $k => $v)
+                                @foreach ($Opskode_kemasan as $k => $v)
                                     <option value="{{ $k }}">{{ $v }}</option>
                                 @endforeach
                             </select>
@@ -55,8 +92,8 @@
                         <thead>
                             <tr class="text-left border-b">
                                 <th class="py-2 px-3">Seri</th>
-                                <th class="py-2 px-3">Jumlah</th>
-                                <th class="py-2 px-3">Jenis</th>
+                                <th class="py-2 px-3">jumlah_kemasan</th>
+                                <th class="py-2 px-3">kode_kemasan</th>
                                 <th class="py-2 px-3">Merek</th>
                                 <th class="py-2 px-3 w-28">Aksi</th>
                             </tr>
@@ -65,8 +102,8 @@
                             @forelse($kemasan as $item)
                                 <tr class="border-b">
                                     <td class="py-2 px-3">{{ $item->seri }}</td>
-                                    <td class="py-2 px-3">{{ $item->jumlah }}</td>
-                                    <td class="py-2 px-3">{{ $opsJenisKemasan[$item->jenis] ?? $item->jenis }}</td>
+                                    <td class="py-2 px-3">{{ $item->jumlah_kemasan }}</td>
+                                    <td class="py-2 px-3">{{ $opsJenisKemasan[$item->kode_kemasan] ?? $item->kode_kemasan }}</td>
                                     <td class="py-2 px-3">{{ $item->merek }}</td>
                                     <td class="py-2 px-3">
                                         <button type="button" class="text-blue-600 underline text-xs"
@@ -94,35 +131,32 @@
                 <h3 class="font-semibold mb-3">Tambah Peti Kemas</h3>
                 <div>
                     @csrf
-                    <div class="grid md:grid-cols-5 gap-3">
+                    <div class="grid md:grid-cols-2 gap-3">
                         <x-field label="Seri">
                             <input type="number" id="peti_seri" name="seri" readonly
                                 class="w-full border rounded px-3 py-2 bg-gray-100" required>
                         </x-field>
                         <x-field label="No. Cont">
-                            <input id="peti_nomor" name="nomor" placeholder="MSCU1234567"
+                            <input id="peti_nomor" name="nomor_kontainer"
                                 class="w-full border rounded px-3 py-2" style="text-transform:uppercase" required>
                         </x-field>
                         <x-field label="Ukuran">
-                            <select id="peti_ukuran" name="ukuran" class="w-full border rounded px-3 py-2" required>
-                                <option value="">-- Pilih --</option>
+                            <select id="peti_ukuran" name="kode_ukuran_kontainer" class="w-full select2 border rounded px-3 py-2" required>
                                 @foreach ($opsUkuran as $k => $v)
                                     <option value="{{ $k }}">{{ $v }}</option>
                                 @endforeach
                             </select>
                         </x-field>
                         <x-field label="Jenis Muatan">
-                            <select id="peti_jenis_muatan" name="jenis_muatan" class="w-full border rounded px-3 py-2"
+                            <select id="peti_jenis_muatan" name="kode_jenis_kontainer" class="w-full select2 border rounded px-3 py-2"
                                 required>
-                                <option value="">-- Pilih --</option>
                                 @foreach ($opsJenisMuatan as $k => $v)
                                     <option value="{{ $k }}">{{ $v }}</option>
                                 @endforeach
                             </select>
                         </x-field>
                         <x-field label="Tipe">
-                            <select id="peti_tipe" name="tipe" class="w-full border rounded px-3 py-2" required>
-                                <option value="">-- Pilih --</option>
+                            <select id="peti_tipe" name="kode_tipe_kontainer" class="w-full select2 border rounded px-3 py-2" required>
                                 @foreach ($opsTipe as $k => $v)
                                     <option value="{{ $k }}">{{ $v }}</option>
                                 @endforeach
@@ -143,10 +177,10 @@
                         <thead>
                             <tr class="text-left border-b">
                                 <th class="py-2 px-3">Seri</th>
-                                <th class="py-2 px-3">Nomor</th>
-                                <th class="py-2 px-3">Ukuran</th>
-                                <th class="py-2 px-3">Jenis Muatan</th>
-                                <th class="py-2 px-3">Tipe</th>
+                                <th class="py-2 px-3">No Knt</th>
+                                <th class="py-2 px-3">Ukuran Ktr</th>
+                                <th class="py-2 px-3">Jenis Ktr</th>
+                                <th class="py-2 px-3">Tipe Ktr</th>
                                 <th class="py-2 px-3 w-28">Aksi</th>
                             </tr>
                         </thead>
@@ -154,11 +188,11 @@
                             @forelse($petiKemas as $item)
                                 <tr class="border-b">
                                     <td class="py-2 px-3">{{ $item->seri }}</td>
-                                    <td class="py-2 px-3">{{ $item->nomor }}</td>
-                                    <td class="py-2 px-3">{{ $opsUkuran[$item->ukuran] ?? $item->ukuran }}</td>
+                                    <td class="py-2 px-3">{{ $item->nomor_kontainer }}</td>
+                                    <td class="py-2 px-3">{{ $opsUkuran[$item->kode_ukuran_kontainer] ?? $item->kode_ukuran_kontainer }}</td>
                                     <td class="py-2 px-3">
-                                        {{ $opsJenisMuatan[$item->jenis_muatan] ?? $item->jenis_muatan }}</td>
-                                    <td class="py-2 px-3">{{ $opsTipe[$item->tipe] ?? $item->tipe }}</td>
+                                        {{ $opsJenisMuatan[$item->kode_jenis_kontainer] ?? $item->kode_jenis_kontainer }}</td>
+                                    <td class="py-2 px-3">{{ $opsTipe[$item->kode_tipe_kontainer] ?? $item->kode_tipe_kontainer }}</td>
                                     <td class="py-2 px-3">
                                         <button type="button" class="text-blue-600 underline text-xs"
                                             onclick="editPetiKemas({{ $item->id }})">Edit</button>
@@ -213,6 +247,18 @@
         document.getElementById('kem_seri').value = generateNextKemasanSeri();
         document.getElementById('peti_seri').value = generateNextPetiKemasSeri();
 
+        // Initialize Select2
+        $(document).ready(function() {
+            $('.select2').select2({
+                placeholder: function() {
+                    return $(this).data('placeholder') || '-- Pilih --';
+                },
+                allowClear: true,
+                width: '100%',
+                theme: 'classic'
+            });
+        });
+
         // Kemasan Form Handler
         const addKemasanBtn = document.getElementById('addKemasanBtn');
         const kemasanUrl = '{{ route('kemasan.store') }}';
@@ -220,11 +266,11 @@
 
         addKemasanBtn?.addEventListener('click', function() {
             const seri = document.getElementById('kem_seri').value;
-            const jumlah = document.getElementById('kem_jumlah').value;
-            const jenis_kemasan = document.getElementById('kem_jenis').value;
+            const jumlah_kemasan = document.getElementById('kem_jumlah_kemasan').value;
+            const kode_kemasan = document.getElementById('kem_kode_kemasan').value;
             const merek = document.getElementById('kem_merek').value;
 
-            if (!seri || !jumlah || !jenis_kemasan) {
+            if (!seri || !jumlah_kemasan || !kode_kemasan) {
                 alert('Lengkapi semua field kemasan yang wajib diisi');
                 return;
             }
@@ -244,8 +290,8 @@
 
                 const fields = {
                     seri,
-                    jumlah,
-                    jenis_kemasan,
+                    jumlah_kemasan: jumlah_kemasan,
+                    kode_kemasan: kode_kemasan,
                     merek
                 };
                 Object.keys(fields).forEach(function(name) {

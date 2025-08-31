@@ -12,16 +12,16 @@ class ImportKemasanController extends Controller
     {
         $validated = $request->validate([
             'seri' => 'required|integer|min:1',
-            'jumlah' => 'required|numeric|min:0.0001',
-            'jenis_kemasan' => 'required|string',
+            'jumlah_kemasan' => 'required|numeric|min:0.0001',
+            'kode_kemasan' => 'required|string',
             'merek' => 'nullable|string|max:100',
         ]);
         ImportKemasan::create([
-            'user_id' => Auth::id() ?? 1,
+            'user_id' => Auth::user()->id ?? 1,
             'import_notification_id' => null,
             'seri' => $validated['seri'],
-            'jumlah' => $validated['jumlah'],
-            'jenis_kemasan' => $validated['jenis_kemasan'],
+            'jumlah_kemasan' => $validated['jumlah_kemasan'],
+            'kode_kemasan' => $validated['kode_kemasan'],
             'merek' => $validated['merek'],
         ]);
 
@@ -40,8 +40,8 @@ class ImportKemasanController extends Controller
     {
         $validated = $request->validate([
             'seri' => 'required|integer|min:1',
-            'jumlah' => 'required|numeric|min:0.0001',
-            'jenis_kemasan' => 'required|string',
+            'jumlah_kemasan' => 'required|numeric|min:0.0001',
+            'kode_kemasan' => 'required|string',
             'merek' => 'nullable|string|max:100',
         ]);
 
@@ -49,8 +49,8 @@ class ImportKemasanController extends Controller
 
         $kemasan->update([
             'seri' => $validated['seri'],
-            'jumlah' => $validated['jumlah'],
-            'jenis_kemasan' => $validated['jenis_kemasan'],
+            'jumlah_kemasan' => $validated['jumlah_kemasan'],
+            'kode_kemasan' => $validated['kode_kemasan'],
             'merek' => $validated['merek'],
         ]);
 

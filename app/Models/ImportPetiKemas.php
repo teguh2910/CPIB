@@ -9,15 +9,7 @@ class ImportPetiKemas extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',
-        'import_notification_id',
-        'seri',
-        'nomor',
-        'ukuran',
-        'jenis_muatan',
-        'tipe',
-    ];
+    protected $guarded = [];
 
     protected $casts = [
         'seri' => 'integer',

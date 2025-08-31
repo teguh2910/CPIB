@@ -3,9 +3,9 @@
 @section('title', 'Tambah Barang')
 
 @php
-    $opsNegara = config('import.negara');
+    $opsNegara = config('import.kode_negara');
     $opsSatuan = config('import.satuan_barang');
-    $opsKemasan = config('import.jenis_kemasan');
+    $opsKemasan = config('import.kode_kemasan');
     $opsSpek = config('import.spesifikasi_lain');
     $opsKond = config('import.kondisi_barang');
     $opsKetBM = config('import.ket_bm');
@@ -30,6 +30,73 @@
 @endphp
 
 @section('content')
+
+    <style>
+        /* Custom Select2 styling to match Tailwind CSS */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            background-color: #ffffff;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #374151;
+            line-height: 1.5;
+            padding-left: 0;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #6b7280;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+            right: 10px;
+        }
+
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .select2-container--default .select2-selection--single:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .select2-container--default .select2-results__option {
+            padding: 0.5rem 0.75rem;
+            color: #374151;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            margin: 0.5rem;
+            width: calc(100% - 1rem);
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+    </style>
 
     <div class="bg-white rounded-lg shadow-md">
         <!-- Form -->
@@ -58,12 +125,12 @@
                         {{-- Kolom Kiri --}}
                         <div class="space-y-4">
                             <x-field label="Seri">
-                                <input name="seri" placeholder="Seri" value="{{ old('seri') }}"
+                                <input name="seri_barang" placeholder="Seri" value="{{ old('seri') }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required>
                             </x-field>
                             <x-field label="POS Tarif / HS Code">
-                                <input name="pos_tarif" placeholder="HS Code" value="{{ old('pos_tarif') }}"
+                                <input name="hs" placeholder="HS Code" value="{{ old('hs') }}"
                                     class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     required>
                             </x-field>
@@ -73,14 +140,14 @@
                                     Lartas</label>
                                 <div class="flex gap-6">
                                     <label class="inline-flex items-center">
-                                        <input type="radio" name="lartas" value="1"
-                                            {{ old('lartas') == '1' ? 'checked' : '' }}
+                                        <input type="radio" name="pernyataan_lartas" value="Y"
+                                            {{ old('pernyataan_lartas') == '1' ? 'checked' : '' }}
                                             class="text-blue-600 focus:ring-blue-500" required>
                                         <span class="ml-2 text-sm text-gray-700">Ya</span>
                                     </label>
                                     <label class="inline-flex items-center">
-                                        <input type="radio" name="lartas" value="0"
-                                            {{ old('lartas', '0') == '0' ? 'checked' : '' }}
+                                        <input type="radio" name="pernyataan_lartas" value="T"
+                                            {{ old('pernyataan_lartas', '0') == '0' ? 'checked' : '' }}
                                             class="text-blue-600 focus:ring-blue-500" required>
                                         <span class="ml-2 text-sm text-gray-700">Tidak</span>
                                     </label>
@@ -100,16 +167,11 @@
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Spesifikasi Lain">
-                                    <input name="spesifikasi" value="{{ old('spesifikasi') }}"
+                                    <select name="spesifikasi_lain"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </x-field>
-                                <x-field label="Kondisi Barang">
-                                    <select name="kondisi"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih --</option>
                                         @foreach ($opsKond as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('kondisi') === (string) $k) selected @endif>
+                                                @if ((string) old('spesifikasi_lain') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
@@ -122,20 +184,19 @@
                         <div class="space-y-4">
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Negara Asal">
-                                    <select name="negara_asal"
+                                    <select name="kode_negara_asal"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih --</option>
                                         @foreach ($opsNegara as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('negara_asal') === (string) $k) selected @endif>
+                                                @if ((string) old('kode_negara_asal') === (string) $k) selected @endif>
                                                 {{ $v }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </x-field>
                                 <x-field label="Berat Bersih (Kg)">
-                                    <input type="number" step="0.001" name="berat_bersih"
-                                        value="{{ old('berat_bersih') }}"
+                                    <input type="number" step="0.001" name="netto"
+                                        value="{{ old('netto') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
@@ -143,19 +204,18 @@
 
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Jumlah Satuan Barang">
-                                    <input type="number" step="0.000001" name="jumlah" id="jumlah"
-                                        value="{{ old('jumlah') }}"
+                                    <input type="number" step="0.000001" name="jumlah_satuan" id="jumlah_satuan"
+                                        value="{{ old('jumlah_satuan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
                                 <x-field label="Jenis Satuan">
-                                    <select name="satuan"
+                                    <select name="kode_satuan"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih --</option>
                                         @foreach ($opsSatuan as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('satuan') === (string) $k) selected @endif>
-                                                {{ $v }}
+                                                @if ((string) old('kode_satuan') === (string) $k) selected @endif>
+                                                {{ $k }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -169,13 +229,12 @@
                                         required>
                                 </x-field>
                                 <x-field label="Jenis Kemasan">
-                                    <select name="jenis_kemasan"
+                                    <select name="kode_kemasan"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih --</option>
                                         @foreach ($opsKemasan as $k => $v)
                                             <option value="{{ $k }}"
-                                                @if ((string) old('jenis_kemasan') === (string) $k) selected @endif>
-                                                {{ $v }}
+                                                @if ((string) old('kode_kemasan') === (string) $k) selected @endif>
+                                                {{ $k }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -183,13 +242,22 @@
                             </div>
 
                             <div class="grid md:grid-cols-2 gap-4">
-                                <x-field label="Nilai Barang">
-                                    <input type="number" step="0.01" name="nilai_barang" id="nilai_barang"
-                                        value="{{ old('nilai_barang') }}"
+                                <x-field label="CIF">
+                                    <input type="number" step="0.01" name="cif" id="cif"
+                                        value="{{ old('cif') }}"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </x-field>
+                                <x-field label="CIF Rupiah">
+                                    <input type="number" step="0.01" name="cif_rupiah" id="cif_rupiah"
+                                        value="{{ old('cif_rupiah') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                                 <x-field label="FOB">
                                     <input type="number" step="0.01" name="fob" value="{{ old('fob') }}"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                </x-field>
+                                <x-field label="Harga Satuan">
+                                    <input type="number" step="0.01" name="harga_satuan" value="{{ old('harga_satuan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
@@ -205,102 +273,9 @@
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <x-field label="Harga Satuan">
-                                    <input type="number" step="0.01" name="harga_satuan" id="harga_satuan"
-                                        value="{{ old('harga_satuan') }}"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50"
-                                        readonly>
-                                </x-field>
-                                <x-field label="Dokumen Fasilitas">
-                                    <select name="dokumen_fasilitas"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih Dokumen --</option>
-                                        @foreach ($dokument as $dok)
-                                            <option value="{{ $dok }}"
-                                                @if (old('dokumen_fasilitas') === $dok) selected @endif>
-                                                {{ $dok }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </x-field>
-                            </div>
                         </div>
                     </div>
-                </div>
-
-                {{-- ===== Pungutan ===== --}}
-                <div class="bg-gray-50 border rounded-lg p-6 mb-6">
-                    <h3 class="text-lg font-medium text-gray-800 mb-4">Pungutan</h3>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        {{-- BM (Bea Masuk) --}}
-                        <div class="bg-white border border-gray-300 rounded-lg p-4 space-y-4">
-                            <h4 class="text-md font-medium text-gray-800">BM (Bea Masuk)</h4>
-                            <x-field label="% Tarif">
-                                <input type="number" step="0.01" name="tarif_bm"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </x-field>
-                            <x-field label="">
-                                <select name="status_bm"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1">Dibayar</option>
-                                    <option value="2">Tidak Dibayar</option>
-                                    <option value="3">Bebas</option>
-                                </select>
-                            </x-field>
-                            <x-field label="(%)">
-                                <input type="number" value="100" step="0.01" name="ket_bm"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </x-field>
-                        </div>
-
-                        {{-- PPN --}}
-                        <div class="bg-white border border-gray-300 rounded-lg p-4 space-y-4">
-                            <h4 class="text-md font-medium text-gray-800">PPN</h4>
-                            <x-field label="% Tarif (11% / 12%)">
-                                <select name="tarif_ppn"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="0">0</option>
-                                    <option value="11" selected>11</option>
-                                    <option value="12">12</option>
-                                </select>
-                            </x-field>
-                            <x-field label="">
-                                <select name="status_ppn"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1">Dibayar</option>
-                                    <option value="2">Tidak Dibayar</option>
-                                    <option value="3">Bebas</option>
-                                </select>
-                            </x-field>
-                            <x-field label="(%)">
-                                <input type="number" value="100" step="0.01" name="ket_ppn"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </x-field>
-                        </div>
-
-                        {{-- PPh --}}
-                        <div class="bg-white border border-gray-300 rounded-lg p-4 space-y-4">
-                            <h4 class="text-md font-medium text-gray-800">PPh</h4>
-                            <x-field label="% Tarif">
-                                <input type="number" step="0.01" name="tarif_pph" value="2.5"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </x-field>
-                            <x-field label="">
-                                <select name="status_pph"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="1">Dibayar</option>
-                                    <option value="2">Tidak Dibayar</option>
-                                    <option value="3">Bebas</option>
-                                </select>
-                            </x-field>
-                            <x-field label="(%)">
-                                <input type="number" value="100" step="0.01" name="ket_pph"
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </x-field>
-                        </div>
-                    </div>
-                </div>
+                </div>                
 
                 {{-- ===== Actions ===== --}}
                 <div class="flex gap-4 pt-6 border-t border-gray-200">
@@ -341,6 +316,37 @@
 
             // Calculate on page load if values exist
             calculateHargaSatuan();
+        });
+
+        // Initialize Select2 for all select elements
+        $(document).ready(function() {
+            // Initialize Select2 for Negara Asal
+            $('select[name="kode_negara_asal"]').select2({
+                placeholder: '-- Pilih Negara Asal --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Spesifikasi Lain
+            $('select[name="spesifikasi_lain"]').select2({
+                placeholder: '-- Pilih Spesifikasi --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Jenis Satuan
+            $('select[name="kode_satuan"]').select2({
+                placeholder: '-- Pilih Satuan --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Jenis Kemasan
+            $('select[name="kode_kemasan"]').select2({
+                placeholder: '-- Pilih Kemasan --',
+                allowClear: true,
+                width: '100%'
+            });
         });
     </script>
 @endsection

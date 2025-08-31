@@ -7,6 +7,7 @@ use App\Http\Controllers\ImportDokumenController;
 use App\Http\Controllers\ImportKemasanController;
 use App\Http\Controllers\ImportNotificationController;
 use App\Http\Controllers\ImportPetiKemasController;
+use App\Http\Controllers\ImportPungutanController;
 use App\Http\Controllers\PartyController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,14 @@ Route::get('/', fn () => redirect()->route('login.form'));
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login.form');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Temporary test route without authentication
+Route::get('/test/pelabuhan-tujuan', [ImportNotificationController::class, 'searchPelabuhanTujuan'])
+    ->name('test.pelabuhan-tujuan.search');
+
+// AJAX route for kurs (temporary - without auth for testing)
+Route::get('/ajax/kurs', [ImportNotificationController::class, 'getKurs'])
+    ->name('ajax.kurs');
 
 // IMPORT NOTIFICATIONS (protected)
 Route::middleware('auth.session')->group(function () {
@@ -57,6 +66,22 @@ Route::middleware('auth.session')->group(function () {
         ->name('ajax.party.search'); // ?type=pengirim|penjual&q=abc
     Route::get('/ajax/party/{id}', [PartyLookupController::class, 'show'])
         ->name('ajax.party.show');
+
+    // AJAX route for pelabuhan search
+    Route::get('/ajax/pelabuhan/search', [ImportNotificationController::class, 'searchPelabuhan'])
+        ->name('ajax.pelabuhan.search');
+
+    // AJAX route for TPS search
+    Route::get('/ajax/tps/search', [ImportNotificationController::class, 'searchTps'])
+        ->name('ajax.tps.search');
+
+    // AJAX route for pelabuhan tujuan search
+    Route::get('/ajax/pelabuhan-tujuan/search', [ImportNotificationController::class, 'searchPelabuhanTujuan'])
+        ->name('ajax.pelabuhan-tujuan.search');
+
+    // AJAX route for negara search
+    Route::get('/ajax/negara/search', [ImportNotificationController::class, 'searchNegara'])
+        ->name('ajax.negara.search');
 
     // CRUD Master
     Route::resource('/master/parties', PartyController::class)->names([

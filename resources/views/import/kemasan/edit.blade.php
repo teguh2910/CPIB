@@ -33,16 +33,16 @@
                         </x-field>
 
                         <x-field label="Jumlah">
-                            <input type="number" name="jumlah" value="{{ old('jumlah', $kemasan->jumlah) }}"
+                            <input type="number" name="jumlah_kemasan" value="{{ old('jumlah_kemasan', $kemasan->jumlah_kemasan) }}"
                                 min="0" step="0.0001" class="w-full border rounded px-3 py-2" required>
                         </x-field>
 
                         <x-field label="Jenis Kemasan">
-                            <select name="jenis_kemasan" class="w-full border rounded px-3 py-2" required>
+                            <select id="kode_kemasan" name="kode_kemasan" class="w-full border rounded px-3 py-2" required>
                                 <option value="">-- Pilih Jenis --</option>
-                                @foreach (config('import.jenis_kemasan') as $key => $value)
+                                @foreach (config('import.kode_kemasan') as $key => $value)
                                     <option value="{{ $key }}"
-                                        {{ old('jenis_kemasan', $kemasan->jenis_kemasan) == $key ? 'selected' : '' }}>
+                                        {{ old('kode_kemasan', $kemasan->kode_kemasan) == $key ? 'selected' : '' }}>
                                         {{ $value }}
                                     </option>
                                 @endforeach
@@ -59,13 +59,25 @@
                         <button type="submit" class="px-6 py-2 bg-black text-white rounded hover:bg-gray-800">
                             Update Kemasan
                         </button>
-                        <a href="{{ route('import.create', ['step' => 'kemasan']) }}"
-                            class="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50">
-                            Batal
-                        </a>
+                        <button type="button" class="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" onclick="window.history.back()">Kembali</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#kode_kemasan').select2({
+                placeholder: '-- Pilih Jenis --',
+                allowClear: true
+            });
+        });
+    </script>
 @endsection

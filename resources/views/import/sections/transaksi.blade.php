@@ -3,7 +3,9 @@
     $opsJenis = config('import.jenis_transaksi');
     $opsIncoterm = config('import.incoterm');
     $opsAsuransi = config('import.jenis_asuransi');
-    $t = $draft ?? [];
+    $t = $transaksi[0];
+    $apiUrl = config('services.pelabuhan_api.url');
+    $apiToken = config('services.pelabuhan_api.token');
 @endphp
 
 <div class="grid md:grid-cols-2 gap-4">
@@ -15,53 +17,55 @@
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Jenis Valuta">
-                        <select name="harga_valuta" class="w-full border rounded px-3 py-2" required>
-                            <option value="">-- Pilih --</option>
+                        <select name="kode_valuta" class="w-full border rounded px-3 py-2" required>
                             @foreach ($opsValuta as $k => $v)
                                 <option value="{{ $k }}"
-                                    {{ old('harga_valuta', $t['harga_valuta'] ?? '') == $k ? 'selected' : '' }}>
-                                    {{ $v }}</option>
+                                    {{ old('kode_valuta', $t['kode_valuta'] ?? 'USD') == $k ? 'selected' : 'USD' }}>
+                                    {{ $k }}</option>
                             @endforeach
                         </select>
                     </x-field>
                     <x-field label="NDPBM">
-                        <input type="number" step="0.0001" name="harga_ndpbm" class="w-full border rounded px-3 py-2"
-                            value="{{ old('harga_ndpbm', $t['harga_ndpbm'] ?? '') }}" required>
+                        <input type="number" step="0.0001" name="ndpbm" class="w-full border rounded px-3 py-2"
+                            value="{{ old('ndpbm', $t['ndpbm'] ?? '') }}" readonly required>
                     </x-field>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Jenis Transaksi">
-                        <select name="harga_jenis" class="w-full border rounded px-3 py-2" required>
-                            <option value="">-- Pilih --</option>
+                        <select name="kode_jenis_nilai" class="w-full border rounded px-3 py-2" required>
                             @foreach ($opsJenis as $k => $v)
                                 <option value="{{ $k }}"
-                                    {{ old('harga_jenis', $t['harga_jenis'] ?? '') == $k ? 'selected' : '' }}>
-                                    {{ $v }}</option>
+                                    {{ old('kode_jenis_nilai', $t['kode_jenis_nilai'] ?? 'LAI') == $k ? 'selected' : 'LAI' }}>
+                                    {{ $k }}</option>
                             @endforeach
                         </select>
                     </x-field>
                     <x-field label="Incoterm">
-                        <select name="harga_incoterm" class="w-full border rounded px-3 py-2" required>
-                            <option value="">-- Pilih --</option>
+                        <select name="kode_incoterm" class="w-full border rounded px-3 py-2" required>
                             @foreach ($opsIncoterm as $k => $v)
                                 <option value="{{ $k }}"
-                                    {{ old('harga_incoterm', $t['harga_incoterm'] ?? '') == $k ? 'selected' : '' }}>
-                                    {{ $v }}</option>
+                                    {{ old('kode_incoterm', $t['kode_incoterm'] ?? 'CIF') == $k ? 'selected' : 'CIF' }}>
+                                    {{ $k }}</option>
                             @endforeach
                         </select>
                     </x-field>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
-                    <x-field label="Harga Barang">
-                        <input type="number" step="0.01" name="harga_barang" class="w-full border rounded px-3 py-2"
-                            value="{{ old('harga_barang', $t['harga_barang'] ?? '') }}" required>
+                    <x-field label="CIF">
+                        <input type="number" step="0.01" name="cif" class="w-full border rounded px-3 py-2"
+                            value="{{ old('cif', $t['cif'] ?? '') }}" required>
                     </x-field>
-                    <x-field label="Nilai Pabean (NDPBM × Harga)">
+                    <x-field label="Nilai Pabean (NDPBM × CIF)">
                         <input type="text" id="harga_nilai_pabean" name="harga_nilai_pabean"
                             class="w-full border rounded px-3 py-2 bg-gray-100"
-                            value="{{ old('harga_nilai_pabean', $t['harga_nilai_pabean'] ?? '') }}" readonly>
+                            value="{{ old('harga_nilai_pabean', $t['harga_nilai_pabean'] ?? '') }}" disabled>
+                    </x-field>
+                    <x-field label="FOB">
+                        <input type="text" id='fob' name="fob"
+                            class="w-full border rounded px-3 py-2"
+                            value="{{ old('fob', $t['fob'] ?? '') }}">
                     </x-field>
                 </div>
             </div>
@@ -72,12 +76,12 @@
             <h3 class="font-semibold">Berat</h3>
             <div class="grid md:grid-cols-2 gap-3">
                 <x-field label="Berat Kotor (KGM)">
-                    <input type="number" step="0.001" name="berat_kotor" class="w-full border rounded px-3 py-2"
-                        value="{{ old('berat_kotor', $t['berat_kotor'] ?? '') }}" required>
+                    <input type="number" step="0.001" name="bruto" class="w-full border rounded px-3 py-2"
+                        value="{{ old('bruto', $t['bruto'] ?? '') }}" required>
                 </x-field>
                 <x-field label="Berat Bersih (KGM)">
-                    <input type="number" step="0.001" name="berat_bersih" class="w-full border rounded px-3 py-2"
-                        value="{{ old('berat_bersih', $t['berat_bersih'] ?? '') }}" required>
+                    <input type="number" step="0.001" name="netto" class="w-full border rounded px-3 py-2"
+                        value="{{ old('netto', $t['netto'] ?? '') }}" required>
                 </x-field>
             </div>
         </div>
@@ -91,9 +95,9 @@
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Biaya Penambah">
-                        <input type="number" step="0.01" value='0' name="biaya_penambah"
+                        <input type="number" step="0.01" value='0' name="biaya_tambahan"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('biaya_penambah', $t['biaya_penambah'] ?? '') }}">
+                            value="{{ old('biaya_tambahan', $t['biaya_tambahan'] ?? '') }}">
                     </x-field>
                     <x-field label="Biaya Pengurang">
                         <input type="number" step="0.01" value='0' name="biaya_pengurang"
@@ -104,15 +108,15 @@
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Freight">
-                        <input type="number" step="0.01" value='0' name="biaya_freight"
+                        <input type="number" step="0.01" value='0' name="freight"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('biaya_freight', $t['biaya_freight'] ?? '') }}">
+                            value="{{ old('freight', $t['freight'] ?? '') }}">
                     </x-field>
                     <x-field label="Jenis Asuransi">
-                        <select name="biaya_jenis_asuransi" class="w-full border rounded px-3 py-2" required>
+                        <select name="kode_asuransi" class="w-full border rounded px-3 py-2" required>
                             @foreach ($opsAsuransi as $k => $v)
                                 <option value="{{ $k }}"
-                                    {{ old('biaya_jenis_asuransi', $t['biaya_jenis_asuransi'] ?? 'NONE') == $k ? 'selected' : '' }}>
+                                    {{ old('kode_asuransi', $t['kode_asuransi'] ?? 'NONE') == $k ? 'selected' : '' }}>
                                     {{ $v }}</option>
                             @endforeach
                         </select>
@@ -121,16 +125,16 @@
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Amount Asuransi">
-                        <input type="number" step="0.01" value='0' name="biaya_asuransi"
+                        <input type="number" step="0.01" value='0' name="asuransi"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('biaya_asuransi', $t['biaya_asuransi'] ?? '') }}">
+                            value="{{ old('asuransi', $t['asuransi'] ?? '') }}">
                     </x-field>
                     <div class="grid grid-cols-1 gap-1">
                         <label class="text-sm">Voluntary Declaration</label>
                         <div class="flex items-center gap-3">
-                            <input type="number" step="0.01" value='0' name="biaya_voluntary_amt"
+                            <input type="number" step="0.01" value='0' name="vd"
                                 placeholder="Amount" class="w-full border rounded px-3 py-2"
-                                value="{{ old('biaya_voluntary_amt', $t['biaya_voluntary_amt'] ?? '') }}">
+                                value="{{ old('vd', $t['vd'] ?? '') }}">
                         </div>
                     </div>
                 </div>
@@ -143,18 +147,50 @@
 <script>
     (function() {
         // Get form elements
-        const ndpbmInput = document.querySelector('input[name="harga_ndpbm"]');
-        const hargaBarangInput = document.querySelector('input[name="harga_barang"]');
+        const kodeValutaSelect = document.querySelector('select[name="kode_valuta"]');
+        const ndpbmInput = document.querySelector('input[name="ndpbm"]');
+        const cifInput = document.querySelector('input[name="cif"]');
         const nilaiPabeanInput = document.getElementById('harga_nilai_pabean');
+
+        // Function to fetch kurs
+        async function fetchKurs(kodeValuta) {
+            if (!kodeValuta) return;
+
+            try {
+                const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd
+                const response = await fetch(`/ajax/kurs?kode_valuta=${kodeValuta}&tanggal=${today}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data.status === 'true' && data.data && data.data.length > 0) {
+                    const nilaiKurs = data.data[0].nilaiKurs;
+                    ndpbmInput.value = nilaiKurs;
+                    calculateNilaiPabean(); // Recalculate nilai pabean after setting ndpbm
+                } else {
+                    console.error('Failed to fetch kurs:', data.message);
+                }
+            } catch (error) {
+                console.error('Error fetching kurs:', error);
+            }
+        }
 
         // Function to calculate nilai pabean
         function calculateNilaiPabean() {
             const ndpbm = parseFloat(ndpbmInput.value) || 0;
-            const hargaBarang = parseFloat(hargaBarangInput.value) || 0;
+            const cif = parseFloat(cifInput.value) || 0;
 
             // Only calculate if both values are present
-            if (ndpbm > 0 && hargaBarang > 0) {
-                const nilaiPabean = ndpbm * hargaBarang;
+            if (ndpbm > 0 && cif > 0) {
+                const nilaiPabean = ndpbm * cif;
 
                 // Format as currency with 2 decimal places
                 nilaiPabeanInput.value = nilaiPabean.toLocaleString('id-ID', {
@@ -168,14 +204,25 @@
         }
 
         // Add event listeners
-        if (ndpbmInput && hargaBarangInput && nilaiPabeanInput) {
+        if (kodeValutaSelect) {
+            kodeValutaSelect.addEventListener('change', function() {
+                fetchKurs(this.value);
+            });
+        }
+
+        if (ndpbmInput && cifInput && nilaiPabeanInput) {
             ndpbmInput.addEventListener('input', calculateNilaiPabean);
-            hargaBarangInput.addEventListener('input', calculateNilaiPabean);
+            cifInput.addEventListener('input', calculateNilaiPabean);
 
             // Calculate on page load if both values exist and nilai pabean is empty
-            if ((ndpbmInput.value || hargaBarangInput.value) && !nilaiPabeanInput.value) {
+            if ((ndpbmInput.value || cifInput.value) && !nilaiPabeanInput.value) {
                 calculateNilaiPabean();
             }
+        }
+
+        // Fetch kurs on page load if kode_valuta is set
+        if (kodeValutaSelect && kodeValutaSelect.value && !ndpbmInput.value) {
+            fetchKurs(kodeValutaSelect.value);
         }
     })();
 </script>

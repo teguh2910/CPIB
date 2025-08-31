@@ -25,16 +25,16 @@ return new class extends Migration
 
             // Pengangkutan Section
             $table->string('angkut_cara');
-            $table->string('angkut_nama', 120)->nullable();
-            $table->string('angkut_voy', 50)->nullable();
-            $table->string('angkut_bendera')->nullable();
-            $table->date('tanggal_tiba')->nullable();
+            $table->string('angkut_nama', 120);
+            $table->string('angkut_voy', 50);
+            $table->string('angkut_bendera');
+            $table->date('tanggal_tiba');
 
             // Pelabuhan & Tempat Penimbunan
-            $table->string('kode_pelabuhan_muat')->nullable();
-            $table->string('kode_pelabuhan_transit')->nullable();
-            $table->string('kode_pelabuhan_tujuan')->nullable();
-            $table->string('kode_tps')->nullable();
+            $table->string('kode_pelabuhan_muat');
+            $table->string('kode_pelabuhan_transit');
+            $table->string('kode_pelabuhan_tujuan');
+            $table->string('kode_tps');
 
             $table->timestamps();
         });

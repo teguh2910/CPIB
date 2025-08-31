@@ -25,12 +25,12 @@
             </div>
         @endif
         @csrf
-        <input type="file" name="file" class="border rounded px-2 py-1 text-sm" />
+        <input type="file" name="file" class="border border-gray-300 rounded px-2 py-1 text-sm" />
         <button type="submit" name="action" value="import"
             class="px-3 py-1 bg-green-600 text-white rounded text-sm">Upload Excel
-            (CSV)</button>
+            </button>
         <a href="{{ route('barang.template') }}" class="ml-2 text-sm text-blue-600 underline">Download Template
-            CSV</a>
+            </a>
         <button type="submit" name="action" value="updateAll"
             class="ml-2 px-3 py-1 bg-green-600 text-white rounded text-sm">Generate Pungutan</button>
         <span id="update-all-status" class="ml-3 text-sm"></span>
@@ -44,25 +44,25 @@
             <thead>
                 <tr class="text-left border-b">
                     <th class="py-2 px-3">Seri</th>
-                    <th class="py-2 px-3">POS</th>
-                    <th class="py-2 px-3">Uraian</th>
+                    <th class="py-2 px-3">HS</th>
+                    <th class="py-2 px-3">uraian</th>
                     <th class="py-2 px-3">Jumlah</th>
                     <th class="py-2 px-3">Satuan</th>
-                    <th class="py-2 px-3">Nilai</th>
-                    <th class="py-2 px-3">Pabean Rp</th>
+                    <th class="py-2 px-3">CIF</th>
+                    <th class="py-2 px-3">CIF Rupiah</th>
                     <th class="py-2 px-3 w-28">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($barangData as $barang)
                     <tr class="border-b align-top">
-                        <td class="py-2 px-3">{{ $barang->seri }}</td>
-                        <td class="py-2 px-3">{{ $barang->pos_tarif }}</td>
+                        <td class="py-2 px-3">{{ $barang->seri_barang }}</td>
+                        <td class="py-2 px-3">{{ $barang->hs }}</td>
                         <td class="py-2 px-3">{{ $barang->uraian }}</td>
-                        <td class="py-2 px-3">{{ number_format($barang->jumlah, 0) }}</td>
-                        <td class="py-2 px-3">{{ $opsSatuan[$barang->satuan] ?? $barang->satuan }}</td>
-                        <td class="py-2 px-3">{{ number_format($barang->nilai_barang, 0) }}</td>
-                        <td class="py-2 px-3">{{ number_format($barang->nilai_pabean_rp, 0) }}</td>
+                        <td class="py-2 px-3">{{ number_format($barang->jumlah_satuan, 0) }}</td>
+                        <td class="py-2 px-3">{{ $opsSatuan[$barang->kode_satuan] ?? $barang->kode_satuan }}</td>
+                        <td class="py-2 px-3">{{ number_format($barang->cif, 0) }}</td>
+                        <td class="py-2 px-3">{{ number_format($barang->cif_rupiah, 0) }}</td>
                         <td class="py-2 px-3">
                             <a href="{{ route('barang.edit', $barang->id) }}"
                                 class="text-blue-600 underline text-xs">Edit</a>

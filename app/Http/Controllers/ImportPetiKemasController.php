@@ -10,22 +10,14 @@ class ImportPetiKemasController extends Controller
 {
     public function store_petikemas(Request $request)
     {
-        $request->validate([
-            'seri' => 'required|integer|min:1',
-            'nomor' => 'required|string|min:1',
-            'ukuran' => 'required|string',
-            'jenis_muatan' => 'required|string',
-            'tipe' => 'required|string',
-        ]);
-
         ImportPetiKemas::create([
-            'user_id' => 1,
-            'import_notification_id' => null, // Will be set when import notification is finalized
-            'seri' => $request->seri,
-            'nomor' => strtoupper($request->nomor),
-            'ukuran' => $request->ukuran,
-            'jenis_muatan' => $request->jenis_muatan,
-            'tipe' => $request->tipe,
+            'user_id' => Auth::user()->id,
+            'import_notification_id' => null,
+            'seri' => $request->input('seri'),
+            'nomor_kontainer' => $request->input('nomor'),
+            'kode_ukuran_kontainer' => $request->input('ukuran'),
+            'kode_jenis_kontainer' => $request->input('jenis_muatan'),
+            'kode_tipe_kontainer' => $request->input('tipe'),
         ]);
 
         return redirect()->to(url()->previous())->with('success', 'Peti Kemas berhasil ditambahkan');
@@ -42,20 +34,20 @@ class ImportPetiKemasController extends Controller
     {
         $request->validate([
             'seri' => 'required|integer|min:1',
-            'nomor' => 'required|string|min:1',
-            'ukuran' => 'required|string',
-            'jenis_muatan' => 'required|string',
-            'tipe' => 'required|string',
+            'nomor_kontainer' => 'required|string|min:1',
+            'kode_ukuran_kontainer' => 'required|string',
+            'kode_jenis_kontainer' => 'required|string',
+            'kode_tipe_kontainer' => 'required|string',
         ]);
 
         $petikemas = ImportPetiKemas::findOrFail($id);
 
         $petikemas->update([
             'seri' => $request->seri,
-            'nomor' => strtoupper($request->nomor),
-            'ukuran' => $request->ukuran,
-            'jenis_muatan' => $request->jenis_muatan,
-            'tipe' => $request->tipe,
+            'nomor_kontainer' => strtoupper($request->nomor_kontainer),
+            'kode_ukuran_kontainer' => $request->kode_ukuran_kontainer,
+            'kode_jenis_kontainer' => $request->kode_jenis_kontainer,
+            'kode_tipe_kontainer' => $request->kode_tipe_kontainer,
         ]);
 
         return redirect()->to(url()->previous())
@@ -64,7 +56,7 @@ class ImportPetiKemasController extends Controller
 
     public function destroy_petikemas($id)
     {
-        $petikemas = ImportPetiKemas::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $petikemas = ImportPetiKemas::findOrFail($id);
         $petikemas->delete();
 
         return redirect()->to(url()->previous())->with('success', 'Peti Kemas berhasil dihapus');
