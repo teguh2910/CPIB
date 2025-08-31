@@ -206,7 +206,7 @@ $(document).ready(function() {
         allowClear: true,
         minimumInputLength: 0, // Allow search from first character
         ajax: {
-            url: '{{ route("ajax.tps.search") }}',
+            url: '/ajax/tps/search',
             dataType: 'json',
             delay: 300,
             data: function (params) {
