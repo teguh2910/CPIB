@@ -188,7 +188,7 @@
             if (confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ url('dokumen') }}/' + id;
+                form.action = '/dokumen/' + id;
                 form.style.display = 'none';
 
                 const tokenInput = document.createElement('input');
