@@ -289,7 +289,7 @@ $(document).ready(function() {
         allowClear: true,
         minimumInputLength: 0, // Allow search from first character
         ajax: {
-            url: '{{ route("ajax.pelabuhan-tujuan.search") }}',
+            url: '/ajax/pelabuhan-tujuan/search',
             dataType: 'json',
             delay: 300,
             data: function (params) {
