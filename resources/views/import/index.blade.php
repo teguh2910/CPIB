@@ -21,7 +21,7 @@
                         <th class="py-2">No. Voy</th>
                         <th class="py-2">ETA</th>
                         <th class="py-2">Status</th>
-                        <th class="py-2">Aksi</th>
+                        <th class="py-2"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -40,9 +40,10 @@
                                     class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Edit</a>
                                     <a href="{{ route('import.export', $r->id) }}"
                                     class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Export</a>
-                                <a href=""
-                                    class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Kirim
-                                    CIESA</a>
+                                    <a href="{{ route('import.export.json', $r->id) }}"
+                                    class="ml-2 px-2 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Kirim
+                                    CIESA(under dev)</a>
+                                
                             </td>
                         </tr>
                     @empty

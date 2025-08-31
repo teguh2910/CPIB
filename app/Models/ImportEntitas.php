@@ -21,11 +21,11 @@ class ImportEntitas extends Model
 
     public function pengirimParty(): BelongsTo
     {
-        return $this->belongsTo(Party::class, 'nama_identitas','id');
+        return $this->belongsTo(Party::class, 'nama_identitas', 'id');
     }
 
     public function penjualParty(): BelongsTo
     {
-        return $this->belongsTo(Party::class, 'nama_identitas','id');
+        return $this->belongsTo(Party::class, 'nama_identitas', 'id');
     }
 }

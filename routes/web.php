@@ -99,5 +99,9 @@ Route::middleware('auth.session')->group(function () {
     Route::get('export/{importNotification}', [ImportNotificationController::class, 'exportByNotification'])
         ->whereNumber('importNotification')
         ->name('import.export');
+    // Export JSON for a single ImportNotification (nested structure)
+    Route::get('export/{importNotification}/json', [ImportNotificationController::class, 'exportJsonByNotification'])
+        ->whereNumber('importNotification')
+        ->name('import.export.json');
 
 });

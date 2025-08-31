@@ -11,6 +11,7 @@ class ImportBarang extends Model
 
     protected $casts = [
         'lartas' => 'boolean',
+        'kode_kondisi_barang' => 'string',
     ];
 
     public function user(): BelongsTo

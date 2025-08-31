@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\ImportBarang;
+use App\Models\ImportBarangDokumen;
+use App\Models\ImportBarangTarif;
+use App\Models\ImportBarangVd;
 use App\Models\ImportDokumen;
 use App\Models\ImportEntitas;
 use App\Models\ImportHeader;
@@ -13,9 +16,6 @@ use App\Models\ImportPernyataan;
 use App\Models\ImportPetiKemas;
 use App\Models\ImportPungutan;
 use App\Models\ImportTransaksi;
-use App\Models\ImportBarangDokumen;
-use App\Models\ImportBarangTarif;
-use App\Models\ImportBarangVd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
@@ -31,12 +31,13 @@ class ImportNotificationController extends Controller
     public function index()
     {
         $importNotifications = \DB::table('import_notifications')
-        ->join('import_entitas', 'import_notifications.id', '=', 'import_entitas.import_notification_id')
-        ->join('import_headers', 'import_notifications.id', '=', 'import_headers.import_notification_id')
-        ->join('import_pengangkuts', 'import_notifications.id', '=', 'import_pengangkuts.import_notification_id')
-        ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
-        ->where('kode_entitas', 9)
+            ->join('import_entitas', 'import_notifications.id', '=', 'import_entitas.import_notification_id')
+            ->join('import_headers', 'import_notifications.id', '=', 'import_headers.import_notification_id')
+            ->join('import_pengangkuts', 'import_notifications.id', '=', 'import_pengangkuts.import_notification_id')
+            ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
+            ->where('kode_entitas', 9)
             ->get();
+
         return view('import.index', compact('importNotifications'));
     }
 
@@ -63,7 +64,7 @@ class ImportNotificationController extends Controller
             'IMPORT_PERNYATAAN' => \App\Models\ImportPernyataan::all()->toArray(),
         ];
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheetIndex = 0;
 
         foreach ($sheets as $name => $rows) {
@@ -78,6 +79,7 @@ class ImportNotificationController extends Controller
             if (empty($rows)) {
                 $sheet->fromArray([['No data']], null, 'A1');
                 $sheetIndex++;
+
                 continue;
             }
 
@@ -137,7 +139,7 @@ class ImportNotificationController extends Controller
             'IMPORT_PERNYATAAN' => \App\Models\ImportPernyataan::where('import_notification_id', $importNotificationId)->get()->toArray(),
         ];
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheetIndex = 0;
 
         foreach ($sheets as $name => $rows) {
@@ -152,6 +154,7 @@ class ImportNotificationController extends Controller
             if (empty($rows)) {
                 $sheet->fromArray([['No data']], null, 'A1');
                 $sheetIndex++;
+
                 continue;
             }
 
@@ -182,6 +185,268 @@ class ImportNotificationController extends Controller
 
         $writer->save('php://output');
         exit;
+    }
+
+    /**
+     * Export data related to a single import notification id into a nested JSON structure
+     */
+    public function exportJsonByNotification(int $importNotificationId)
+    {
+        $id = $importNotificationId;
+
+        $notification = ImportNotification::findOrFail($id);
+
+        $header = ImportHeader::where('import_notification_id', $id)->first();
+        $transaksi = ImportTransaksi::where('import_notification_id', $id)->first();
+        $pernyataan = ImportPernyataan::where('import_notification_id', $id)->first();
+
+        $pengangkuts = ImportPengangkut::where('import_notification_id', $id)->get();
+        $kemasans = ImportKemasan::where('import_notification_id', $id)->get();
+        $petikemas = ImportPetiKemas::where('import_notification_id', $id)->get();
+        $dokumens = ImportDokumen::where('import_notification_id', $id)->get();
+        //$entitas = ImportEntitas::where('import_notification_id', $id)->get();
+        $entitas = \DB::table('import_entitas')->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
+            ->where('import_entitas.import_notification_id', $id)
+            ->get();
+        $barangs = ImportBarang::where('import_notification_id', $id)->get();
+
+        // Top level defaults and mappings (assumptions for fields not present in schema)
+        $result = [
+            'asalData' => 'S', // assumption: source S
+            'asuransi' => $transaksi->asuransi ?? 0,
+            'biayaPengurang' => $transaksi->biaya_pengurang ?? 0,
+            'biayaTambahan' => $transaksi->biaya_tambahan ?? 0,
+            'bruto' => $transaksi->bruto ?? 0,
+            'cif' => $transaksi->cif ?? 0,
+            'disclaimer' => '1',
+            'flagVd' => 'T',
+            'fob' => $transaksi->fob ?? 0,
+            'freight' => $transaksi->freight ?? 0,
+            'hargaPenyerahan' => 0,
+            'idPengguna' => 'aisinindonesia',
+            'jabatanTtd' => $pernyataan->jabatan_pernyataan ?? null,
+            'jumlahKontainer' => $petikemas->count(),
+            'jumlahTandaPengaman' => 0,
+            'kodeAsuransi' => $transaksi->kode_asuransi ?? null,
+            'kodeCaraBayar' => $header->kode_cara_bayar ?? null,
+            'kodeDokumen' => $dokumens->first()->kode_dokumen ?? null,
+            'kodeIncoterm' => $transaksi->kode_incoterm ?? null,
+            'kodeJenisImpor' => $header->kode_jenis_impor ?? null,
+            'kodeJenisNilai' => $transaksi->kode_jenis_nilai ?? null,
+            'kodeJenisProsedur' => $header->kode_jenis_prosedur ?? null,
+            'kodeKantor' => $header->kode_kantor ?? null,
+            'kodePelMuat' => $pengangkuts->first()->kode_pelabuhan_muat ?? null,
+            'kodePelTransit' => $pengangkuts->first()->kode_pelabuhan_transit ?? null,
+            'kodePelTujuan' => $pengangkuts->first()->kode_pelabuhan_tujuan ?? null,
+            'kodeTps' => $pengangkuts->first()->kode_tps ?? null,
+            'kodeTutupPu' => $pengangkuts->first()->kode_tutup_pu ?? null,
+            'kodeValuta' => $transaksi->kode_valuta ?? null,
+            'kotaTtd' => $pernyataan->kota_pernyataan ?? null,
+            'namaTtd' => $pernyataan->nama_pernyataan ?? null,
+            'ndpbm' => $transaksi->ndpbm ?? 0,
+            'netto' => $transaksi->netto ?? 0,
+            'nilaiBarang' => $transaksi->nilai_barang ?? 0,
+            'nilaiIncoterm' => (int) $transaksi->nilai_incoterm,
+            'nilaiMaklon' => 0,
+            'nomorAju' => $header->nomor_aju ?? null,
+            'nomorBc11' => $pengangkuts->first()->nomor_bc_11 ?? null,
+            'posBc11' => $pengangkuts->first()->nomor_pos ?? null,
+            'seri' => 0,
+            'subPosBc11' => $pengangkuts->first()->nomor_sub_pos ?? null,
+            'tanggalAju' => optional($header->created_at)->format('Y-m-d') ?? null,
+            'tanggalBc11' => $pengangkuts->first()->tanggal_bc_11 ?? null,
+            'tanggalTiba' => $pengangkuts->first()->tanggal_tiba,
+            'tanggalTtd' => $pernyataan->tanggal_pernyataan,
+            'totalDanaSawit' => 0,
+            'volume' => 0,
+            'vd' => $transaksi->vd ?? 0,
+        ];
+
+        // barang
+        $result['barang'] = [];
+        foreach ($barangs as $b) {
+            $seri = $b->seri_barang ?? $b->id;
+
+            $barang = [
+                'asuransi' => $b->asuransi ?? 0,
+                'bruto' => $b->bruto ?? 0,
+                'cif' => $b->cif ?? 0,
+                'cifRupiah' => $b->cif_rupiah ?? $b->cif ?? 0,
+                'diskon' => 0,
+                'fob' => $b->fob ?? 0,
+                'freight' => $b->freight ?? 0,
+                'hargaEkspor' => 0,
+                'hargaPatokan' => 0,
+                'hargaPenyerahan' => 0,
+                'hargaPerolehan' => 0,
+                'hargaSatuan' => $b->harga_satuan ?? 0,
+                'hjeCukai' => 0,
+                'isiPerKemasan' => 0,
+                'jumlahBahanBaku' => 0,
+                'jumlahDilekatkan' => 0,
+                'jumlahKemasan' => $b->jumlah_kemasan ?? 0,
+                'jumlahPitaCukai' => $b->jumlah_pita_cukai ?? 0,
+                'jumlahRealisasi' => 0,
+                'jumlahSatuan' => $b->jumlah_satuan ?? 0,
+                'kapasitasSilinder' => 0,
+                'kodeJenisKemasan' => $b->kode_kemasan ?? null,
+                'kodeKondisiBarang' => $b->kode_kondisi_barang ?? null,
+                'kodeNegaraAsal' => $b->kode_negara_asal ?? null,
+                'kodeSatuanBarang' => $b->kode_satuan ?? null,
+                'merk' => '-',
+                'ndpbm' => $b->ndpbm ?? 0,
+                'netto' => $b->netto ?? 0,
+                'nilaiBarang' => $b->nilai_barang ?? 0,
+                'nilaiDanaSawit' => 0,
+                'nilaiDevisa' => 0,
+                'nilaiTambah' => 0,
+                'pernyataanLartas' => $b->pernyataan_lartas ? 'Y' : 'N',
+                'persentaseImpor' => 0,
+                'posTarif' => $b->hs ?? null,
+                'saldoAkhir' => 0.0,
+                'saldoAwal' => 0.0,
+                'seriBarang' => (int) $seri,
+                'seriBarangDokAsal' => 0,
+                'seriIjin' => 0,
+                'tahunPembuatan' => 0,
+                'tarifCukai' => 0,
+                'tipe' => '-',
+                'uraian' => $b->uraian ?? null,
+                'volume' => 0,
+            ];
+
+            // barangDokumen
+            $barangDok = ImportBarangDokumen::where('import_notification_id', $id)->where('seri_barang', $seri)->get();
+            $barang['barangDokumen'] = $barangDok->map(function ($d) {
+                return ['seriDokumen' => (string) $d->seri_dokumen];
+            })->toArray();
+
+            // barangTarif
+            $tarifs = \DB::table('import_barangs')
+                ->join('import_barang_tarifs', 'import_barang_tarifs.seri_barang', '=', 'import_barangs.seri_barang')
+                ->where('import_barang_tarifs.import_notification_id', $id)->where('import_barangs.seri_barang', $seri)->get();
+            $barang['barangTarif'] = $tarifs->map(function ($t) use ($seri) {
+                return [
+                    'jumlahSatuan' => $t->jumlah_satuan ?? 1,
+                    'kodeFasilitasTarif' => $t->kode_fasilitas ?? ($t->kodeFasilitasTarif ?? null),
+                    'kodeJenisPungutan' => $t->kode_pungutan ?? ($t->kodeJenisPungutan ?? null),
+                    'kodeJenisTarif' => $t->kode_tarif ?? ($t->kodeJenisTarif ?? null),
+                    'nilaiBayar' => $t->nilai_bayar ?? 0,
+                    'nilaiFasilitas' => $t->nilai_fasilitas ?? 0,
+                    'seriBarang' => (int) $seri,
+                    'tarif' => $t->tarif ?? 0,
+                    'tarifFasilitas' => $t->tarif_fasilitas ?? 0,
+                ];
+            })->toArray();
+
+            // barangVd
+            $vds = ImportBarangVd::where('import_notification_id', $id)->where('seri_barang', $seri)->get();
+            $barang['barangVd'] = $vds->map(function ($v) {
+                return [
+                    'kodeJenisVd' => $v->kode_vd ?? $v->kodeJenisVd ?? null,
+                    'nilaiBarangVd' => $v->nilai_barang ?? 0,
+                ];
+            })->toArray();
+
+            $barang['barangSpekKhusus'] = [];
+            $barang['barangPemilik'] = [];
+
+            $result['barang'][] = $barang;
+        }
+
+        // entitas
+        $result['entitas'] = $entitas->map(function ($e) {
+            $entitasItem = [];
+
+            if (!is_null($e->alamat_identitas)) {
+                $entitasItem['alamatEntitas'] = $e->alamat_identitas;
+            }
+            if (!is_null($e->kode_entitas)) {
+                $entitasItem['kodeEntitas'] = $e->kode_entitas;
+            }
+            if (!is_null($e->kode_jenis_api)) {
+                $entitasItem['kodeJenisApi'] = $e->kode_jenis_api;
+            }
+            if (!is_null($e->kode_jenis_identitas)) {
+                $entitasItem['kodeJenisIdentitas'] = $e->kode_jenis_identitas;
+            }
+            if (!is_null($e->kode_status)) {
+                $entitasItem['kodeStatus'] = $e->kode_status;
+            }
+            if (!is_null($e->nama_identitas)) {
+                $entitasItem['namaEntitas'] = $e->name;
+            }
+            if (!is_null($e->nib_identitas)) {
+                $entitasItem['nibEntitas'] = $e->nib_identitas;
+            }
+            if (!is_null($e->nomor_identitas)) {
+                $entitasItem['nomorIdentitas'] = $e->nomor_identitas;
+            }
+            $entitasItem['seriEntitas'] = (int) $e->id; // Always include seriEntitas
+            if (!is_null($e->kode_negara)) {
+                $entitasItem['kodeNegara'] = $e->kode_negara;
+            }
+
+            return $entitasItem;
+        })->toArray();
+
+        // kemasan
+        $result['kemasan'] = $kemasans->map(function ($k) {
+            return [
+                'jumlahKemasan' => $k->jumlah_kemasan ?? 0,
+                'kodeJenisKemasan' => $k->kode_kemasan ?? null,
+                'merkKemasan' => $k->merek ?? $k->merk ?? null,
+                'seriKemasan' => (int) $k->seri,
+            ];
+        })->toArray();
+
+        // kontainer (petikemas)
+        $result['kontainer'] = $petikemas->map(function ($p) {
+            return [
+                'kodeJenisKontainer' => $p->kode_jenis_kontainer ?? null,
+                'kodeTipeKontainer' => $p->kode_tipe_kontainer ?? null,
+                'kodeUkuranKontainer' => $p->kode_ukuran_kontainer ?? null,
+                'nomorKontainer' => $p->nomor_kontainer ?? null,
+                'seriKontainer' => (int) $p->seri,
+            ];
+        })->toArray();
+
+        // dokumen - map kode_fasilitas to human name using config/import.php
+        $fasilitasMap = config('import.kode_fasilitas', []);
+        $result['dokumen'] = $dokumens->map(function ($d) use ($fasilitasMap) {
+            $kode = $d->kode_fasilitas ?? ($d->kodeFasilitas ?? '');
+            $namaFasilitas = $kode !== null && $kode !== '' ? ($fasilitasMap[$kode] ?? null) : null;
+
+            // Build base item with namaFasilitas inserted right after kodeFasilitas when available
+            $item = [
+                'idDokumen' => (string) $d->id,
+                'kodeDokumen' => $d->kode_dokumen ?? null,
+                'kodeFasilitas' => $d->kode_fasilitas ?? "",
+            ];
+
+            if ($namaFasilitas !== null) {
+                $item['namaFasilitas'] = $namaFasilitas;
+            }
+
+            $item['nomorDokumen'] = $d->nomor_dokumen ?? null;
+            $item['seriDokumen'] = (int) $d->seri;
+            $item['tanggalDokumen'] = $d->tanggal_dokumen;
+
+            return $item;
+        })->toArray();
+
+        // pengangkut
+        $result['pengangkut'] = $pengangkuts->map(function ($p) {
+            return [
+                'kodeBendera' => $p->angkut_bendera ?? null,
+                'namaPengangkut' => $p->angkut_nama ?? null,
+                'nomorPengangkut' => $p->angkut_voy ?? null,
+                'kodeCaraAngkut' => $p->angkut_cara ?? null,
+                'seriPengangkut' => (int) $p->id,
+            ];
+        })->toArray();
+
+        return response()->json($result, 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
@@ -408,7 +673,7 @@ class ImportNotificationController extends Controller
                     session(['import_draft' => $draft]);
                 }
             }
-            if ($currentStep === 'pungutan'){
+            if ($currentStep === 'pungutan') {
                 $existingPungutan = ImportPungutan::whereNull('import_notification_id')
                     ->first();
                 if ($existingPungutan) {
@@ -426,6 +691,7 @@ class ImportNotificationController extends Controller
                     session(['import_draft' => $draft]);
                 }
             }
+
             return redirect()->route('import.create', ['step' => $nextStep])
                 ->with('success', ucfirst($currentStep).' data saved successfully. Please continue with the next step.');
         }
@@ -498,6 +764,7 @@ class ImportNotificationController extends Controller
                 'kode_barang' => 'kode_barang',
                 'uraian' => 'uraian',
                 'spesifikasi_lain' => 'spesifikasi_lain',
+                'kode_kondisi_barang' => 'kode_kondisi_barang',
                 'kode_negara_asal' => 'kode_negara_asal',
                 'netto' => 'netto',
                 'jumlah_satuan' => 'jumlah_satuan',
@@ -694,11 +961,11 @@ class ImportNotificationController extends Controller
             // Update ImportBarangTarif
             ImportBarangTarif::whereNull('import_notification_id')
                 ->update(['import_notification_id' => $notificationId]);
-            
+
             // Update ImportBarangDokumen
             ImportBarangDokumen::whereNull('import_notification_id')
                 ->update(['import_notification_id' => $notificationId]);
-            
+
             // Update ImportBarangVd
             ImportBarangVd::whereNull('import_notification_id')
                 ->update(['import_notification_id' => $notificationId]);
@@ -747,6 +1014,7 @@ class ImportNotificationController extends Controller
         $PPN = $pungutan->first()->ppn ?? 0;
         $PPH = $pungutan->first()->pph ?? 0;
         $total = $BM + $PPN + $PPH;
+
         return view('import.edit', compact('header', 'entitas_pengirim', 'entitas_penjual', 'dokument', 'kemasan', 'petiKemas', 'barangData', 'importNotification', 'pengangkut', 'transaksi', 'pungutan', 'pernyataan', 'BM', 'PPN', 'PPH', 'total'));
     }
 

@@ -5,10 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Artisan;
 
 class AuthController extends Controller
 {
@@ -25,7 +24,7 @@ class AuthController extends Controller
         ]);
 
         // Call the API for authentication
-        $apiUrl = config('services.pelabuhan_api.url') . '/nle-oauth/v1/user/login';
+        $apiUrl = config('services.pelabuhan_api.url').'/nle-oauth/v1/user/login';
 
         $response = Http::post($apiUrl, [
             'username' => $data['username'],
@@ -43,16 +42,16 @@ class AuthController extends Controller
         if (File::exists($envFile)) {
             $envContent = File::get($envFile);
             $newToken = $apiData['access_token'];
-            
+
             // Replace the PELABUHAN_API_TOKEN line
             $envContent = preg_replace(
                 '/^PELABUHAN_API_TOKEN=.*/m',
-                'PELABUHAN_API_TOKEN=' . $newToken,
+                'PELABUHAN_API_TOKEN='.$newToken,
                 $envContent
             );
-            
+
             File::put($envFile, $envContent);
-            
+
             // Clear config cache to reload the new token
             \Artisan::call('config:clear');
         }
@@ -60,7 +59,7 @@ class AuthController extends Controller
         // Find or create local user
         // Ensure email is not null (database requires NOT NULL). If API doesn't provide email,
         // create a safe fallback using username so DB insert won't fail.
-        $fallbackEmail = !empty($apiData['email']) ? $apiData['email'] : ($data['username'] . '@no-email.local');
+        $fallbackEmail = ! empty($apiData['email']) ? $apiData['email'] : ($data['username'].'@no-email.local');
 
         $user = User::firstOrCreate(
             ['username' => $data['username']],

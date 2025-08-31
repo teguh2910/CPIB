@@ -7,7 +7,6 @@ use App\Models\ImportDokumen;
 use App\Models\ImportTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ImportBarangController extends Controller
 {
@@ -68,11 +67,12 @@ class ImportBarangController extends Controller
     public function edit($id)
     {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
+
         return view('import.sections.barang-edit', compact('barang'));
     }
 
     public function update(Request $request, $id)
-    {        
+    {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
         $barang->update([
             'seri_barang' => $request->input('seri_barang'),
@@ -94,6 +94,7 @@ class ImportBarangController extends Controller
             'freight' => $request->input('freight'),
             'asuransi' => $request->input('asuransi'),
         ]);
+
         return redirect()->back()
             ->with('success', 'Barang berhasil diperbarui');
     }
@@ -103,6 +104,5 @@ class ImportBarangController extends Controller
         $barang->delete();
 
         return redirect()->back()->with('success', 'Barang berhasil dihapus');
-    }    
-
+    }
 }
