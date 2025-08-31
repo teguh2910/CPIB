@@ -261,7 +261,7 @@
 
         // Kemasan Form Handler
         const addKemasanBtn = document.getElementById('addKemasanBtn');
-        const kemasanUrl = '{{ route('kemasan.store') }}';
+        const kemasanUrl = '/kemasan';
         const kemasanCsrf = '{{ csrf_token() }}';
 
         addKemasanBtn?.addEventListener('click', function() {
@@ -312,7 +312,7 @@
 
         // Peti Kemas Form Handler
         const addPetiKemasBtn = document.getElementById('addPetiKemasBtn');
-        const petiKemasUrl = '{{ route('petikemas.store') }}';
+        const petiKemasUrl = '/petikemas';
         const petiKemasCsrf = '{{ csrf_token() }}';
 
         addPetiKemasBtn?.addEventListener('click', function() {
@@ -372,7 +372,7 @@
             if (confirm('Apakah Anda yakin ingin menghapus kemasan ini?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ url('kemasan') }}/' + id;
+                form.action = '/kemasan/' + id;
                 form.style.display = 'none';
 
                 const tokenInput = document.createElement('input');
@@ -401,7 +401,7 @@
             if (confirm('Apakah Anda yakin ingin menghapus peti kemas ini?')) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = '{{ url('petikemas') }}/' + id;
+                form.action = '/petikemas/' + id;
                 form.style.display = 'none';
 
                 const tokenInput = document.createElement('input');
