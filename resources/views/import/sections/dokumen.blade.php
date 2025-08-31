@@ -98,7 +98,7 @@
         const addBtn = document.getElementById('addDokumenBtn');
         const itemsInput = document.querySelector('input[name="items_json"]');
         const tbody = document.querySelector('table.w-full tbody');
-        const url = '{{ route('dokumen.store') }}';
+        const url = '/dokumen';
         const csrf = '{{ csrf_token() }}';
 
         function getItems() {
