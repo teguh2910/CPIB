@@ -165,7 +165,7 @@ $(document).ready(function() {
         allowClear: true,
         minimumInputLength: 2,
         ajax: {
-            url: '{{ route("ajax.pelabuhan.search") }}',
+            url: '/ajax/pelabuhan/search',
             dataType: 'json',
             delay: 300,
             data: function (params) {
@@ -247,7 +247,7 @@ $(document).ready(function() {
         allowClear: true,
         minimumInputLength: 0, // Allow search from first character
         ajax: {
-            url: '{{ route("ajax.negara.search") }}',
+            url: '/ajax/negara/search',
             dataType: 'json',
             delay: 300,
             data: function (params) {
