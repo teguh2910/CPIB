@@ -31,9 +31,9 @@
             </button>
         <a href="{{ url('/template.xlsx') }}" class="ml-2 px-3 py-1 bg-yellow-600 text-white rounded text-sm">Download Template
             </a>
-        <button type="submit" name="action" value="updateAll"
+        <!-- <button type="submit" name="action" value="updateAll"
             class="ml-2 px-3 py-1 bg-green-600 text-white rounded text-sm">Generate Pungutan</button>
-        <span id="update-all-status" class="ml-3 text-sm"></span>
+        <span id="update-all-status" class="ml-3 text-sm"></span> -->
     </div>
 @endif
 
