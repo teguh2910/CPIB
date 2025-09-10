@@ -1406,8 +1406,34 @@ class ImportNotificationController extends Controller
      */
     public function searchTps(Request $request)
     {
+        // Check if import_notification_id is provided in request
+        $importNotificationId = $request->get('import_notification_id');
+        
+        // If not provided, try to get from session or detect from referer
+        if (!$importNotificationId) {
+            $referer = $request->headers->get('referer', '');
+            if (preg_match('/\/import\/(\d+)\/edit/', $referer, $matches)) {
+                $importNotificationId = $matches[1];
+            }
+        }
 
-        $header = ImportHeader::select('kode_kantor')->where('import_notification_id', null)->first();
+        // Get kode_kantor based on context
+        if ($importNotificationId) {
+            // Editing existing document - get kode_kantor from specific notification
+            $header = ImportHeader::select('kode_kantor')
+                ->where('import_notification_id', $importNotificationId)
+                ->first();
+        } else {
+            // Creating new document - get kode_kantor from unlinked headers
+            $header = ImportHeader::select('kode_kantor')
+                ->where('import_notification_id', null)
+                ->first();
+        }
+        
+        if (!$header) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Header data not found']);
+        }
+        
         $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', ''); // Get search term from request
         $apiUrl = config('services.pelabuhan_api.url');
@@ -1457,8 +1483,35 @@ class ImportNotificationController extends Controller
      */
     public function searchPelabuhanTujuan(Request $request)
     {
-        $kodeKantor = ImportHeader::select('kode_kantor')->where('import_notification_id', null)->first();
-        $kodeKantor = $kodeKantor->kode_kantor;
+        // Check if import_notification_id is provided in request
+        $importNotificationId = $request->get('import_notification_id');
+        
+        // If not provided, try to get from session or detect from referer
+        if (!$importNotificationId) {
+            $referer = $request->headers->get('referer', '');
+            if (preg_match('/\/import\/(\d+)\/edit/', $referer, $matches)) {
+                $importNotificationId = $matches[1];
+            }
+        }
+
+        // Get kode_kantor based on context
+        if ($importNotificationId) {
+            // Editing existing document - get kode_kantor from specific notification
+            $header = ImportHeader::select('kode_kantor')
+                ->where('import_notification_id', $importNotificationId)
+                ->first();
+        } else {
+            // Creating new document - get kode_kantor from unlinked headers
+            $header = ImportHeader::select('kode_kantor')
+                ->where('import_notification_id', null)
+                ->first();
+        }
+        
+        if (!$header) {
+            return response()->json(['status' => 'ERROR', 'message' => 'Header data not found']);
+        }
+        
+        $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', '');
         $apiUrl = config('services.pelabuhan_api.url');
         $apiToken = config('services.pelabuhan_api.token');
