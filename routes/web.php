@@ -26,6 +26,9 @@ Route::get('/test/pelabuhan-tujuan', [ImportNotificationController::class, 'sear
 Route::get('/ajax/kurs', [ImportNotificationController::class, 'getKurs'])
     ->name('ajax.kurs');
 
+// Template download (no auth required)
+Route::get('/master/parties/template', [PartyController::class, 'downloadTemplate'])->name('parties.template');
+
 // IMPORT NOTIFICATIONS (protected)
 Route::middleware('auth.session')->group(function () {
     // Main Import Notification CRUD
@@ -92,6 +95,7 @@ Route::middleware('auth.session')->group(function () {
         'update' => 'parties.update',
         'destroy' => 'parties.destroy',
     ]);
+    Route::post('/master/parties/upload-excel', [PartyController::class, 'uploadExcel'])->name('parties.upload-excel');
 
     // Export all tables to Excel (each table -> separate sheet)
     Route::get('export/all', [ImportNotificationController::class, 'exportAll'])->name('import.exportAll');

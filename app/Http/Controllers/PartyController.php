@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\PartiesImport;
 use App\Models\Party;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PartyController extends Controller
 {
@@ -34,6 +36,13 @@ class PartyController extends Controller
         $countries = config('import.negara');
 
         return view('parties.create', compact('countries'));
+    }
+
+    public function show(Party $party)
+    {
+        $countries = config('import.negara');
+
+        return view('parties.show', compact('party', 'countries'));
     }
 
     public function store(Request $request)
@@ -78,5 +87,71 @@ class PartyController extends Controller
         $party->delete();
 
         return redirect()->route('parties.index')->with('success', 'Master dihapus.');
+    }
+
+    public function uploadExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => ['required', 'file', 'mimes:xlsx,xls', 'max:10240'], // 10MB max
+        ]);
+
+        try {
+            Excel::import(new PartiesImport, $request->file('excel_file'));
+
+            return redirect()->route('parties.index')->with('success', 'Data berhasil diimpor dari Excel.');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = 'Baris '.$failure->row().': '.implode(', ', $failure->errors());
+            }
+
+            return redirect()->route('parties.index')->withErrors($errors);
+        } catch (\Exception $e) {
+            return redirect()->route('parties.index')->withErrors(['Terjadi kesalahan: '.$e->getMessage()]);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $headers = ['type', 'code', 'name', 'address', 'country'];
+        foreach ($headers as $col => $header) {
+            $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1).'1', $header);
+        }
+
+        // Add sample data
+        $sampleData = [
+            ['pengirim', 'SUP001', 'PT Supplier Indonesia', 'Jl. Sudirman No. 123, Jakarta', 'ID'],
+            ['penjual', 'SEL001', 'CV Seller Nusantara', 'Jl. Malioboro No. 45, Yogyakarta', 'ID'],
+            ['pengirim', 'EXP001', 'ABC Export Company', '123 Main St, New York', 'US'],
+        ];
+
+        $row = 2;
+        foreach ($sampleData as $data) {
+            foreach ($data as $col => $value) {
+                $sheet->setCellValue(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col + 1).$row, $value);
+            }
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Create writer and output
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $fileName = 'template_parties_'.date('Y-m-d').'.xlsx';
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment; filename="'.$fileName.'"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+        exit;
     }
 }
