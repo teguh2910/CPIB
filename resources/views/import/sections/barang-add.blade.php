@@ -16,17 +16,7 @@
     $transaksiData = \App\Models\ImportTransaksi::where('user_id', auth()->id())->first();
     $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
 
-    // Ambil daftar dokumen untuk dropdown fasilitas/lartas
-    $dokumenData = \App\Models\ImportDokumen::where('user_id', auth()->id())->get();
-    $dokList = $dokumenData
-        ->map(function ($d) {
-            $jenis = config('import.jenis_dokumen')[$d->jenis] ?? $d->jenis;
-            $tgl = $d->tanggal ?? '';
-            $no = $d->nomor ?? '';
-            return trim("$jenis - $no ($tgl)");
-        })
-        ->values()
-        ->all();
+    
 @endphp
 
 @section('content')
@@ -102,7 +92,7 @@
         <!-- Form -->
         <form action="{{ route('barang.store') }}" method="POST" class="p-6">
             @csrf
-            <input type="hidden" name="ndpbm" value="{{ $ndpbm }}">
+            <input type="hidden" name="ndpbm" value="{{ $new_ndpbm }}">
 
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
@@ -175,6 +165,36 @@
                                                 {{ $v }}
                                             </option>
                                         @endforeach
+                                    </select>
+                                </x-field>
+                                <x-field label="Fasilitas">
+                                    <select name="dok_fasilitas"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">-- Pilih Fasilitas --</option>
+                                        @foreach ($dokumenData as $dok)
+                                            <option value="{{ $dok->kode_dokumen }}"
+                                                @if (old('dok_fasilitas') === $dok->kode_dokumen) selected @endif>
+                                                {{ 'Kode '.$dok->kode_dokumen . ' - ' .' Nomor ' . $dok->nomor_dokumen . ' (' . $dok->tanggal_dokumen->format('d-m-Y') . ')' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </x-field>
+                                <x-field label="Jenis Transaksi">
+                                    <select name="kodeJenisVd"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">-- Pilih Jenis Transaksi --</option>
+                                        <option value="NTR">NTR - TRANSAKSI JUAL BELI</option>
+                                        <option value="BTR">BTR - BUKAN TRANSAKSI JUAL BELI</option>
+                                        <option value="CAM">CAM - Barang terdiri dari barang-barang yang merupakan obyek transaksi gabungan dari dua atau lebih jenis transaksi 1 sampai dengan 10</option>
+                                        <option value="CMA">CMA - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG HADIAH/PROMOSI/CONTOH</option>
+                                        <option value="FTR">FTR - TRANSAKSI JUAL BELI BERDASARKAN HARGA FUTURES (FUTURE PRICE), YAITU HARGA YANG BARU DAPAT DITENTUKAN SETELAH PIB DISAMPAIKAN</option>
+                                        <option value="HBH">HBH - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG BANTUAN/HIBAH</option>
+                                        <option value="ITM">ITM - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG YANG DIIMPOR OLEH INTERMEDIARY YANG TIDAK MEMBELI BARANG</option>
+                                        <option value="KON">KON - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG KONSINYASI</option>
+                                        <option value="LES">LES - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG SEWA (LEASING)</option>
+                                        <option value="PRO">PRO - TRANSAKSI JUAL BELI MENGANDUNG PROCEEDS YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
+                                        <option value="ROY">ROY - TRANSAKSI JUAL BELI MENGANDUNG ROYALTI YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
+                                        <option value="TIT">TIT - TITIPAN</option>
                                     </select>
                                 </x-field>
                             </div>
@@ -252,12 +272,15 @@
                                         value="{{ old('cif_rupiah') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
-                                <x-field label="FOB">
-                                    <input type="number" step="0.01" name="fob" value="{{ old('fob') }}"
+                                <x-field label="NDPBM">
+                                    <input type="number" step="0.01" name="ndpbm" id="ndpbm"
+                                        value="{{ $new_ndpbm }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
+                                    <input type="hidden" step="0.01" name="fob" value="0"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <x-field label="Harga Satuan">
-                                    <input type="number" step="0.01" name="harga_satuan" value="{{ old('harga_satuan') }}"
+                                    <input type="number" step="0.01" name="harga_satuan" id="harga_satuan" value="{{ old('harga_satuan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
@@ -294,25 +317,45 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const nilaiBarangInput = document.getElementById('nilai_barang');
-            const jumlahInput = document.getElementById('jumlah');
+            // Auto-calculate CIF Rupiah
+            const cifInput = document.getElementById('cif');
+            const ndpbmInput = document.getElementById('ndpbm');
+            const cifRupiahInput = document.getElementById('cif_rupiah');
+
+            function calculateCifRupiah() {
+                const cif = parseFloat(cifInput.value) || 0;
+                const ndpbm = parseFloat(ndpbmInput.value) || 0;
+
+                const cifRupiah = cif * ndpbm;
+                cifRupiahInput.value = cifRupiah.toFixed(2);
+            }
+
+            // Calculate CIF Rupiah on input change
+            if (cifInput) cifInput.addEventListener('input', calculateCifRupiah);
+            if (ndpbmInput) ndpbmInput.addEventListener('input', calculateCifRupiah);
+
+            // Calculate on page load if values exist
+            calculateCifRupiah();
+
+            // Auto-calculate Harga Satuan
+            const jumlahSatuanInput = document.getElementById('jumlah_satuan');
             const hargaSatuanInput = document.getElementById('harga_satuan');
 
             function calculateHargaSatuan() {
-                const nilaiBarang = parseFloat(nilaiBarangInput.value) || 0;
-                const jumlah = parseFloat(jumlahInput.value) || 0;
+                const cif = parseFloat(cifInput.value) || 0;
+                const jumlahSatuan = parseFloat(jumlahSatuanInput.value) || 0;
 
-                if (jumlah > 0) {
-                    const hargaSatuan = nilaiBarang / jumlah;
+                if (jumlahSatuan > 0) {
+                    const hargaSatuan = cif / jumlahSatuan;
                     hargaSatuanInput.value = hargaSatuan.toFixed(2);
                 } else {
                     hargaSatuanInput.value = '';
                 }
             }
 
-            // Calculate on input change
-            nilaiBarangInput.addEventListener('input', calculateHargaSatuan);
-            jumlahInput.addEventListener('input', calculateHargaSatuan);
+            // Calculate Harga Satuan on input change
+            if (cifInput) cifInput.addEventListener('input', calculateHargaSatuan);
+            if (jumlahSatuanInput) jumlahSatuanInput.addEventListener('input', calculateHargaSatuan);
 
             // Calculate on page load if values exist
             calculateHargaSatuan();
@@ -344,6 +387,13 @@
             // Initialize Select2 for Jenis Kemasan
             $('select[name="kode_kemasan"]').select2({
                 placeholder: '-- Pilih Kemasan --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Fasilitas
+            $('select[name="dok_fasilitas"]').select2({
+                placeholder: '-- Pilih Fasilitas --',
                 allowClear: true,
                 width: '100%'
             });

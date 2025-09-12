@@ -33,7 +33,12 @@ class ImportBarangController extends Controller
 
     public function create()
     {
-        return view('import.sections.barang-add');
+        // Get NDPBM from transaksi data
+        $transaksiData = ImportTransaksi::where('import_notification_id', null)->first();
+        $new_ndpbm = $transaksiData ? $transaksiData->ndpbm : 1;
+        $dokumenData = ImportDokumen::where('import_notification_id', null)->whereNotNull('kode_fasilitas')->get();
+        //dd($dokumenData);
+        return view('import.sections.barang-add', compact('new_ndpbm', 'dokumenData'));
     }
 
     public function store(Request $request)

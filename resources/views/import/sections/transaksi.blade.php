@@ -53,7 +53,7 @@
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
-                    <x-field label="CIF">
+                    <x-field label="Nilai Invoice">
                         <input type="number" step="0.01" name="cif" class="w-full border rounded px-3 py-2"
                             value="{{ old('cif', $t['cif'] ?? '') }}" required>
                     </x-field>
@@ -62,11 +62,11 @@
                             class="w-full border rounded px-3 py-2 bg-gray-100"
                             value="{{ old('harga_nilai_pabean', $t['harga_nilai_pabean'] ?? '') }}" disabled>
                     </x-field>
-                    <x-field label="FOB">
-                        <input type="text" id='fob' name="fob"
+                    
+                        <input type="hidden" id='fob' name="fob"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('fob', $t['fob'] ?? '') }}">
-                    </x-field>
+                            value="0">
+                    
                 </div>
             </div>
         </div>

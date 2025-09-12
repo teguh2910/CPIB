@@ -45,9 +45,9 @@
             <div>
                 <label class="block text-sm mb-1">nomor_pos & nomor_sub_pos</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="number" name="nomor_pos" class="w-full border rounded px-3 py-2"
+                    <input maxlength="4" name="nomor_pos" class="w-full border rounded px-3 py-2"
                         value="{{ old('nomor_pos', $pengangkut[0]->nomor_pos ?? '') }}" placeholder="nomor_pos">
-                    <input type="number" name="nomor_sub_pos" class="w-full border rounded px-3 py-2"
+                    <input maxlength="4" name="nomor_sub_pos" class="w-full border rounded px-3 py-2"
                         value="{{ old('nomor_sub_pos', $pengangkut[0]->nomor_sub_pos ?? '') }}" placeholder="Subpos">
                 </div>
             </div>

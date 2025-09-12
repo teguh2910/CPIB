@@ -10,7 +10,7 @@ class ImportDokumen extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'tanggal' => 'date',
+        'tanggal_dokumen' => 'date',
     ];
 
     public function user(): BelongsTo
