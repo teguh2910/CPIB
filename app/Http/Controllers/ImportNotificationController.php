@@ -37,7 +37,6 @@ class ImportNotificationController extends Controller
             ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
             ->where('kode_entitas', 9)
             ->get();
-
         return view('import.index', compact('importNotifications'));
     }
 
@@ -1365,6 +1364,36 @@ class ImportNotificationController extends Controller
             return redirect()->back()->with('success', "Selesai: {$updated} baris diperbarui");
         }
 
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(ImportNotification $importNotification)
+    {
+        try {
+            // Delete related records first to maintain referential integrity
+            ImportBarang::where('import_notification_id', $importNotification->id)->delete();
+            ImportBarangDokumen::where('import_notification_id', $importNotification->id)->delete();
+            ImportBarangTarif::where('import_notification_id', $importNotification->id)->delete();
+            ImportBarangVd::where('import_notification_id', $importNotification->id)->delete();
+            ImportDokumen::where('import_notification_id', $importNotification->id)->delete();
+            ImportEntitas::where('import_notification_id', $importNotification->id)->delete();
+            ImportHeader::where('import_notification_id', $importNotification->id)->delete();
+            ImportKemasan::where('import_notification_id', $importNotification->id)->delete();
+            ImportPengangkut::where('import_notification_id', $importNotification->id)->delete();
+            ImportPernyataan::where('import_notification_id', $importNotification->id)->delete();
+            ImportPetiKemas::where('import_notification_id', $importNotification->id)->delete();
+            ImportPungutan::where('import_notification_id', $importNotification->id)->delete();
+            ImportTransaksi::where('import_notification_id', $importNotification->id)->delete();
+
+            // Finally delete the main notification record
+            $importNotification->delete();
+
+            return redirect()->route('import.index')->with('success', 'Data pemberitahuan impor berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->route('import.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+        }
     }
 
     /**

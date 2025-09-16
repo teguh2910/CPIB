@@ -16,7 +16,6 @@
     $transaksiData = \App\Models\ImportTransaksi::where('user_id', auth()->id())->first();
     $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
 
-    
 @endphp
 
 @section('content')
@@ -172,9 +171,9 @@
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">-- Pilih Fasilitas --</option>
                                         @foreach ($dokumenData as $dok)
-                                            <option value="{{ $dok->kode_dokumen }}"
+                                            <option value="{{ $dok->seri }}"
                                                 @if (old('dok_fasilitas') === $dok->kode_dokumen) selected @endif>
-                                                {{ 'Kode '.$dok->kode_dokumen . ' - ' .' Nomor ' . $dok->nomor_dokumen . ' (' . $dok->tanggal_dokumen->format('d-m-Y') . ')' }}
+                                                {{ 'Kode ' . $dok->kode_dokumen . ' - ' . ' Nomor ' . $dok->nomor_dokumen . ' (' . $dok->tanggal_dokumen->format('d-m-Y') . ')' }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -183,17 +182,27 @@
                                     <select name="kodeJenisVd"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">-- Pilih Jenis Transaksi --</option>
-                                        <option value="NTR">NTR - TRANSAKSI JUAL BELI</option>
+                                        <option value="NTR" selected>NTR - TRANSAKSI JUAL BELI</option>
                                         <option value="BTR">BTR - BUKAN TRANSAKSI JUAL BELI</option>
-                                        <option value="CAM">CAM - Barang terdiri dari barang-barang yang merupakan obyek transaksi gabungan dari dua atau lebih jenis transaksi 1 sampai dengan 10</option>
-                                        <option value="CMA">CMA - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG HADIAH/PROMOSI/CONTOH</option>
-                                        <option value="FTR">FTR - TRANSAKSI JUAL BELI BERDASARKAN HARGA FUTURES (FUTURE PRICE), YAITU HARGA YANG BARU DAPAT DITENTUKAN SETELAH PIB DISAMPAIKAN</option>
-                                        <option value="HBH">HBH - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG BANTUAN/HIBAH</option>
-                                        <option value="ITM">ITM - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG YANG DIIMPOR OLEH INTERMEDIARY YANG TIDAK MEMBELI BARANG</option>
-                                        <option value="KON">KON - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG KONSINYASI</option>
-                                        <option value="LES">LES - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG SEWA (LEASING)</option>
-                                        <option value="PRO">PRO - TRANSAKSI JUAL BELI MENGANDUNG PROCEEDS YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
-                                        <option value="ROY">ROY - TRANSAKSI JUAL BELI MENGANDUNG ROYALTI YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
+                                        <option value="CAM">CAM - Barang terdiri dari barang-barang yang merupakan obyek
+                                            transaksi gabungan dari dua atau lebih jenis transaksi 1 sampai dengan 10
+                                        </option>
+                                        <option value="CMA">CMA - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG
+                                            HADIAH/PROMOSI/CONTOH</option>
+                                        <option value="FTR">FTR - TRANSAKSI JUAL BELI BERDASARKAN HARGA FUTURES (FUTURE
+                                            PRICE), YAITU HARGA YANG BARU DAPAT DITENTUKAN SETELAH PIB DISAMPAIKAN</option>
+                                        <option value="HBH">HBH - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG BANTUAN/HIBAH
+                                        </option>
+                                        <option value="ITM">ITM - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG YANG DIIMPOR
+                                            OLEH INTERMEDIARY YANG TIDAK MEMBELI BARANG</option>
+                                        <option value="KON">KON - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG KONSINYASI
+                                        </option>
+                                        <option value="LES">LES - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG SEWA (LEASING)
+                                        </option>
+                                        <option value="PRO">PRO - TRANSAKSI JUAL BELI MENGANDUNG PROCEEDS YANG NILAINYA
+                                            BELUM DAPAT DITENTUKAN</option>
+                                        <option value="ROY">ROY - TRANSAKSI JUAL BELI MENGANDUNG ROYALTI YANG NILAINYA
+                                            BELUM DAPAT DITENTUKAN</option>
                                         <option value="TIT">TIT - TITIPAN</option>
                                     </select>
                                 </x-field>
@@ -215,8 +224,7 @@
                                     </select>
                                 </x-field>
                                 <x-field label="Berat Bersih (Kg)">
-                                    <input type="number" step="0.001" name="netto"
-                                        value="{{ old('netto') }}"
+                                    <input type="number" step="0.001" name="netto" value="{{ old('netto') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                         required>
                                 </x-field>
@@ -277,10 +285,11 @@
                                         value="{{ $new_ndpbm }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
-                                    <input type="hidden" step="0.01" name="fob" value="0"
-                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <input type="hidden" step="0.01" name="fob" value="0"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <x-field label="Harga Satuan">
-                                    <input type="number" step="0.01" name="harga_satuan" id="harga_satuan" value="{{ old('harga_satuan') }}"
+                                    <input type="number" step="0.01" name="harga_satuan" id="harga_satuan"
+                                        value="{{ old('harga_satuan') }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
@@ -296,9 +305,33 @@
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
+
+                            {{-- ===== Bea dan Pajak ===== --}}
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                                <h4 class="text-md font-medium text-blue-800 mb-3">Bea Masuk</h4>
+                                <div class="grid md:grid-cols-3 gap-4">
+                                    <x-field label="BM(%)">
+                                        <input type="number" value="0" step="0.01" name="bm"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai BM">
+                                    </x-field>
+                                    <x-field label="PPN(%)">
+                                        <input type="number" value="11" step="0.01" name="ppn"
+                                            value="{{ old('ket_ppn') }}"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai PPN">
+                                    </x-field>
+                                    <x-field label="PPH(%)">
+                                        <input type="number" value="2.5" step="0.01" name="pph"
+                                            value="{{ old('ket_pph') }}"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai PPH">
+                                    </x-field>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>                
+                </div>
 
                 {{-- ===== Actions ===== --}}
                 <div class="flex gap-4 pt-6 border-t border-gray-200">

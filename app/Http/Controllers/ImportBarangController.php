@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\ImportBarang;
 use App\Models\ImportDokumen;
 use App\Models\ImportTransaksi;
+use App\Models\ImportBarangDokumen;
+use App\Models\ImportBarangVd;
+use App\Models\ImportBarangTarif;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -37,7 +40,6 @@ class ImportBarangController extends Controller
         $transaksiData = ImportTransaksi::where('import_notification_id', null)->first();
         $new_ndpbm = $transaksiData ? $transaksiData->ndpbm : 1;
         $dokumenData = ImportDokumen::where('import_notification_id', null)->whereNotNull('kode_fasilitas')->get();
-        //dd($dokumenData);
         return view('import.sections.barang-add', compact('new_ndpbm', 'dokumenData'));
     }
 
@@ -64,7 +66,47 @@ class ImportBarangController extends Controller
             'freight' => $request->input('freight'),
             'asuransi' => $request->input('asuransi'),
         ]);
-
+        ImportBarangVd::create([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_vd' => $request->input('kodeJenisVd'),
+            'nilai_barang' => 0,            
+        ]);
+        ImportBarangTarif::create([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('bm')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('bm')/100),
+            'kode_pungutan' => 'BM',
+        ]);
+        ImportBarangTarif::create([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('ppn')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('ppn')/100),
+            'kode_pungutan' => 'PPN',
+        ]);
+        ImportBarangTarif::create([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('pph')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('pph')/100),
+            'kode_pungutan' => 'PPH',
+        ]);
+        ImportBarangDokumen::create([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'seri_dokumen' => $request->input('dok_fasilitas'),
+        ]);
         return redirect()->route('import.create', ['step' => 'barang'])
             ->with('success', 'Barang berhasil ditambahkan');
     }

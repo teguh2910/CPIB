@@ -36,14 +36,24 @@
                                 <span class="px-2 py-1 rounded text-xs border">{{ $r->status }}</span>
                             </td>
                             <td class="py-2">
-                                <a href="{{ route('import.edit', $r->id) }}"
+                                <a href="{{ route('import.edit', $r->import_notification_id) }}"
                                     class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Edit</a>
-                                    <a href="{{ route('import.export', $r->id) }}"
+                                <a href="{{ route('import.export', $r->import_notification_id) }}"
                                     class="px-2 py-1 bg-green-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200">Export</a>
-                                    <a href="{{ route('import.export.json', $r->id) }}"
+                                <form method="POST" action="{{ route('import.destroy', $r->import_notification_id) }}"
+                                    class="inline-block ml-2"
+                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="px-2 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-200">
+                                        Hapus
+                                    </button>
+                                </form>
+                                <a href="{{ route('import.export.json', $r->import_notification_id) }}"
                                     class="ml-2 px-2 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Kirim
                                     CIESA(under dev)</a>
-                                
+
                             </td>
                         </tr>
                     @empty
