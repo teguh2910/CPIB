@@ -83,6 +83,7 @@ class ImportBarangController extends Controller
             'nilai_bayar' => $request->input('cif_rupiah')*($request->input('bm')/100),
             'kode_pungutan' => 'BM',
         ]);
+        $nilai_bm=$request->input('cif_rupiah')*($request->input('bm')/100);
         ImportBarangTarif::create([
             'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
@@ -90,7 +91,7 @@ class ImportBarangController extends Controller
             'tarif' => ($request->input('ppn')),
             'kode_fasilitas' => 1,
             'tarif_fasilitas' => 100,
-            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('ppn')/100),
+            'nilai_bayar' => ($request->input('cif_rupiah')+$nilai_bm)*($request->input('ppn')/100),
             'kode_pungutan' => 'PPN',
         ]);
         ImportBarangTarif::create([
@@ -100,7 +101,7 @@ class ImportBarangController extends Controller
             'tarif' => ($request->input('pph')),
             'kode_fasilitas' => 1,
             'tarif_fasilitas' => 100,
-            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('pph')/100),
+            'nilai_bayar' => ($request->input('cif_rupiah')+$nilai_bm)*($request->input('pph')/100),
             'kode_pungutan' => 'PPH',
         ]);
         if($request->input('dok_fasilitas')!=null)
@@ -173,6 +174,7 @@ class ImportBarangController extends Controller
             'nilai_bayar' => $request->input('cif_rupiah')*($request->input('bm')/100),
             'kode_pungutan' => 'BM',
         ]);
+        $nilai_bm=$request->input('cif_rupiah')*($request->input('bm')/100);
         $ImportBarangTarif=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->first();
         $ImportBarangTarif->update([
             'user_id' => 1,
@@ -181,7 +183,7 @@ class ImportBarangController extends Controller
             'tarif' => ($request->input('ppn')),
             'kode_fasilitas' => 1,
             'tarif_fasilitas' => 100,
-            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('ppn')/100),
+            'nilai_bayar' => ($request->input('cif_rupiah')+$nilai_bm)*($request->input('ppn')/100),
             'kode_pungutan' => 'PPN',
         ]);
         $ImportBarangTarif=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->first();
@@ -192,7 +194,7 @@ class ImportBarangController extends Controller
             'tarif' => ($request->input('pph')),
             'kode_fasilitas' => 1,
             'tarif_fasilitas' => 100,
-            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('pph')/100),
+            'nilai_bayar' => ($request->input('cif_rupiah')+$nilai_bm)*($request->input('pph')/100),
             'kode_pungutan' => 'PPH',
         ]);
         if($request->input('dok_fasilitas')!=null)
