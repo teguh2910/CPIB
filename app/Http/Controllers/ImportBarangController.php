@@ -102,11 +102,14 @@ class ImportBarangController extends Controller
             'nilai_bayar' => $request->input('cif_rupiah')*($request->input('pph')/100),
             'kode_pungutan' => 'PPH',
         ]);
-        ImportBarangDokumen::create([
-            'user_id' => 1,
-            'seri_barang' => $request->input('seri_barang'),
-            'seri_dokumen' => $request->input('dok_fasilitas'),
-        ]);
+        if($request->input('dok_fasilitas')!=null)
+            {
+            ImportBarangDokumen::create([
+                'user_id' => 1,
+                'seri_barang' => $request->input('seri_barang'),
+                'seri_dokumen' => $request->input('dok_fasilitas'),
+            ]);
+            }
         return redirect()->route('import.create', ['step' => 'barang'])
             ->with('success', 'Barang berhasil ditambahkan');
     }

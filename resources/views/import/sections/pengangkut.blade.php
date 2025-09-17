@@ -96,7 +96,7 @@
             </div>
 
             <x-field label="Perkiraan Tanggal Tiba (ETA)">
-                <input type="date" name="tanggal_tiba" class="w-full border rounded px-3 py-2"
+                <input type="date" name="tanggal_tiba" required class="w-full border rounded px-3 py-2"
                     value="{{ old('tanggal_tiba', $pengangkut[0]->tanggal_tiba ?? $etaValue) }}">
             </x-field>
         </div>

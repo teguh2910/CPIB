@@ -92,8 +92,8 @@ Route::middleware('auth.session')->group(function () {
         'update' => 'parties.update',
         'destroy' => 'parties.destroy',
     ]);
-    Route::get('/master/parties/template', [PartyController::class, 'downloadTemplate'])->name('parties.template');
-    Route::post('/master/parties/upload-excel', [PartyController::class, 'uploadExcel'])->name('parties.upload-excel');
+    Route::get('/masters/parties/template', [PartyController::class, 'downloadTemplate'])->name('parties.template');
+    Route::post('/masters/parties/upload-excel', [PartyController::class, 'uploadExcel'])->name('parties.upload-excel');
 
     // Export all tables to Excel (each table -> separate sheet)
     Route::get('export/all', [ImportNotificationController::class, 'exportAll'])->name('import.exportAll');

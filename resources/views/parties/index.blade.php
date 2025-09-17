@@ -6,14 +6,17 @@
         <div class="flex items-center justify-between mb-4">
             <h1 class="text-xl font-semibold">Master Pengirim & Penjual</h1>
             <div class="flex gap-2">
-                <a href="{{ route('parties.template') }}" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Download Template</a>
-                <form method="POST" action="{{ route('parties.upload-excel') }}" enctype="multipart/form-data" class="flex gap-2">
+                <a href="{{ route('parties.template') }}" class="px-3 py-2 rounded bg-blue-600 text-white text-sm">Download
+                    Template</a>
+                <form method="POST" action="{{ route('parties.upload-excel') }}" enctype="multipart/form-data"
+                    class="flex gap-2">
                     @csrf
                     <input type="file" name="excel_file" accept=".xlsx,.xls" required
                         class="text-sm border rounded px-2 py-1">
                     <button type="submit" class="px-3 py-2 rounded bg-green-600 text-white text-sm">Upload Excel</button>
                 </form>
-                <a href="{{ route('parties.create') }}" class="px-3 py-2 rounded bg-black text-white text-sm">Tambah Baru</a>
+                <a href="{{ route('parties.create') }}" class="px-3 py-2 rounded bg-black text-white text-sm">Tambah
+                    Baru</a>
             </div>
         </div>
 
