@@ -8,6 +8,7 @@ use App\Models\ImportTransaksi;
 use App\Models\ImportBarangDokumen;
 use App\Models\ImportBarangVd;
 use App\Models\ImportBarangTarif;
+use App\Models\ImportPungutan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -117,14 +118,24 @@ class ImportBarangController extends Controller
     public function edit($id)
     {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
+        $vd=ImportBarangVd::where('id', $id)->first();
+        $barang_dokumen = ImportBarangDokumen::where('id', $id)->first();
+        $dokumenData = ImportDokumen::where('seri', $barang_dokumen->seri_dokumen)->first();
+        $dokumen=ImportDokumen::where('import_notification_id', $barang->import_notification_id)->get();
+        $new_ndpbm = ImportTransaksi::where('import_notification_id', $barang->import_notification_id)->first();
+        $new_ndpbm = $new_ndpbm->ndpbm;
+        $barang_tarif_bm = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->first();
+        $barang_tarif_ppn = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->first();
+        $barang_tarif_pph = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->first();
+        return view('import.sections.barang-edit', compact('barang', 'vd', 'dokumenData', 'dokumen', 'new_ndpbm', 'barang_tarif_bm', 'barang_tarif_ppn', 'barang_tarif_pph'));
 
-        return view('import.sections.barang-edit', compact('barang'));
     }
 
     public function update(Request $request, $id)
     {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
         $barang->update([
+            'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
             'hs' => $request->input('hs'),
             'pernyataan_lartas' => $request->input('pernyataan_lartas'),
@@ -144,7 +155,64 @@ class ImportBarangController extends Controller
             'freight' => $request->input('freight'),
             'asuransi' => $request->input('asuransi'),
         ]);
-
+        $ImportBarangVd=ImportBarangVd::where('id', $id)->first();
+        $ImportBarangVd->update([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_vd' => $request->input('kodeJenisVd'),
+            'nilai_barang' => 0,            
+        ]);
+        $ImportBarangTarif=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->first();
+        $ImportBarangTarif->update([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('bm')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('bm')/100),
+            'kode_pungutan' => 'BM',
+        ]);
+        $ImportBarangTarif=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->first();
+        $ImportBarangTarif->update([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('ppn')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('ppn')/100),
+            'kode_pungutan' => 'PPN',
+        ]);
+        $ImportBarangTarif=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->first();
+        $ImportBarangTarif->update([
+            'user_id' => 1,
+            'seri_barang' => $request->input('seri_barang'),
+            'kode_tarif' => 1,
+            'tarif' => ($request->input('pph')),
+            'kode_fasilitas' => 1,
+            'tarif_fasilitas' => 100,
+            'nilai_bayar' => $request->input('cif_rupiah')*($request->input('pph')/100),
+            'kode_pungutan' => 'PPH',
+        ]);
+        if($request->input('dok_fasilitas')!=null)
+            {
+            $ImportBarangDokumen=ImportBarangDokumen::where('id', $id)->first();
+            $ImportBarangDokumen->update([
+                'user_id' => 1,
+                'seri_barang' => $request->input('seri_barang'),
+                'seri_dokumen' => $request->input('dok_fasilitas'),
+            ]);
+            }
+        $bm=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->sum('nilai_bayar');
+        $ppn=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->sum('nilai_bayar');
+        $pph=ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->sum('nilai_bayar');
+        ImportPungutan::where('import_notification_id', $barang->import_notification_id)->update([
+            'bea_masuk' => $bm,
+            'ppn' => $ppn,
+            'pph' => $pph,
+            'total_pungutan' => $bm+$ppn+$pph,
+        ]);
         return redirect()->back()
             ->with('success', 'Barang berhasil diperbarui');
     }

@@ -5,7 +5,7 @@
     $opsAsuransi = config('import.jenis_asuransi');
     $t = $transaksi[0] ?? [];
     $apiUrl = config('services.pelabuhan_api.url');
-    $apiToken = config('services.pelabuhan_api.token');
+    $apiToken = \App\Services\PelabuhanApiService::getToken();
 @endphp
 
 <div class="grid md:grid-cols-2 gap-4">
@@ -95,22 +95,22 @@
             <div class="grid grid-cols-1 gap-3">
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Biaya Penambah">
-                        <input type="number" step="0.01" value='0' name="biaya_tambahan"
+                        <input type="number" step="0.01" name="biaya_tambahan"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('biaya_tambahan', $t['biaya_tambahan'] ?? '') }}">
+                            value="{{ old('biaya_tambahan', $t['biaya_tambahan'] ?? '0') }}">
                     </x-field>
                     <x-field label="Biaya Pengurang">
-                        <input type="number" step="0.01" value='0' name="biaya_pengurang"
+                        <input type="number" step="0.01" name="biaya_pengurang"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('biaya_pengurang', $t['biaya_pengurang'] ?? '') }}">
+                            value="{{ old('biaya_pengurang', $t['biaya_pengurang'] ?? '0') }}">
                     </x-field>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Freight">
-                        <input type="number" step="0.01" value='0' name="freight"
+                        <input type="number" step="0.01" name="freight"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('freight', $t['freight'] ?? '') }}">
+                            value="{{ old('freight', $t['freight'] ?? '0') }}">
                     </x-field>
                     <x-field label="Jenis Asuransi">
                         <select name="kode_asuransi" class="w-full border rounded px-3 py-2" required>
@@ -125,16 +125,16 @@
 
                 <div class="grid md:grid-cols-2 gap-3">
                     <x-field label="Amount Asuransi">
-                        <input type="number" step="0.01" value='0' name="asuransi"
+                        <input type="number" step="0.01" name="asuransi"
                             class="w-full border rounded px-3 py-2"
-                            value="{{ old('asuransi', $t['asuransi'] ?? '') }}">
+                            value="{{ old('asuransi', $t['asuransi'] ?? '0') }}">
                     </x-field>
                     <div class="grid grid-cols-1 gap-1">
                         <label class="text-sm">Voluntary Declaration</label>
                         <div class="flex items-center gap-3">
-                            <input type="number" step="0.01" value='0' name="vd"
+                            <input type="number" step="0.01" name="vd"
                                 placeholder="Amount" class="w-full border rounded px-3 py-2"
-                                value="{{ old('vd', $t['vd'] ?? '') }}">
+                                value="{{ old('vd', $t['vd'] ?? '0') }}">
                         </div>
                     </div>
                 </div>

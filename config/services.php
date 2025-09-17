@@ -37,7 +37,8 @@ return [
 
     'pelabuhan_api' => [
         'url' => env('PELABUHAN_API_URL'),
-        'token' => env('PELABUHAN_API_TOKEN'),
+        // token is dynamic per-login and stored in session; access via App\Services\PelabuhanApiService::getToken()
+        'token' => null,
     ],
 
 ];

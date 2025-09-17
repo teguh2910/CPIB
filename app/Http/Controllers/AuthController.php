@@ -37,24 +37,8 @@ class AuthController extends Controller
 
         $apiData = $response->json('item');
 
-        // Update .env file with new access token
-        $envFile = base_path('.env');
-        if (File::exists($envFile)) {
-            $envContent = File::get($envFile);
-            $newToken = $apiData['access_token'];
-
-            // Replace the PELABUHAN_API_TOKEN line
-            $envContent = preg_replace(
-                '/^PELABUHAN_API_TOKEN=.*/m',
-                'PELABUHAN_API_TOKEN='.$newToken,
-                $envContent
-            );
-
-            File::put($envFile, $envContent);
-
-            // Clear config cache to reload the new token
-            \Artisan::call('config:clear');
-        }
+        // Do NOT write token to .env; store it in session only
+        \App\Services\PelabuhanApiService::storeToken($apiData['access_token'], (int) ($apiData['expires_in'] ?? 3600));
 
         // Find or create local user
         // Ensure email is not null (database requires NOT NULL). If API doesn't provide email,
@@ -70,9 +54,7 @@ class AuthController extends Controller
             ]
         );
 
-        // Store API token and user info in session
-        $request->session()->put('access_token', $apiData['access_token']);
-        $request->session()->put('token_expires_at', now()->addSeconds($apiData['expires_in'])->timestamp);
+    // Store API user info in session (token already stored by service)
         $request->session()->put('user_id', $user->id);
         $request->session()->put('user_name', $user->name);
         $request->session()->put('api_user_data', $apiData);
@@ -97,7 +79,8 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         // Clear API related session data
-        $request->session()->forget(['access_token', 'api_user_data', 'token_expires_at']);
+        \App\Services\PelabuhanApiService::clearToken();
+        $request->session()->forget(['api_user_data']);
 
         return redirect()->route('login.form');
     }

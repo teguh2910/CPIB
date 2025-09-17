@@ -12,21 +12,9 @@
     $opsKetPPN = config('import.ket_ppn');
     $opsKetPPH = config('import.ket_pph');
 
-    // Get NDPBM from transaksi data
-    $transaksiData = \App\Models\ImportTransaksi::where('user_id', auth()->id())->first();
-    $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
+    
 
-    // Ambil daftar dokumen untuk dropdown fasilitas/lartas
-    $dokumenData = \App\Models\ImportDokumen::where('user_id', auth()->id())->get();
-    $dokList = $dokumenData
-        ->map(function ($d) {
-            $jenis = config('import.jenis_dokumen')[$d->jenis] ?? $d->jenis;
-            $tgl = $d->tanggal ?? '';
-            $no = $d->nomor ?? '';
-            return trim("$jenis - $no ($tgl)");
-        })
-        ->values()
-        ->all();
+    
 @endphp
 
 @section('content')
@@ -103,7 +91,7 @@
         <form action="{{ route('barang.update', $barang->id) }}" method="POST" class="p-6">
             @csrf
             @method('PUT')  
-            <input type="hidden" name="ndpbm" value="{{ $ndpbm }}">
+            <input type="hidden" name="ndpbm" value="{{ $new_ndpbm }}">
 
             @if ($errors->any())
                 <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
@@ -176,6 +164,36 @@
                                                 {{ $v }}
                                             </option>
                                         @endforeach
+                                    </select>
+                                </x-field>
+                                <x-field label="Fasilitas">
+                                    <select name="dok_fasilitas"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">-- Pilih Fasilitas --</option>
+                                        @foreach ($dokumen as $dok)
+                                            <option value="{{ $dok->seri }}"
+                                                @if ($dok->seri === $dokumenData->seri) selected @endif>
+                                                {{ 'Kode ' . $dok->kode_dokumen . ' - ' . ' Nomor ' . $dok->nomor_dokumen . ' (' . $dok->tanggal_dokumen->format('d-m-Y') . ')' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </x-field>
+                                <x-field label="Jenis Transaksi">
+                                    <select name="kodeJenisVd"
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">-- Pilih Jenis Transaksi --</option>
+                                        <option value="NTR" {{ (old('kode_vd') ?? $vd->kode_vd) == 'NTR' ? 'selected' : '' }}>NTR - TRANSAKSI JUAL BELI</option>
+                                        <option value="BTR" {{ (old('kode_vd') ?? $vd->kode_vd) == 'BTR' ? 'selected' : '' }}>BTR - BUKAN TRANSAKSI JUAL BELI</option>
+                                        <option value="CAM" {{ (old('kode_vd') ?? $vd->kode_vd) == 'CAM' ? 'selected' : '' }}>CAM - Barang terdiri dari barang-barang yang merupakan obyek transaksi gabungan dari dua atau lebih jenis transaksi 1 sampai dengan 10</option>
+                                        <option value="CMA" {{ (old('kode_vd') ?? $vd->kode_vd) == 'CMA' ? 'selected' : '' }}>CMA - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG HADIAH/PROMOSI/CONTOH</option>
+                                        <option value="FTR" {{ (old('kode_vd') ?? $vd->kode_vd) == 'FTR' ? 'selected' : '' }}>FTR - TRANSAKSI JUAL BELI BERDASARKAN HARGA FUTURES (FUTURE PRICE), YAITU HARGA YANG BARU DAPAT DITENTUKAN SETELAH PIB DISAMPAIKAN</option>
+                                        <option value="HBH" {{ (old('kode_vd') ?? $vd->kode_vd) == 'HBH' ? 'selected' : '' }}>HBH - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG BANTUAN/HIBAH</option>
+                                        <option value="ITM" {{ (old('kode_vd') ?? $vd->kode_vd) == 'ITM' ? 'selected' : '' }}>ITM - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG YANG DIIMPOR OLEH INTERMEDIARY YANG TIDAK MEMBELI BARANG</option>
+                                        <option value="KON" {{ (old('kode_vd') ?? $vd->kode_vd) == 'KON' ? 'selected' : '' }}>KON - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG KONSINYASI</option>
+                                        <option value="LES" {{ (old('kode_vd') ?? $vd->kode_vd) == 'LES' ? 'selected' : '' }}>LES - BUKAN TRANSAKSI JUAL BELI BERUPA BARANG SEWA (LEASING)</option>
+                                        <option value="PRO" {{ (old('kode_vd') ?? $vd->kode_vd) == 'PRO' ? 'selected' : '' }}>PRO - TRANSAKSI JUAL BELI MENGANDUNG PROCEEDS YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
+                                        <option value="ROY" {{ (old('kode_vd') ?? $vd->kode_vd) == 'ROY' ? 'selected' : '' }}>ROY - TRANSAKSI JUAL BELI MENGANDUNG ROYALTI YANG NILAINYA BELUM DAPAT DITENTUKAN</option>
+                                        <option value="TIT" {{ (old('kode_vd') ?? $vd->kode_vd) == 'TIT' ? 'selected' : '' }}>TIT - TITIPAN</option>
                                     </select>
                                 </x-field>
                             </div>
@@ -253,26 +271,52 @@
                                         value="{{ old('cif_rupiah') ?? $barang->cif_rupiah }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
-                                <x-field label="FOB">
-                                    <input type="number" step="0.01" name="fob" value="{{ old('fob') ?? $barang->fob }}"
+                                <x-field label="NDPBM">
+                                    <input type="number" step="0.01" name="ndpbm" id="ndpbm"
+                                        value="{{ $new_ndpbm }}" readonly
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
+                                <input type="hidden" step="0.01" name="fob" value="0"
+                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <x-field label="Harga Satuan">
-                                    <input type="number" step="0.01" name="harga_satuan" value="{{ old('harga_satuan') ?? $barang->harga_satuan }}"
+                                    <input type="number" step="0.01" name="harga_satuan" id="harga_satuan"
+                                        value="{{ old('harga_satuan') ?? $barang->harga_satuan }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <x-field label="Freight">
                                     <input type="number" step="0.01" name="freight"
-                                        value="{{ old('freight') ?? $barang->freight }}"
+                                        value="{{ old('freight') ?? $barang->freight ?? '0' }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
                                 <x-field label="Asuransi">
                                     <input type="number" step="0.01" name="asuransi"
-                                        value="{{ old('asuransi') ?? $barang->asuransi }}"
+                                        value="{{ old('asuransi') ?? $barang->asuransi ?? '0' }}"
                                         class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 </x-field>
+                            </div>
+
+                            {{-- ===== Bea dan Pajak ===== --}}
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+                                <h4 class="text-md font-medium text-blue-800 mb-3">Bea Masuk</h4>
+                                <div class="grid md:grid-cols-3 gap-4">
+                                    <x-field label="BM(%)">
+                                        <input type="number" value="{{ old('bm') ?? $barang_tarif_bm->tarif ?? '0' }}" step="0.01" name="bm"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai BM">
+                                    </x-field>
+                                    <x-field label="PPN(%)">
+                                        <input type="number" value="{{ old('ppn') ?? $barang_tarif_ppn->tarif ?? '11' }}" step="0.01" name="ppn"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai PPN">
+                                    </x-field>
+                                    <x-field label="PPH(%)">
+                                        <input type="number" value="{{ old('pph') ?? $barang_tarif_pph->tarif ?? '2.5' }}" step="0.01" name="pph"
+                                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Masukkan nilai PPH">
+                                    </x-field>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -284,34 +328,56 @@
                         class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">
                         Simpan Barang
                     </button>
-                    <button type="button" onclick="history.back()" class="px-6 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300">
-                            Kembali
-                        </button>                </div>
+                    <a href="javascript:history.back()"
+                        class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">
+                        Batal
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const nilaiBarangInput = document.getElementById('nilai_barang');
-            const jumlahInput = document.getElementById('jumlah');
+            // Auto-calculate CIF Rupiah
+            const cifInput = document.getElementById('cif');
+            const ndpbmInput = document.getElementById('ndpbm');
+            const cifRupiahInput = document.getElementById('cif_rupiah');
+
+            function calculateCifRupiah() {
+                const cif = parseFloat(cifInput.value) || 0;
+                const ndpbm = parseFloat(ndpbmInput.value) || 0;
+
+                const cifRupiah = cif * ndpbm;
+                cifRupiahInput.value = cifRupiah.toFixed(2);
+            }
+
+            // Calculate CIF Rupiah on input change
+            if (cifInput) cifInput.addEventListener('input', calculateCifRupiah);
+            if (ndpbmInput) ndpbmInput.addEventListener('input', calculateCifRupiah);
+
+            // Calculate on page load if values exist
+            calculateCifRupiah();
+
+            // Auto-calculate Harga Satuan
+            const jumlahSatuanInput = document.getElementById('jumlah_satuan');
             const hargaSatuanInput = document.getElementById('harga_satuan');
 
             function calculateHargaSatuan() {
-                const nilaiBarang = parseFloat(nilaiBarangInput.value) || 0;
-                const jumlah = parseFloat(jumlahInput.value) || 0;
+                const cif = parseFloat(cifInput.value) || 0;
+                const jumlahSatuan = parseFloat(jumlahSatuanInput.value) || 0;
 
-                if (jumlah > 0) {
-                    const hargaSatuan = nilaiBarang / jumlah;
+                if (jumlahSatuan > 0) {
+                    const hargaSatuan = cif / jumlahSatuan;
                     hargaSatuanInput.value = hargaSatuan.toFixed(2);
                 } else {
                     hargaSatuanInput.value = '';
                 }
             }
 
-            // Calculate on input change
-            nilaiBarangInput.addEventListener('input', calculateHargaSatuan);
-            jumlahInput.addEventListener('input', calculateHargaSatuan);
+            // Calculate Harga Satuan on input change
+            if (cifInput) cifInput.addEventListener('input', calculateHargaSatuan);
+            if (jumlahSatuanInput) jumlahSatuanInput.addEventListener('input', calculateHargaSatuan);
 
             // Calculate on page load if values exist
             calculateHargaSatuan();
@@ -343,6 +409,13 @@
             // Initialize Select2 for Jenis Kemasan
             $('select[name="kode_kemasan"]').select2({
                 placeholder: '-- Pilih Kemasan --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Fasilitas
+            $('select[name="dok_fasilitas"]').select2({
+                placeholder: '-- Pilih Fasilitas --',
                 allowClear: true,
                 width: '100%'
             });

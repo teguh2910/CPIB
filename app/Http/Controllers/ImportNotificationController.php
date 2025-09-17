@@ -1012,7 +1012,7 @@ class ImportNotificationController extends Controller
         $barangData = ImportBarang::where('import_notification_id', $id)->get();
         $pungutan = ImportPungutan::where('import_notification_id', $id)->get();
         $pernyataan = ImportPernyataan::where('import_notification_id', $id)->get();
-        $BM = $pungutan->first()->bm ?? 0;
+        $BM = $pungutan->first()->bea_masuk ?? 0;
         $PPN = $pungutan->first()->ppn ?? 0;
         $PPH = $pungutan->first()->pph ?? 0;
         $total = $BM + $PPN + $PPH;
@@ -1130,6 +1130,8 @@ class ImportNotificationController extends Controller
 
                     ]);                
                 session(['import_draft' => $draft]);
+                return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
+                    ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
             } elseif ($currentStep == 'transaksi') {
                 $transaksi = ImportTransaksi::where('import_notification_id', $importNotification->id)
                     ->first();  
@@ -1151,7 +1153,9 @@ class ImportNotificationController extends Controller
                         'kode_asuransi' => $request->input('kode_asuransi'),
                         'asuransi' => $request->input('asuransi'),
                         'vd' => $request->input('vd'),
-                    ]);           
+                    ]);    
+                    return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
+                    ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');       
                       
             }        
             return redirect()->route('import.edit', $importNotification)->with('success', ucfirst($currentStep).' data saved.')->with('step', $nextStep);
@@ -1271,33 +1275,8 @@ class ImportNotificationController extends Controller
 
             return redirect()->back()->with('success', "Import finished: {$created} created, {$skipped} skipped.");
         }
-        if ($action == 'updateAll') {
-            $userId = 1;
-
-            // Get current NDPMB/harga_ndpbm
-            $transaksiData = ImportTransaksi::where('import_notification_id', $importNotification->id)->first();
-            $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
-
-            $barangs = ImportBarang::where('user_id', $userId)->get();
-            $updated = 0;
-            foreach ($barangs as $b) {
-                $nilaiBarang = $b->nilai_barang ?? 0;
-                $tarifBm = $b->tarif_bm ?? 0;
-                $tarifPpn = $b->ppn_tarif ?? 0;
-                $tarifPph = $b->tarif_pph ?? 0;
-                $b->import_notification_id = $importNotification->id;
-                $b->nilai_pabean_rp = $nilaiBarang * $ndpbm;
-                $b->biaya_bm = ($tarifBm / 100) * $nilaiBarang * $ndpbm;
-                $b->biaya_ppn = ($tarifPpn / 100) * $nilaiBarang * $ndpbm;
-                $b->biaya_pph = ($tarifPph / 100) * $nilaiBarang * $ndpbm;
-
-                if ($b->isDirty()) {
-                    $b->save();
-                    $updated++;
-                }
-            }
-
-            return redirect()->back()->with('success', "Selesai: {$updated} baris diperbarui");
+        if ($action == 'submit') {            
+            return redirect()->route('import.index')->with('success', 'PIB Updated successfully.');
         }
 
     }
@@ -1338,8 +1317,8 @@ class ImportNotificationController extends Controller
     public function searchPelabuhan(Request $request)
     {
         $query = $request->get('q', '');
-        $apiUrl = config('services.pelabuhan_api.url');
-        $apiToken = config('services.pelabuhan_api.token');
+    $apiUrl = config('services.pelabuhan_api.url');
+    $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($query) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1401,8 +1380,8 @@ class ImportNotificationController extends Controller
         
         $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', ''); // Get search term from request
-        $apiUrl = config('services.pelabuhan_api.url');
-        $apiToken = config('services.pelabuhan_api.token');
+    $apiUrl = config('services.pelabuhan_api.url');
+    $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1478,8 +1457,8 @@ class ImportNotificationController extends Controller
         
         $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', '');
-        $apiUrl = config('services.pelabuhan_api.url');
-        $apiToken = config('services.pelabuhan_api.token');
+    $apiUrl = config('services.pelabuhan_api.url');
+    $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1571,8 +1550,8 @@ class ImportNotificationController extends Controller
         $kodeValuta = $request->get('kode_valuta');
         $tanggal = $request->get('tanggal', date('Y-m-d'));
 
-        $apiUrl = config('services.pelabuhan_api.url');
-        $apiToken = config('services.pelabuhan_api.token');
+    $apiUrl = config('services.pelabuhan_api.url');
+    $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeValuta) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
