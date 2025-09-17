@@ -1,9 +1,15 @@
 {{-- Header dengan tombol tambah --}}
 <div class="flex justify-between items-center mb-4">
     <h3 class="text-lg font-semibold">Daftar Barang</h3>
-    <a href="{{ route('barang.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-        + Tambah Barang
-    </a>
+    @if(request()->routeIs('import.edit') && request('step') === 'barang')
+        <a href="{{ url('barangs/creates/' . request()->route('importNotification')->id) }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+            + Tambah Barang
+        </a>
+    @else
+        <a href="{{ route('barang.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+            + Tambah Barang
+        </a>
+    @endif
 
 </div>
 

@@ -51,6 +51,7 @@ Route::middleware('auth.session')->group(function () {
     // Import BARANG
     Route::get('barang', [ImportBarangController::class, 'index'])->name('barang.index');
     Route::get('barang/create', [ImportBarangController::class, 'create'])->name('barang.create');
+    Route::get('barangs/creates/{id}', [ImportBarangController::class, 'creates'])->name('barangs.create');
     Route::post('barang', [ImportBarangController::class, 'store'])->name('barang.store');
     // CSV/Excel upload
     Route::post('barang/upload', [ImportBarangController::class, 'upload'])->name('barang.upload');
@@ -105,5 +106,5 @@ Route::middleware('auth.session')->group(function () {
     Route::get('export/{importNotification}/json', [ImportNotificationController::class, 'exportJsonByNotification'])
         ->whereNumber('importNotification')
         ->name('import.export.json');
-
+    
 });

@@ -10,11 +10,7 @@
     $opsKond = config('import.kondisi_barang');
     $opsKetBM = config('import.ket_bm');
     $opsKetPPN = config('import.ket_ppn');
-    $opsKetPPH = config('import.ket_pph');
-
-    // Get NDPBM from transaksi data
-    $transaksiData = \App\Models\ImportTransaksi::where('user_id', auth()->id())->first();
-    $ndpbm = $transaksiData ? $transaksiData->harga_ndpbm : 1;
+    $opsKetPPH = config('import.ket_pph');    
 
 @endphp
 
@@ -339,7 +335,7 @@
                         class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">
                         Simpan Barang
                     </button>
-                    <a href="{{ route('import.create', ['step' => 'barang']) }}"
+                    <a href="javascript:history.back()"
                         class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium">
                         Batal
                     </a>

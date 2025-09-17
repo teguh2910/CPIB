@@ -39,8 +39,16 @@ class ImportBarangController extends Controller
     {
         // Get NDPBM from transaksi data
         $transaksiData = ImportTransaksi::where('import_notification_id', null)->first();
-        $new_ndpbm = $transaksiData ? $transaksiData->ndpbm : 1;
+        $new_ndpbm = $transaksiData->ndpbm;
         $dokumenData = ImportDokumen::where('import_notification_id', null)->whereNotNull('kode_fasilitas')->get();
+        return view('import.sections.barang-add', compact('new_ndpbm', 'dokumenData'));
+    }
+    public function creates($id)
+    {
+        // Get NDPBM from transaksi data
+        $transaksiData = ImportTransaksi::where('import_notification_id', $id)->first();
+        $new_ndpbm = $transaksiData->ndpbm;
+        $dokumenData = ImportDokumen::where('import_notification_id', $id)->whereNotNull('kode_fasilitas')->get();
         return view('import.sections.barang-add', compact('new_ndpbm', 'dokumenData'));
     }
 
@@ -120,8 +128,9 @@ class ImportBarangController extends Controller
     {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
         $vd=ImportBarangVd::where('id', $id)->first();
-        $barang_dokumen = ImportBarangDokumen::where('id', $id)->first();
-        $dokumenData = ImportDokumen::where('seri', $barang_dokumen->seri_dokumen)->first();
+        $barang_dokumen = ImportBarangDokumen::where('import_notification_id', $barang->import_notification_id)->first();
+        $barang_dokumen2 = ImportBarangDokumen::whereNull('import_notification_id')->first();
+        $dokumenData = ImportDokumen::where('seri', $barang_dokumen->seri_dokumen)->first() ?? ImportDokumen::where('seri', $barang_dokumen2->seri_dokumen)->first();
         $dokumen=ImportDokumen::where('import_notification_id', $barang->import_notification_id)->get();
         $new_ndpbm = ImportTransaksi::where('import_notification_id', $barang->import_notification_id)->first();
         $new_ndpbm = $new_ndpbm->ndpbm;
