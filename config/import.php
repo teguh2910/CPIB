@@ -200,7 +200,6 @@ return [
         'AEO' => 'AEO (Authorized Economic Operator)',
         'MITA' => 'MITA Prioritas',
         'UMUM' => 'Umum',
-        'MITA/AEO' => 'MITA Prioritas dan AEO',
     ],
     'kode_entitas' => [
         '1' => 'IMPORTIR',

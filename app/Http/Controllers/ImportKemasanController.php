@@ -23,6 +23,7 @@ class ImportKemasanController extends Controller
             'jumlah_kemasan' => $validated['jumlah_kemasan'],
             'kode_kemasan' => $validated['kode_kemasan'],
             'merek' => $validated['merek'],
+            'no_aju' => session('nomor_aju'),
         ]);
 
         return redirect()->to(url()->previous())

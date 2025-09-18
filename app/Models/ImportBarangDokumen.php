@@ -12,6 +12,7 @@ class ImportBarangDokumen extends Model
         'import_notification_id',
         'seri_barang',
         'seri_dokumen',
+        'no_aju',
     ];
 
     public function user(): BelongsTo

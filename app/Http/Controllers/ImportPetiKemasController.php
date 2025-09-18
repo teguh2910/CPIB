@@ -18,6 +18,7 @@ class ImportPetiKemasController extends Controller
             'kode_ukuran_kontainer' => $request->input('ukuran'),
             'kode_jenis_kontainer' => $request->input('jenis_muatan'),
             'kode_tipe_kontainer' => $request->input('tipe'),
+            'no_aju' => session('nomor_aju'),
         ]);
 
         return redirect()->to(url()->previous())->with('success', 'Peti Kemas berhasil ditambahkan');

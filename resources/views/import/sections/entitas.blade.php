@@ -57,7 +57,7 @@
                     <select name="importir[kode_status]" class="w-full border rounded px-3 py-2" required>
                         <option value="">-- Pilih Status --</option>
                         @foreach ($statusOpts as $k => $v)
-                            <option value="{{ $k }}" @if ((string) old('importir.kode_status', $e['importir']['kode_status'] ?? 'AEO') === (string) $k) selected @endif>
+                            <option value="{{ $k }}" @if ($k === $entitas_importir->kode_status ?? 'AEO') selected @endif>
                                 {{ $v }}
                             </option>
                         @endforeach

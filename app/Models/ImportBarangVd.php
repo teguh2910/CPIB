@@ -13,6 +13,7 @@ class ImportBarangVd extends Model
         'seri_barang',
         'kode_vd',
         'nilai_barang',
+        'no_aju',
     ];
 
     public function user(): BelongsTo

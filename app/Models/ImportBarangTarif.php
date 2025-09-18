@@ -17,6 +17,7 @@ class ImportBarangTarif extends Model
         'kode_fasilitas',
         'tarif_fasilitas',
         'nilai_bayar',
+        'no_aju',
     ];
 
     public function user(): BelongsTo

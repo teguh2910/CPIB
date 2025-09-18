@@ -34,7 +34,7 @@
         <div class="max-w-6xl mx-auto">
             <div class="bg-white rounded-lg shadow-md">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h1 class="text-2xl font-bold text-gray-800">Create Pemberitahuan Impor Barang (PIB)</h1>
+                    <h1 class="text-2xl font-bold text-gray-800">Create Pemberitahuan Impor Barang (PIB) <br> No Aju {{ session('nomor_aju') ?? 'N/A' }}</h1>
                     <p class="text-gray-600 mt-1">Fill in the details for the new import notification - Step
                         {{ $stepIndex + 1 }} of {{ count($steps) }}</p>
                 </div>

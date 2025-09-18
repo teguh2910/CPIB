@@ -17,6 +17,7 @@ class ImportDokumenController extends Controller
             'nomor_dokumen' => $request->nomor_dokumen,
             'tanggal_dokumen' => $request->tanggal_dokumen,
             'kode_fasilitas' => $request->kode_fasilitas,
+            'no_aju' => session('nomor_aju'),
         ]);
 
         return redirect()->to(url()->previous())
