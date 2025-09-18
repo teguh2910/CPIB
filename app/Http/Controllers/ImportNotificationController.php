@@ -463,13 +463,13 @@ class ImportNotificationController extends Controller
             $requestBody = [
                 'Data Pabean' => json_encode($result),
             ];
-
+            $data_json_asli = json_encode($result);
             // Send POST request to API with query parameter isFinal=false and JSON body
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$bearerToken,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post($apiUrl.'/openapi/document?isFinal=false', $requestBody);
+            ])->post($apiUrl.'/openapi/document?isFinal=false', $data_json_asli);
 
             if ($response->successful()) {
                 return response()->json([
