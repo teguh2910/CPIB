@@ -50,7 +50,7 @@
                                         Hapus
                                     </button>
                                 </form>
-                                <a href="{{ route('import.export.json', $r->import_notification_id) }}"
+                                <a href="{{ route('import.export.json', $r->nomor_aju) }}"
                                     class="ml-2 px-2 py-1 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">Kirim
                                     CIESA(under dev)</a>
 

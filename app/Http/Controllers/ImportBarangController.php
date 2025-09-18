@@ -64,7 +64,7 @@ class ImportBarangController extends Controller
             'pernyataan_lartas' => $request->input('pernyataan_lartas'),
             'kode_barang' => $request->input('kode_barang'),
             'uraian' => $request->input('uraian'),
-            'spesifikasi_lain' => $request->input('spesifikasi_lain'),
+            'kode_kondisi_barang' => $request->input('spesifikasi_lain'),
             'kode_negara_asal' => $request->input('kode_negara_asal'),
             'netto' => $request->input('netto'),
             'jumlah_satuan' => $request->input('jumlah_satuan'),
@@ -72,6 +72,7 @@ class ImportBarangController extends Controller
             'jumlah_kemasan' => $request->input('jumlah_kemasan'),
             'kode_kemasan' => $request->input('kode_kemasan'),
             'cif' => $request->input('cif'),
+            'ndpbm' => $request->input('ndpbm'),
             'cif_rupiah' => $request->input('cif_rupiah'),
             'fob' => $request->input('fob'),
             'harga_satuan' => $request->input('harga_satuan'),
@@ -136,11 +137,16 @@ class ImportBarangController extends Controller
     public function edit($id)
     {
         $barang = ImportBarang::where('id', $id)->firstOrFail();
-        $vd = ImportBarangVd::where('id', $id)->first();
+        $vd = ImportBarangVd::where('no_aju', $barang->no_aju)->first();
         $barang_dokumen = ImportBarangDokumen::where('import_notification_id', $barang->import_notification_id)->first();
         $barang_dokumen2 = ImportBarangDokumen::whereNull('import_notification_id')->first();
-        $dokumenData = ImportDokumen::where('seri', $barang_dokumen->seri_dokumen)->first() ?? ImportDokumen::where('seri', $barang_dokumen2->seri_dokumen)->first();
-        $dokumen = ImportDokumen::where('import_notification_id', $barang->import_notification_id)->get();
+        try{
+            $dokumenData = ImportDokumen::where('seri', $barang_dokumen->seri_dokumen)->first() ?? ImportDokumen::where('seri', $barang_dokumen2->seri_dokumen)->first();
+        }catch(\Exception $e){
+            $dokumenData = ImportDokumen::all();
+                        
+        }
+        $dokumen = ImportDokumen::all();
         $new_ndpbm = ImportTransaksi::where('import_notification_id', $barang->import_notification_id)->first();
         $new_ndpbm = $new_ndpbm->ndpbm;
         $barang_tarif_bm = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->first();
@@ -161,7 +167,8 @@ class ImportBarangController extends Controller
             'pernyataan_lartas' => $request->input('pernyataan_lartas'),
             'kode_barang' => $request->input('kode_barang'),
             'uraian' => $request->input('uraian'),
-            'spesifikasi_lain' => $request->input('spesifikasi_lain'),
+            'kode_kondisi_barang' => $request->input('spesifikasi_lain'),
+            'ndpbm' => $request->input('ndpbm'),
             'kode_negara_asal' => $request->input('kode_negara_asal'),
             'netto' => $request->input('netto'),
             'jumlah_satuan' => $request->input('jumlah_satuan'),
@@ -175,14 +182,14 @@ class ImportBarangController extends Controller
             'freight' => $request->input('freight'),
             'asuransi' => $request->input('asuransi'),
         ]);
-        $ImportBarangVd = ImportBarangVd::where('id', $id)->first();
+        $ImportBarangVd = ImportBarangVd::where('no_aju', $barang->no_aju)->first();
         $ImportBarangVd->update([
             'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
             'kode_vd' => $request->input('kodeJenisVd'),
             'nilai_barang' => 0,
         ]);
-        $ImportBarangTarif = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->first();
+        $ImportBarangTarif = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'BM')->first();
         $ImportBarangTarif->update([
             'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
@@ -194,7 +201,7 @@ class ImportBarangController extends Controller
             'kode_pungutan' => 'BM',
         ]);
         $nilai_bm = $request->input('cif_rupiah') * ($request->input('bm') / 100);
-        $ImportBarangTarif = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->first();
+        $ImportBarangTarif = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'PPN')->first();
         $ImportBarangTarif->update([
             'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
@@ -205,7 +212,7 @@ class ImportBarangController extends Controller
             'nilai_bayar' => ($request->input('cif_rupiah') + $nilai_bm) * ($request->input('ppn') / 100),
             'kode_pungutan' => 'PPN',
         ]);
-        $ImportBarangTarif = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->first();
+        $ImportBarangTarif = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'PPH')->first();
         $ImportBarangTarif->update([
             'user_id' => 1,
             'seri_barang' => $request->input('seri_barang'),
@@ -217,17 +224,17 @@ class ImportBarangController extends Controller
             'kode_pungutan' => 'PPH',
         ]);
         if ($request->input('dok_fasilitas') != null) {
-            $ImportBarangDokumen = ImportBarangDokumen::where('id', $id)->first();
+            $ImportBarangDokumen = ImportBarangDokumen::where('no_aju', $barang->no_aju)->first();
             $ImportBarangDokumen->update([
                 'user_id' => 1,
                 'seri_barang' => $request->input('seri_barang'),
                 'seri_dokumen' => $request->input('dok_fasilitas'),
             ]);
         }
-        $bm = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'BM')->sum('nilai_bayar');
-        $ppn = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPN')->sum('nilai_bayar');
-        $pph = ImportBarangTarif::where('import_notification_id', $barang->import_notification_id)->where('kode_pungutan', 'PPH')->sum('nilai_bayar');
-        ImportPungutan::where('import_notification_id', $barang->import_notification_id)->update([
+        $bm = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'BM')->sum('nilai_bayar');
+        $ppn = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'PPN')->sum('nilai_bayar');
+        $pph = ImportBarangTarif::where('no_aju', $barang->no_aju)->where('kode_pungutan', 'PPH')->sum('nilai_bayar');
+        ImportPungutan::where('no_aju', $barang->no_aju)->update([
             'bea_masuk' => $bm,
             'ppn' => $ppn,
             'pph' => $pph,

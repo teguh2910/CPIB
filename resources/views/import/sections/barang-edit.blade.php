@@ -172,7 +172,7 @@
                                         <option value="">-- Pilih Fasilitas --</option>
                                         @foreach ($dokumen as $dok)
                                             <option value="{{ $dok->seri }}"
-                                                @if ($dok->seri === $dokumenData->seri) selected @endif>
+                                                @if ($dok->seri === (isset($dokumenData) && is_object($dokumenData) && property_exists($dokumenData, 'seri') ? $dokumenData->seri : '')) selected @endif>
                                                 {{ 'Kode ' . $dok->kode_dokumen . ' - ' . ' Nomor ' . $dok->nomor_dokumen . ' (' . $dok->tanggal_dokumen->format('d-m-Y') . ')' }}
                                             </option>
                                         @endforeach

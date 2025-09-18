@@ -191,25 +191,21 @@ class ImportNotificationController extends Controller
     /**
      * Export data related to a single import notification id into a nested JSON structure
      */
-    public function exportJsonByNotification(int $importNotificationId)
-    {
-        $id = $importNotificationId;
+    public function exportJsonByNotification(string $nomorAju)
+    {        
+        $header = ImportHeader::where('nomor_aju', $nomorAju)->first();
+        $transaksi = ImportTransaksi::where('no_aju', $nomorAju)->first();
+        $pernyataan = ImportPernyataan::where('no_aju', $nomorAju)->first();
 
-        $notification = ImportNotification::findOrFail($id);
-
-        $header = ImportHeader::where('import_notification_id', $id)->first();
-        $transaksi = ImportTransaksi::where('import_notification_id', $id)->first();
-        $pernyataan = ImportPernyataan::where('import_notification_id', $id)->first();
-
-        $pengangkuts = ImportPengangkut::where('import_notification_id', $id)->get();
-        $kemasans = ImportKemasan::where('import_notification_id', $id)->get();
-        $petikemas = ImportPetiKemas::where('import_notification_id', $id)->get();
-        $dokumens = ImportDokumen::where('import_notification_id', $id)->get();
+        $pengangkuts = ImportPengangkut::where('no_aju', $nomorAju)->get();
+        $kemasans = ImportKemasan::where('no_aju', $nomorAju)->get();
+        $petikemas = ImportPetiKemas::where('no_aju', $nomorAju)->get();
+        $dokumens = ImportDokumen::where('no_aju', $nomorAju)->get();
         // $entitas = ImportEntitas::where('import_notification_id', $id)->get();
         $entitas = \DB::table('import_entitas')->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
-            ->where('import_entitas.import_notification_id', $id)
+            ->where('import_entitas.no_aju', $nomorAju)
             ->get();
-        $barangs = ImportBarang::where('import_notification_id', $id)->get();
+        $barangs = ImportBarang::where('no_aju', $nomorAju)->get();
 
         // Top level defaults and mappings (assumptions for fields not present in schema)
         $result = [
@@ -301,7 +297,7 @@ class ImportNotificationController extends Controller
                 'nilaiDanaSawit' => 0,
                 'nilaiDevisa' => 0,
                 'nilaiTambah' => 0,
-                'pernyataanLartas' => $b->pernyataan_lartas ? 'Y' : 'N',
+                'pernyataanLartas' => $b->pernyataan_lartas,
                 'persentaseImpor' => 0,
                 'posTarif' => $b->hs ?? null,
                 'saldoAkhir' => 0.0,
@@ -317,7 +313,7 @@ class ImportNotificationController extends Controller
             ];
 
             // barangDokumen
-            $barangDok = ImportBarangDokumen::where('import_notification_id', $id)->where('seri_barang', $seri)->get();
+            $barangDok = ImportBarangDokumen::where('no_aju', $nomorAju)->where('seri_barang', $seri)->get();
             $barang['barangDokumen'] = $barangDok->map(function ($d) {
                 return ['seriDokumen' => (string) $d->seri_dokumen];
             })->toArray();
@@ -325,13 +321,13 @@ class ImportNotificationController extends Controller
             // barangTarif
             $tarifs = \DB::table('import_barangs')
                 ->join('import_barang_tarifs', 'import_barang_tarifs.seri_barang', '=', 'import_barangs.seri_barang')
-                ->where('import_barang_tarifs.import_notification_id', $id)->where('import_barangs.seri_barang', $seri)->get();
+                ->where('import_barang_tarifs.no_aju', $nomorAju)->where('import_barangs.seri_barang', $seri)->get();
             $barang['barangTarif'] = $tarifs->map(function ($t) use ($seri) {
                 return [
                     'jumlahSatuan' => (int) $t->jumlah_satuan ?? 1,
-                    'kodeFasilitasTarif' => $t->kode_fasilitas ?? ($t->kodeFasilitasTarif ?? null),
+                    'kodeFasilitasTarif' => (string) $t->kode_fasilitas ?? ($t->kodeFasilitasTarif ?? null),
                     'kodeJenisPungutan' => $t->kode_pungutan ?? ($t->kodeJenisPungutan ?? null),
-                    'kodeJenisTarif' => $t->kode_tarif ?? ($t->kodeJenisTarif ?? null),
+                    'kodeJenisTarif' => (string)$t->kode_tarif ?? ($t->kodeJenisTarif ?? null),
                     'nilaiBayar' => (int) $t->nilai_bayar ?? 0,
                     'nilaiFasilitas' => $t->nilai_fasilitas ?? 1,
                     'seriBarang' => (int) $seri,
@@ -341,7 +337,7 @@ class ImportNotificationController extends Controller
             })->toArray();
 
             // barangVd
-            $vds = ImportBarangVd::where('import_notification_id', $id)->where('seri_barang', $seri)->get();
+            $vds = ImportBarangVd::where('no_aju', $nomorAju)->where('seri_barang', $seri)->get();
             $barang['barangVd'] = $vds->map(function ($v) {
                 return [
                     'kodeJenisVd' => $v->kode_vd ?? $v->kodeJenisVd ?? null,
