@@ -192,7 +192,7 @@ class ImportNotificationController extends Controller
      * Export data related to a single import notification id into a nested JSON structure
      */
     public function exportJsonByNotification(string $nomorAju)
-    {        
+    {
         $header = ImportHeader::where('nomor_aju', $nomorAju)->first();
         $transaksi = ImportTransaksi::where('no_aju', $nomorAju)->first();
         $pernyataan = ImportPernyataan::where('no_aju', $nomorAju)->first();
@@ -243,7 +243,7 @@ class ImportNotificationController extends Controller
             'ndpbm' => (float) $transaksi->ndpbm ?? 0,
             'netto' => (float) $transaksi->netto ?? 0,
             'nilaiBarang' => (int) $transaksi->nilai_barang ?? 0,
-            'nilaiIncoterm' => (int) $transaksi->nilai_incoterm,
+            'nilaiIncoterm' => (int) $transaksi->nilai_incoterm ?? 0,
             'nilaiMaklon' => 0,
             'nomorAju' => $header->nomor_aju ?? null,
             'nomorBc11' => $pengangkuts->first()->nomor_bc_11 ?? null,
@@ -252,8 +252,8 @@ class ImportNotificationController extends Controller
             'subPosBc11' => $pengangkuts->first()->nomor_sub_pos ?? null,
             'tanggalAju' => optional($header->created_at)->format('Y-m-d') ?? null,
             'tanggalBc11' => $pengangkuts->first()->tanggal_bc_11 ?? null,
-            'tanggalTiba' => $pengangkuts->first()->tanggal_tiba,
-            'tanggalTtd' => $pernyataan->tanggal_pernyataan,
+            'tanggalTiba' => $pengangkuts->first()->tanggal_tiba ?? null,
+            'tanggalTtd' => $pernyataan->tanggal_pernyataan ?? null,
             'totalDanaSawit' => 0,
             'volume' => 0,
             'vd' => (int) $transaksi->vd ?? 0,
@@ -327,7 +327,7 @@ class ImportNotificationController extends Controller
                     'jumlahSatuan' => (int) $t->jumlah_satuan ?? 1,
                     'kodeFasilitasTarif' => (string) $t->kode_fasilitas ?? ($t->kodeFasilitasTarif ?? null),
                     'kodeJenisPungutan' => $t->kode_pungutan ?? ($t->kodeJenisPungutan ?? null),
-                    'kodeJenisTarif' => (string)$t->kode_tarif ?? ($t->kodeJenisTarif ?? null),
+                    'kodeJenisTarif' => (string) $t->kode_tarif ?? ($t->kodeJenisTarif ?? null),
                     'nilaiBayar' => (int) $t->nilai_bayar ?? 0,
                     'nilaiFasilitas' => $t->nilai_fasilitas ?? 1,
                     'seriBarang' => (int) $seri,
@@ -390,7 +390,7 @@ class ImportNotificationController extends Controller
         // kemasan
         $result['kemasan'] = $kemasans->map(function ($k) {
             return [
-                'jumlahKemasan' => $k->jumlah_kemasan ?? 0,
+                'jumlahKemasan' => (int) $k->jumlah_kemasan ?? 0,
                 'kodeJenisKemasan' => $k->kode_kemasan ?? null,
                 'merkKemasan' => $k->merek ?? $k->merk ?? null,
                 'seriKemasan' => (int) $k->seri,
@@ -427,7 +427,7 @@ class ImportNotificationController extends Controller
 
             $item['nomorDokumen'] = $d->nomor_dokumen ?? null;
             $item['seriDokumen'] = (int) $d->seri;
-            $item['tanggalDokumen'] = $d->tanggal_dokumen;
+            $item['tanggalDokumen'] = $d->tanggal_dokumen ?? null;
 
             return $item;
         })->toArray();
@@ -458,19 +458,25 @@ class ImportNotificationController extends Controller
         }
 
         try {
-            // Prepare request body according to API documentation
-            // Request Body: Data Pabean (string) - JSONSchema Dokumen Pabean
-            $requestBody = [
-                'Data Pabean' => json_encode($result),
-            ];
-            $data_json_asli = json_encode($result);
+            // The API expects the raw JSON object directly as the request body
+            // not wrapped in a "Data Pabean" field or double-encoded
+
+            // Log the data being sent for debugging
+            \Log::info('Sending data to API:', ['data' => $result]);
+
             // Send POST request to API with query parameter isFinal=false and JSON body
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$bearerToken,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post($apiUrl.'/openapi/document?isFinal=false', $data_json_asli);
+            ])->post($apiUrl.'/openapi/document?isFinal=false', $result);
 
+            // Log the response for debugging
+            \Log::info('API Response:', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'headers' => $response->headers(),
+            ]);
             if ($response->successful()) {
                 return response()->json([
                     'success' => true,
@@ -534,6 +540,7 @@ class ImportNotificationController extends Controller
         $PPN = ImportBarangTarif::whereNull('import_notification_id')->where('kode_pungutan', 'PPN')->sum('nilai_bayar');
         $PPH = ImportBarangTarif::whereNull('import_notification_id')->where('kode_pungutan', 'PPH')->sum('nilai_bayar');
         $total = $BM + $PPN + $PPH;
+
         return view('import.create', compact('header', 'entitas_importir', 'transaksi', 'dokument', 'entitas_pengirim', 'entitas_penjual', 'pengangkut', 'kemasan', 'petiKemas', 'barangData', 'BM', 'PPN', 'PPH', 'total'));
     }
 
@@ -745,7 +752,7 @@ class ImportNotificationController extends Controller
                         'kode_pelabuhan_tujuan' => $request->input('kode_pelabuhan_tujuan'),
                         'kode_tps' => $request->input('kode_tps'),
                         'no_aju' => session('nomor_aju'),
-                    ]);                    
+                    ]);
                 } else {
                     $savedPengangkut = ImportPengangkut::create([
                         'user_id' => Auth::user()->id ?? 1,
@@ -1141,6 +1148,7 @@ class ImportNotificationController extends Controller
             // Clear the session draft after successful submission
             session()->forget('nomor_aju');
         }
+
         return redirect()->route('import.index')->with('success', 'PIB created successfully.');
     }
 
@@ -1193,7 +1201,7 @@ class ImportNotificationController extends Controller
                 $header = ImportHeader::where('import_notification_id', $importNotification->id)->first();
                 $header->update($request->input('header'));
                 session(['nomor_aju' => $header->nomor_aju]);
-            } 
+            }
             if ($currentStep == 'entitas') {
                 $entitas_importir = ImportEntitas::where('no_aju', session('nomor_aju'))->where('kode_entitas', 1)->first();
                 $entitas_importir->update([
@@ -1245,8 +1253,8 @@ class ImportNotificationController extends Controller
                     'alamat_identitas' => $request->input('penjual')['alamat_identitas5'],
                     'kode_negara' => $request->input('penjual')['kode_negara2'],
                 ]);
-                
-            } 
+
+            }
             if ($currentStep === 'pengangkut') {
                 $existingPengangkut = ImportPengangkut::where('no_aju', session('nomor_aju'))
                     ->first();
@@ -1268,7 +1276,7 @@ class ImportNotificationController extends Controller
                     'kode_tps' => $request->input('kode_tps'),
 
                 ]);
-            } 
+            }
             if ($currentStep === 'transaksi') {
                 $transaksi = ImportTransaksi::where('no_aju', session('nomor_aju'))
                     ->first();
@@ -1290,7 +1298,7 @@ class ImportNotificationController extends Controller
                     'kode_asuransi' => $request->input('kode_asuransi'),
                     'asuransi' => $request->input('asuransi'),
                     'vd' => $request->input('vd'),
-                ]);                
+                ]);
             }
             if ($currentStep === 'pungutan') {
                 $pungutan = ImportPungutan::where('no_aju', session('nomor_aju'))
@@ -1301,7 +1309,7 @@ class ImportNotificationController extends Controller
                     'ppn' => $request->input('ppn'),
                     'pph' => $request->input('pph'),
                     'total_pungutan' => $request->input('total'),
-                ]);                
+                ]);
             }
             if ($currentStep === 'pernyataan') {
                 $pernyataan = ImportPernyataan::where('no_aju', session('nomor_aju'))
@@ -1312,10 +1320,11 @@ class ImportNotificationController extends Controller
                     'jabatan_pernyataan' => $request->input('jabatan_pernyataan'),
                     'kota_pernyataan' => $request->input('kota_pernyataan'),
                     'tanggal_pernyataan' => $request->input('tanggal_pernyataan'),
-                ]);                
+                ]);
             }
+
             return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
-                ->with('success', ucfirst($currentStep).' data saved successfully. Please continue with the next step.');            
+                ->with('success', ucfirst($currentStep).' data saved successfully. Please continue with the next step.');
         }
 
         if ($action === 'import') {
