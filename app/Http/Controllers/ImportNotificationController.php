@@ -215,7 +215,7 @@ class ImportNotificationController extends Controller
         $result = [
             'asalData' => 'S', // assumption: source S
             'asuransi' => $transaksi->asuransi ?? 0,
-            'biayaPengurang' => $transaksi->biaya_pengurang ?? 0,
+            'biayaPengurang' => (int) $transaksi->biaya_pengurang ?? 0,
             'biayaTambahan' => $transaksi->biaya_tambahan ?? 0,
             'bruto' => $transaksi->bruto ?? 0,
             'cif' => $transaksi->cif ?? 0,
@@ -447,10 +447,12 @@ class ImportNotificationController extends Controller
             ];
         })->toArray();
 
+        // TEMPORARILY COMMENTED OUT - API sending disabled for JSON inspection
         // Send data to API according to documentation:
         // Query Parameters: isFinal=false (boolean, default=false for draft)
         // Headers: Authorization=Bearer {token}
         // Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
+        /*
         $apiUrl = config('services.document_api.url');
         $bearerToken = \App\Services\PelabuhanApiService::getToken();
 
@@ -497,6 +499,17 @@ class ImportNotificationController extends Controller
                 'data' => $result,
             ], 500, [], JSON_PRETTY_PRINT);
         }
+        */
+
+        // TEMPORARY: Return JSON data for inspection
+        return response()->json([
+            'message' => 'JSON format inspection - API sending is commented out',
+            'data_pabean_json' => json_encode($result),
+            'data_pabean_object' => $result,
+            'api_request_body_would_be' => [
+                'Data Pabean' => json_encode($result),
+            ],
+        ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
