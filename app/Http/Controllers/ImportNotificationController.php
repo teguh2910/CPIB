@@ -447,7 +447,10 @@ class ImportNotificationController extends Controller
             ];
         })->toArray();
 
-        // Send data to API
+        // Send data to API according to documentation:
+        // Query Parameters: isFinal=false (boolean, default=false for draft)
+        // Headers: Authorization=Bearer {token}
+        // Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
         $apiUrl = config('services.document_api.url');
         $bearerToken = \App\Services\PelabuhanApiService::getToken();
 
@@ -458,11 +461,18 @@ class ImportNotificationController extends Controller
         }
 
         try {
+            // Prepare request body according to API documentation
+            // Request Body: Data Pabean (string) - JSONSchema Dokumen Pabean
+            $requestBody = [
+                'Data Pabean' => json_encode($result),
+            ];
+
+            // Send POST request to API with query parameter isFinal=false and JSON body
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$bearerToken,
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
-            ])->post($apiUrl.'/openapi/document?isFinal=false', $result);
+            ])->post($apiUrl.'/openapi/document?isFinal=false', $requestBody);
 
             if ($response->successful()) {
                 return response()->json([
@@ -1148,7 +1158,7 @@ class ImportNotificationController extends Controller
                 // Redirect back to the edit form for this notification and go to the next step
                 return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
                     ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
-            } elseif  ($currentStep === 'pengangkut') {
+            } elseif ($currentStep === 'pengangkut') {
                 $existingPengangkut = ImportPengangkut::where('import_notification_id', $importNotification->id)
                     ->first();
                 $existingPengangkut = ImportPengangkut::create([
