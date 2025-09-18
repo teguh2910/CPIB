@@ -230,7 +230,7 @@ class ImportNotificationController extends Controller
             'jumlahTandaPengaman' => 0,
             'kodeAsuransi' => $transaksi->kode_asuransi ?? null,
             'kodeCaraBayar' => $header->kode_cara_bayar ?? null,
-            'kodeDokumen' => 20,
+            'kodeDokumen' => "20",
             'kodeIncoterm' => $transaksi->kode_incoterm ?? null,
             'kodeJenisImpor' => $header->kode_jenis_impor ?? null,
             'kodeJenisNilai' => $transaksi->kode_jenis_nilai ?? null,
