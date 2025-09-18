@@ -448,7 +448,6 @@ class ImportNotificationController extends Controller
         // Query Parameters: isFinal=false (boolean, default=false for draft)
         // Headers: Authorization=Bearer {token}
         // Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
-        /*
         $apiUrl = config('services.document_api.url');
         $bearerToken = \App\Services\PelabuhanApiService::getToken();
 
@@ -495,17 +494,16 @@ class ImportNotificationController extends Controller
                 'data' => $result,
             ], 500, [], JSON_PRETTY_PRINT);
         }
-        */
 
         // TEMPORARY: Return JSON data for inspection
-        return response()->json([
-            'message' => 'JSON format inspection - API sending is commented out',
-            'data_pabean_json' => json_encode($result),
-            'data_pabean_object' => $result,
-            'api_request_body_would_be' => [
-                'Data Pabean' => json_encode($result),
-            ],
-        ], 200, [], JSON_PRETTY_PRINT);
+        // return response()->json([
+        //     'message' => 'JSON format inspection - API sending is commented out',
+        //     'data_pabean_json' => json_encode($result),
+        //     'data_pabean_object' => $result,
+        //     'api_request_body_would_be' => [
+        //         'Data Pabean' => json_encode($result),
+        //     ],
+        // ], 200, [], JSON_PRETTY_PRINT);
     }
 
     /**
