@@ -41,4 +41,9 @@ return [
         'token' => null,
     ],
 
+    'document_api' => [
+        'url' => env('PELABUHAN_API_URL'),
+        'token' => null, // Uses same token as pelabuhan_api
+    ],
+
 ];

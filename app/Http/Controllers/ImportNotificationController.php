@@ -18,6 +18,7 @@ use App\Models\ImportPungutan;
 use App\Models\ImportTransaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -37,6 +38,7 @@ class ImportNotificationController extends Controller
             ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
             ->where('kode_entitas', 9)
             ->get();
+
         return view('import.index', compact('importNotifications'));
     }
 
@@ -203,7 +205,7 @@ class ImportNotificationController extends Controller
         $kemasans = ImportKemasan::where('import_notification_id', $id)->get();
         $petikemas = ImportPetiKemas::where('import_notification_id', $id)->get();
         $dokumens = ImportDokumen::where('import_notification_id', $id)->get();
-        //$entitas = ImportEntitas::where('import_notification_id', $id)->get();
+        // $entitas = ImportEntitas::where('import_notification_id', $id)->get();
         $entitas = \DB::table('import_entitas')->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
             ->where('import_entitas.import_notification_id', $id)
             ->get();
@@ -357,32 +359,32 @@ class ImportNotificationController extends Controller
         $result['entitas'] = $entitas->map(function ($e) {
             $entitasItem = [];
 
-            if (!is_null($e->alamat_identitas)) {
+            if (! is_null($e->alamat_identitas)) {
                 $entitasItem['alamatEntitas'] = $e->alamat_identitas;
             }
-            if (!is_null($e->kode_entitas)) {
+            if (! is_null($e->kode_entitas)) {
                 $entitasItem['kodeEntitas'] = $e->kode_entitas;
             }
-            if (!is_null($e->kode_jenis_api)) {
+            if (! is_null($e->kode_jenis_api)) {
                 $entitasItem['kodeJenisApi'] = $e->kode_jenis_api;
             }
-            if (!is_null($e->kode_jenis_identitas)) {
+            if (! is_null($e->kode_jenis_identitas)) {
                 $entitasItem['kodeJenisIdentitas'] = $e->kode_jenis_identitas;
             }
-            if (!is_null($e->kode_status)) {
+            if (! is_null($e->kode_status)) {
                 $entitasItem['kodeStatus'] = $e->kode_status;
             }
-            if (!is_null($e->nama_identitas)) {
+            if (! is_null($e->nama_identitas)) {
                 $entitasItem['namaEntitas'] = $e->name;
             }
-            if (!is_null($e->nib_identitas)) {
+            if (! is_null($e->nib_identitas)) {
                 $entitasItem['nibEntitas'] = $e->nib_identitas;
             }
-            if (!is_null($e->nomor_identitas)) {
+            if (! is_null($e->nomor_identitas)) {
                 $entitasItem['nomorIdentitas'] = $e->nomor_identitas;
             }
             $entitasItem['seriEntitas'] = (int) $e->id; // Always include seriEntitas
-            if (!is_null($e->kode_negara)) {
+            if (! is_null($e->kode_negara)) {
                 $entitasItem['kodeNegara'] = $e->kode_negara;
             }
 
@@ -420,7 +422,7 @@ class ImportNotificationController extends Controller
             $item = [
                 'idDokumen' => (string) $d->id,
                 'kodeDokumen' => $d->kode_dokumen ?? null,
-                'kodeFasilitas' => $d->kode_fasilitas ?? "",
+                'kodeFasilitas' => $d->kode_fasilitas ?? '',
             ];
 
             if ($namaFasilitas !== null) {
@@ -445,7 +447,46 @@ class ImportNotificationController extends Controller
             ];
         })->toArray();
 
-        return response()->json($result, 200, [], JSON_PRETTY_PRINT);
+        // Send data to API
+        $apiUrl = config('services.document_api.url');
+        $bearerToken = \App\Services\PelabuhanApiService::getToken();
+
+        if (! $bearerToken) {
+            return response()->json([
+                'error' => 'No valid API token found. Please authenticate first.',
+            ], 401);
+        }
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer '.$bearerToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ])->post($apiUrl.'/openapi/document?isFinal=false', $result);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data sent to API successfully',
+                    'api_response' => $response->json(),
+                    'data' => $result,
+                ], 200, [], JSON_PRETTY_PRINT);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'API request failed',
+                    'status_code' => $response->status(),
+                    'api_response' => $response->json(),
+                    'data' => $result,
+                ], $response->status(), [], JSON_PRETTY_PRINT);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error sending data to API: '.$e->getMessage(),
+                'data' => $result,
+            ], 500, [], JSON_PRETTY_PRINT);
+        }
     }
 
     /**
@@ -926,63 +967,63 @@ class ImportNotificationController extends Controller
 
             // Update all related records with the new import_notification_id
             // Update ImportHeader
-            try {                
-            ImportHeader::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+            try {
+                ImportHeader::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportEntitas
-            ImportEntitas::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportEntitas
+                ImportEntitas::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportDokumen
-            ImportDokumen::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportDokumen
+                ImportDokumen::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportPengangkut
-            ImportPengangkut::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportPengangkut
+                ImportPengangkut::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportKemasan
-            ImportKemasan::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportKemasan
+                ImportKemasan::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportPetiKemas
-            ImportPetiKemas::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportPetiKemas
+                ImportPetiKemas::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportTransaksi
-            ImportTransaksi::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportTransaksi
+                ImportTransaksi::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportBarang
-            ImportBarang::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportBarang
+                ImportBarang::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportBarangTarif
-            ImportBarangTarif::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportBarangTarif
+                ImportBarangTarif::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportBarangDokumen
-            ImportBarangDokumen::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportBarangDokumen
+                ImportBarangDokumen::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportBarangVd
-            ImportBarangVd::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportBarangVd
+                ImportBarangVd::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Update ImportPungutan
-            ImportPungutan::whereNull('import_notification_id')
-                ->update(['import_notification_id' => $notificationId]);
+                // Update ImportPungutan
+                ImportPungutan::whereNull('import_notification_id')
+                    ->update(['import_notification_id' => $notificationId]);
 
-            // Create ImportPernyataan
-            $pernyataan = ImportPernyataan::create([
-                'user_id' => Auth::user()->id,
-                'import_notification_id' => $notificationId,
-                'nama_pernyataan' => $request->input('nama_pernyataan'),
-                'jabatan_pernyataan' => $request->input('jabatan_pernyataan'),
-                'kota_pernyataan' => $request->input('kota_pernyataan'),
-                'tanggal_pernyataan' => $request->input('tanggal_pernyataan'),
-            ]);
+                // Create ImportPernyataan
+                $pernyataan = ImportPernyataan::create([
+                    'user_id' => Auth::user()->id,
+                    'import_notification_id' => $notificationId,
+                    'nama_pernyataan' => $request->input('nama_pernyataan'),
+                    'jabatan_pernyataan' => $request->input('jabatan_pernyataan'),
+                    'kota_pernyataan' => $request->input('kota_pernyataan'),
+                    'tanggal_pernyataan' => $request->input('tanggal_pernyataan'),
+                ]);
             } catch (\Throwable $th) {
                 dd($th);
             }
@@ -1028,7 +1069,7 @@ class ImportNotificationController extends Controller
         $steps = ['header', 'entitas', 'dokumen', 'pengangkut', 'kemasan', 'transaksi', 'barang', 'pungutan', 'pernyataan'];
         $currentStep = $request->input('current_step', 'header');
         $action = $request->input('action', 'submit');
-        
+
         // Get existing draft data from session
         $draft = session('import_draft', []);
         // Update draft with current step data
@@ -1041,7 +1082,7 @@ class ImportNotificationController extends Controller
         session(['import_draft' => $draft]);
         $currentIndex = array_search($currentStep, $steps, true);
         $nextStep = $currentIndex < count($steps) - 1 ? $steps[$currentIndex + 1] : $steps[0];
-        if ($action === 'save_continue') {            
+        if ($action === 'save_continue') {
             if ($currentStep == 'header') {
                 // Update the ImportHeader record linked to this notification
                 $header = ImportHeader::where('import_notification_id', $importNotification->id)->first();
@@ -1052,112 +1093,114 @@ class ImportNotificationController extends Controller
                 return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
                     ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
             } elseif ($currentStep == 'entitas') {
-                $entitas_importir = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas',1)->first();
+                $entitas_importir = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas', 1)->first();
                 $entitas_importir->update([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_entitas' => $request->input('kode_entitas'),
-                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas'),
-                        'nomor_identitas' => $request->input('importir')['nomor_identitas'],
-                        'nama_identitas' => $request->input('importir')['nama_identitas'],
-                        'alamat_identitas' => $request->input('importir')['alamat_identitas'],
-                        'nib_identitas' => $request->input('importir')['nib_identitas'],
-                        'kode_jenis_api' => 02,
-                        'kode_status' => $request->input('importir')['kode_status'],
-                    ]);
-                    $entitas_pemusatan = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas',11)->first();
-                    $entitas_pemusatan->update([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_entitas' => $request->input('kode_entitas2'),
-                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas2'),
-                        'nomor_identitas' => $request->input('pemusatan')['nomor_identitas2'],
-                        'nama_identitas' => $request->input('pemusatan')['nama_identitas2'],
-                        'alamat_identitas' => $request->input('pemusatan')['alamat_identitas2'],
-                        'kode_jenis_api' => 02,
-                        'kode_status' => $request->input('importir')['kode_status'],
-                    ]);
-                    $entitas_pemilik = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas',7)->first();
-                    $entitas_pemilik->update([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_entitas' => $request->input('kode_entitas3'),
-                        'kode_jenis_identitas' => $request->input('kode_jenis_identitas3'),
-                        'nomor_identitas' => $request->input('pemilik')['nomor_identitas3'],
-                        'nama_identitas' => $request->input('pemilik')['nama_identitas3'],
-                        'alamat_identitas' => $request->input('pemilik')['alamat_identitas3'],
-                        'kode_jenis_api' => 02,
-                        'kode_status' => $request->input('importir')['kode_status'],
-                    ]);
-                    $entitas_pengirim = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas',9)->first();
-                    $entitas_pengirim->update([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_entitas' => $request->input('kode_entitas4'),
-                        'nama_identitas' => $request->input('pengirim')['nama_identitas4'],
-                        'alamat_identitas' => $request->input('pengirim')['alamat_identitas4'],
-                        'kode_negara' => $request->input('pengirim')['kode_negara'],
-                    ]);
-                    $entitas_penjual = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas',10)->first();
-                    $entitas_penjual->update([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_entitas' => $request->input('kode_entitas5'),
-                        'nama_identitas' => $request->input('penjual')['nama_identitas5'],
-                        'alamat_identitas' => $request->input('penjual')['alamat_identitas5'],
-                        'kode_negara' => $request->input('penjual')['kode_negara2'],
-                    ]);
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_entitas' => $request->input('kode_entitas'),
+                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas'),
+                    'nomor_identitas' => $request->input('importir')['nomor_identitas'],
+                    'nama_identitas' => $request->input('importir')['nama_identitas'],
+                    'alamat_identitas' => $request->input('importir')['alamat_identitas'],
+                    'nib_identitas' => $request->input('importir')['nib_identitas'],
+                    'kode_jenis_api' => 02,
+                    'kode_status' => $request->input('importir')['kode_status'],
+                ]);
+                $entitas_pemusatan = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas', 11)->first();
+                $entitas_pemusatan->update([
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_entitas' => $request->input('kode_entitas2'),
+                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas2'),
+                    'nomor_identitas' => $request->input('pemusatan')['nomor_identitas2'],
+                    'nama_identitas' => $request->input('pemusatan')['nama_identitas2'],
+                    'alamat_identitas' => $request->input('pemusatan')['alamat_identitas2'],
+                    'kode_jenis_api' => 02,
+                    'kode_status' => $request->input('importir')['kode_status'],
+                ]);
+                $entitas_pemilik = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas', 7)->first();
+                $entitas_pemilik->update([
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_entitas' => $request->input('kode_entitas3'),
+                    'kode_jenis_identitas' => $request->input('kode_jenis_identitas3'),
+                    'nomor_identitas' => $request->input('pemilik')['nomor_identitas3'],
+                    'nama_identitas' => $request->input('pemilik')['nama_identitas3'],
+                    'alamat_identitas' => $request->input('pemilik')['alamat_identitas3'],
+                    'kode_jenis_api' => 02,
+                    'kode_status' => $request->input('importir')['kode_status'],
+                ]);
+                $entitas_pengirim = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas', 9)->first();
+                $entitas_pengirim->update([
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_entitas' => $request->input('kode_entitas4'),
+                    'nama_identitas' => $request->input('pengirim')['nama_identitas4'],
+                    'alamat_identitas' => $request->input('pengirim')['alamat_identitas4'],
+                    'kode_negara' => $request->input('pengirim')['kode_negara'],
+                ]);
+                $entitas_penjual = ImportEntitas::where('import_notification_id', $importNotification->id)->where('kode_entitas', 10)->first();
+                $entitas_penjual->update([
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_entitas' => $request->input('kode_entitas5'),
+                    'nama_identitas' => $request->input('penjual')['nama_identitas5'],
+                    'alamat_identitas' => $request->input('penjual')['alamat_identitas5'],
+                    'kode_negara' => $request->input('penjual')['kode_negara2'],
+                ]);
                 session(['import_draft' => $draft]);
 
                 // Redirect back to the edit form for this notification and go to the next step
                 return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
                     ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
-            } else// Handle pengangkut step saving
-            if ($currentStep === 'pengangkut') {
+            } elseif  ($currentStep === 'pengangkut') {
                 $existingPengangkut = ImportPengangkut::where('import_notification_id', $importNotification->id)
-                    ->first();                
-                    $existingPengangkut = ImportPengangkut::create([
-                        'user_id' => Auth::user()->id ?? 1,
-                        'kode_tutup_pu' => $request->input('kode_tutup_pu'),
-                        'nomor_bc_11' => $request->input('nomor_bc_11'),
-                        'tanggal_bc_11' => $request->input('tanggal_bc_11'),
-                        'nomor_pos' => $request->input('nomor_pos'),
-                        'nomor_sub_pos' => $request->input('nomor_sub_pos'),
-                        'angkut_cara' => $request->input('angkut_cara'),
-                        'angkut_nama' => $request->input('angkut_nama'),
-                        'angkut_voy' => $request->input('angkut_voy'),
-                        'angkut_bendera' => $request->input('angkut_bendera'),
-                        'tanggal_tiba' => $request->input('tanggal_tiba'),
-                        'kode_pelabuhan_muat' => $request->input('kode_pelabuhan_muat'),
-                        'kode_pelabuhan_transit' => $request->input('kode_pelabuhan_transit'),
-                        'kode_pelabuhan_tujuan' => $request->input('kode_pelabuhan_tujuan'),
-                        'kode_tps' => $request->input('kode_tps'),
+                    ->first();
+                $existingPengangkut = ImportPengangkut::create([
+                    'user_id' => Auth::user()->id ?? 1,
+                    'kode_tutup_pu' => $request->input('kode_tutup_pu'),
+                    'nomor_bc_11' => $request->input('nomor_bc_11'),
+                    'tanggal_bc_11' => $request->input('tanggal_bc_11'),
+                    'nomor_pos' => $request->input('nomor_pos'),
+                    'nomor_sub_pos' => $request->input('nomor_sub_pos'),
+                    'angkut_cara' => $request->input('angkut_cara'),
+                    'angkut_nama' => $request->input('angkut_nama'),
+                    'angkut_voy' => $request->input('angkut_voy'),
+                    'angkut_bendera' => $request->input('angkut_bendera'),
+                    'tanggal_tiba' => $request->input('tanggal_tiba'),
+                    'kode_pelabuhan_muat' => $request->input('kode_pelabuhan_muat'),
+                    'kode_pelabuhan_transit' => $request->input('kode_pelabuhan_transit'),
+                    'kode_pelabuhan_tujuan' => $request->input('kode_pelabuhan_tujuan'),
+                    'kode_tps' => $request->input('kode_tps'),
 
-                    ]);                
+                ]);
                 session(['import_draft' => $draft]);
+
                 return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
                     ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
             } elseif ($currentStep == 'transaksi') {
                 $transaksi = ImportTransaksi::where('import_notification_id', $importNotification->id)
-                    ->first();  
-                    $transaksi->update([
-                        'user_id' => 1,
-                        'kode_valuta' => $request->input('kode_valuta'),
-                        'ndpbm' => $request->input('ndpbm'),
-                        'kode_jenis_nilai' => $request->input('kode_jenis_nilai'),
-                        'kode_incoterm' => $request->input('kode_incoterm'),
-                        'cif' => $request->input('cif'),
-                        'fob' => $request->input('fob'),
-                        'bruto' => $request->input('bruto'),
-                        'netto' => $request->input('netto'),
-                        'nilai_incoterm' => 0,
-                        'nilai_barang' => 0,
-                        'biaya_tambahan' => $request->input('biaya_tambahan'),
-                        'biaya_pengurang' => $request->input('biaya_pengurang'),
-                        'freight' => $request->input('freight'),
-                        'kode_asuransi' => $request->input('kode_asuransi'),
-                        'asuransi' => $request->input('asuransi'),
-                        'vd' => $request->input('vd'),
-                    ]);    
-                    return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
-                    ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');       
-                      
-            }        
+                    ->first();
+                $transaksi->update([
+                    'user_id' => 1,
+                    'kode_valuta' => $request->input('kode_valuta'),
+                    'ndpbm' => $request->input('ndpbm'),
+                    'kode_jenis_nilai' => $request->input('kode_jenis_nilai'),
+                    'kode_incoterm' => $request->input('kode_incoterm'),
+                    'cif' => $request->input('cif'),
+                    'fob' => $request->input('fob'),
+                    'bruto' => $request->input('bruto'),
+                    'netto' => $request->input('netto'),
+                    'nilai_incoterm' => 0,
+                    'nilai_barang' => 0,
+                    'biaya_tambahan' => $request->input('biaya_tambahan'),
+                    'biaya_pengurang' => $request->input('biaya_pengurang'),
+                    'freight' => $request->input('freight'),
+                    'kode_asuransi' => $request->input('kode_asuransi'),
+                    'asuransi' => $request->input('asuransi'),
+                    'vd' => $request->input('vd'),
+                ]);
+
+                return redirect()->route('import.edit', [$importNotification, 'step' => $nextStep])
+                    ->with('success', ucfirst($currentStep).' data updated successfully. Please continue with the next step.');
+
+            }
+
             return redirect()->route('import.edit', $importNotification)->with('success', ucfirst($currentStep).' data saved.')->with('step', $nextStep);
         }
 
@@ -1275,7 +1318,7 @@ class ImportNotificationController extends Controller
 
             return redirect()->back()->with('success', "Import finished: {$created} created, {$skipped} skipped.");
         }
-        if ($action == 'submit') {            
+        if ($action == 'submit') {
             return redirect()->route('import.index')->with('success', 'PIB Updated successfully.');
         }
 
@@ -1307,7 +1350,7 @@ class ImportNotificationController extends Controller
 
             return redirect()->route('import.index')->with('success', 'Data pemberitahuan impor berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()->route('import.index')->with('error', 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage());
+            return redirect()->route('import.index')->with('error', 'Terjadi kesalahan saat menghapus data: '.$e->getMessage());
         }
     }
 
@@ -1317,8 +1360,8 @@ class ImportNotificationController extends Controller
     public function searchPelabuhan(Request $request)
     {
         $query = $request->get('q', '');
-    $apiUrl = config('services.pelabuhan_api.url');
-    $apiToken = \App\Services\PelabuhanApiService::getToken();
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($query) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1352,9 +1395,9 @@ class ImportNotificationController extends Controller
     {
         // Check if import_notification_id is provided in request
         $importNotificationId = $request->get('import_notification_id');
-        
+
         // If not provided, try to get from session or detect from referer
-        if (!$importNotificationId) {
+        if (! $importNotificationId) {
             $referer = $request->headers->get('referer', '');
             if (preg_match('/\/import\/(\d+)\/edit/', $referer, $matches)) {
                 $importNotificationId = $matches[1];
@@ -1373,15 +1416,15 @@ class ImportNotificationController extends Controller
                 ->where('import_notification_id', null)
                 ->first();
         }
-        
-        if (!$header) {
+
+        if (! $header) {
             return response()->json(['status' => 'ERROR', 'message' => 'Header data not found']);
         }
-        
+
         $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', ''); // Get search term from request
-    $apiUrl = config('services.pelabuhan_api.url');
-    $apiToken = \App\Services\PelabuhanApiService::getToken();
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1429,9 +1472,9 @@ class ImportNotificationController extends Controller
     {
         // Check if import_notification_id is provided in request
         $importNotificationId = $request->get('import_notification_id');
-        
+
         // If not provided, try to get from session or detect from referer
-        if (!$importNotificationId) {
+        if (! $importNotificationId) {
             $referer = $request->headers->get('referer', '');
             if (preg_match('/\/import\/(\d+)\/edit/', $referer, $matches)) {
                 $importNotificationId = $matches[1];
@@ -1450,15 +1493,15 @@ class ImportNotificationController extends Controller
                 ->where('import_notification_id', null)
                 ->first();
         }
-        
-        if (!$header) {
+
+        if (! $header) {
             return response()->json(['status' => 'ERROR', 'message' => 'Header data not found']);
         }
-        
+
         $kodeKantor = $header->kode_kantor;
         $searchTerm = $request->get('q', '');
-    $apiUrl = config('services.pelabuhan_api.url');
-    $apiToken = \App\Services\PelabuhanApiService::getToken();
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeKantor) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
@@ -1550,8 +1593,8 @@ class ImportNotificationController extends Controller
         $kodeValuta = $request->get('kode_valuta');
         $tanggal = $request->get('tanggal', date('Y-m-d'));
 
-    $apiUrl = config('services.pelabuhan_api.url');
-    $apiToken = \App\Services\PelabuhanApiService::getToken();
+        $apiUrl = config('services.pelabuhan_api.url');
+        $apiToken = \App\Services\PelabuhanApiService::getToken();
 
         if (empty($kodeValuta) || empty($apiUrl) || empty($apiToken)) {
             return response()->json(['status' => 'ERROR', 'message' => 'Missing parameters']);
