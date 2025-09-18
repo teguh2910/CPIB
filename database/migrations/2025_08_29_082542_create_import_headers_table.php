@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('kode_jenis_impor');
             $table->string('kode_jenis_prosedur');
             $table->string('kode_cara_bayar');
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

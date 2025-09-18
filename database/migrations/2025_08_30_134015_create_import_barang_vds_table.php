@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('seri_barang');
             $table->string('kode_vd');
             $table->integer('nilai_barang');
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

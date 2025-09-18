@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('kode_jenis_api')->nullable();
             $table->string('kode_negara')->nullable();
             $table->string('kode_status')->nullable();
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

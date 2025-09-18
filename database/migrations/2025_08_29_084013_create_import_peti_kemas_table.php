@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('kode_jenis_kontainer');
             $table->string('kode_tipe_kontainer');
             $table->timestamps();
-
+            $table->string('no_aju');
             $table->index(['user_id', 'seri']);
         });
     }

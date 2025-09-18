@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('nomor_dokumen');
             $table->date('tanggal_dokumen');
             $table->string('kode_fasilitas')->nullable();
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

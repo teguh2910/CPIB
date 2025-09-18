@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('kode_fasilitas');
             $table->integer('tarif_fasilitas');
             $table->integer('nilai_bayar');
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

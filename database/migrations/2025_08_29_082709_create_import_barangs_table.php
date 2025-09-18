@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('kode_satuan');
             $table->decimal('jumlah_kemasan', 15, 2)->nullable();
             $table->string('kode_kemasan')->nullable();
-
+            $table->string('no_aju');
             // Value & Finance
             $table->decimal('cif', 15, 2);
             $table->decimal('fob', 15, 2)->nullable();

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('jabatan_pernyataan', 100)->nullable();
             $table->string('kota_pernyataan', 150);
             $table->date('tanggal_pernyataan')->nullable();
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

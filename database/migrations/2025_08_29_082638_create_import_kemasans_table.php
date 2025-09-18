@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal('jumlah_kemasan', 15, 6)->nullable();
             $table->string('kode_kemasan')->nullable();
             $table->string('merek', 100)->nullable();
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

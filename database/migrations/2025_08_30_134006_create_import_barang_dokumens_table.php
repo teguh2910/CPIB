@@ -19,7 +19,7 @@ return new class extends Migration
             // Document fields
             $table->integer('seri_barang');
             $table->integer('seri_dokumen');
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

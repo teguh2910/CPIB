@@ -20,7 +20,7 @@ return new class extends Migration
             $table->decimal('ppn', 15, 2)->nullable();
             $table->decimal('pph', 15, 2)->nullable();
             $table->decimal('total_pungutan', 15, 2)->nullable();
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

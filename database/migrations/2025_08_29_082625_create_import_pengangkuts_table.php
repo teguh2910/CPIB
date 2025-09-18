@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('kode_pelabuhan_transit');
             $table->string('kode_pelabuhan_tujuan');
             $table->string('kode_tps');
-
+            $table->string('no_aju');
             $table->timestamps();
         });
     }

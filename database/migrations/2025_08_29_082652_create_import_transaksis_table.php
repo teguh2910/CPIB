@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('kode_asuransi');
             $table->decimal('asuransi', 15, 2)->nullable();
             $table->decimal('vd', 15, 2)->nullable();
-
+            $table->string('no_aju');
             // Berat
             $table->decimal('bruto', 15, 2);
             $table->decimal('netto', 15, 2);
