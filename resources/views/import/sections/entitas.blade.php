@@ -133,7 +133,7 @@
                         class="w-full border rounded px-3 py-2" required>
                         <option value="">-- Pilih Pengirim --</option>
                         @foreach ($pengirimParties as $party)
-                            <option value="{{ $party->id }}" @if (($entitas_pengirim[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
+                            <option value="{{ $party->name }}" @if (($entitas_pengirim[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach
@@ -170,7 +170,7 @@
                         class="w-full border rounded px-3 py-2" required>
                         <option value="">-- Pilih Penjual --</option>
                         @foreach ($penjualParties as $party)
-                            <option value="{{ $party->id }}" @if (($entitas_penjual[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
+                            <option value="{{ $party->name }}" @if (($entitas_penjual[0]['nama_identitas'] ?? null) == $party->id) selected @endif>
                                 {{ $party->name }}
                             </option>
                         @endforeach

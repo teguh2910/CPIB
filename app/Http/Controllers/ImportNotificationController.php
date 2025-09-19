@@ -35,7 +35,6 @@ class ImportNotificationController extends Controller
             ->join('import_entitas', 'import_notifications.id', '=', 'import_entitas.import_notification_id')
             ->join('import_headers', 'import_notifications.id', '=', 'import_headers.import_notification_id')
             ->join('import_pengangkuts', 'import_notifications.id', '=', 'import_pengangkuts.import_notification_id')
-            ->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
             ->where('kode_entitas', 9)
             ->get();
 
@@ -202,11 +201,8 @@ class ImportNotificationController extends Controller
         $petikemas = ImportPetiKemas::where('no_aju', $nomorAju)->get();
         $dokumens = ImportDokumen::where('no_aju', $nomorAju)->get();
         // $entitas = ImportEntitas::where('import_notification_id', $id)->get();
-        $entitas = \DB::table('import_entitas')->join('parties', 'import_entitas.nama_identitas', '=', 'parties.id')
-            ->where('import_entitas.no_aju', $nomorAju)
-            ->get();
+        $entitas = ImportEntitas::where('no_aju', $nomorAju)->get();
         $barangs = ImportBarang::where('no_aju', $nomorAju)->get();
-
         // Top level defaults and mappings (assumptions for fields not present in schema)
         $result = [
             'asalData' => 'S', // assumption: source S
@@ -448,8 +444,8 @@ class ImportNotificationController extends Controller
         // Query Parameters: isFinal=false (boolean, default=false for draft)
         // Headers: Authorization=Bearer {token}
         // Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
-        $apiUrl = config('services.document_api.url');
-        $bearerToken = \App\Services\PelabuhanApiService::getToken();
+        // $apiUrl = config('services.document_api.url');
+        // $bearerToken = \App\Services\PelabuhanApiService::getToken();
 
         if (! $bearerToken) {
             return response()->json([

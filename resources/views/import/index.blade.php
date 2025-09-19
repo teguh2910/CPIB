@@ -28,7 +28,7 @@
                     @forelse($importNotifications as $r)
                         <tr class="border-b">
                             <td class="py-2">{{ $r->nomor_aju ?? '-' }}</td>
-                            <td class="py-2">{{ $r->name ?? '-' }}</td>
+                            <td class="py-2">{{ $r->nama_identitas ?? '-' }}</td>
                             <td class="py-2">{{ $r->angkut_nama ?? '-' }}</td>
                             <td class="py-2">{{ $r->angkut_voy ?? '-' }}</td>
                             <td class="py-2">{{ $r->tanggal_tiba ?? '-' }}</td>
