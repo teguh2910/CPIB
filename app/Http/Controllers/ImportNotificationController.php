@@ -442,10 +442,10 @@ class ImportNotificationController extends Controller
         // TEMPORARILY COMMENTED OUT - API sending disabled for JSON inspection
         // Send data to API according to documentation:
         // Query Parameters: isFinal=false (boolean, default=false for draft)
-        // Headers: Authorization=Bearer {token}
-        // Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
-        // $apiUrl = config('services.document_api.url');
-        // $bearerToken = \App\Services\PelabuhanApiService::getToken();
+        //Headers: Authorization=Bearer {token}
+        //Request Body: Data Pabean (string) containing JSONSchema Dokumen Pabean
+        $apiUrl = config('services.document_api.url');
+        $bearerToken = \App\Services\PelabuhanApiService::getToken();
 
         if (! $bearerToken) {
             return response()->json([
