@@ -367,7 +367,7 @@ class ImportNotificationController extends Controller
                 $entitasItem['kodeStatus'] = $e->kode_status;
             }
             if (! is_null($e->nama_identitas)) {
-                $entitasItem['namaEntitas'] = $e->name;
+                $entitasItem['namaEntitas'] = $e->nama_identitas;
             }
             if (! is_null($e->nib_identitas)) {
                 $entitasItem['nibEntitas'] = $e->nib_identitas;
